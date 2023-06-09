@@ -36,7 +36,6 @@ func (r *router) setGroup() {
 }
 
 func (r *router) buildSellerRoutes() {
-	// Example
 	// repo := seller.NewRepository(r.db)
 	// service := seller.NewService(repo)
 	// handler := handler.NewSeller(service)
