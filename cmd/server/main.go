@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// NO MODIFICAR
+	// NO MODIFICAR.
 	db, err := sql.Open("mysql", "meli_sprint_user:Meli_Sprint#123@/melisprint")
 	if err != nil {
 		panic(err)
