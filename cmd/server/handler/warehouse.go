@@ -24,12 +24,12 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 
 func (w *Warehouse) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// warehouses, err := w.warehouseService.GetAll()
-		// if err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		// 	return
-		// }
-		// c.JSON(http.StatusOK, warehouses)
+		warehouses, err := w.warehouseService.GetAll(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, warehouses)
 	}
 }
 
