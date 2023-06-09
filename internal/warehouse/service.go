@@ -14,7 +14,7 @@ var (
 
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Warehouse, error)
-	// Get(id int) (domain.Warehouse, error)
+	Get(ctx context.Context, id int) (domain.Warehouse, error)
 	Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
 	// Update(w domain.Warehouse) (domain.Warehouse, error)
 	// Delete(id int) error
@@ -54,4 +54,13 @@ func (s *service) GetAll(ctx context.Context) ([]domain.Warehouse, error) {
 	}
 
 	return ware, nil
+}
+
+func (s *service) Get(ctx context.Context, id int) (domain.Warehouse, error) {
+	w, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Warehouse{}, ErrNotFound
+	}
+
+	return w, nil
 }
