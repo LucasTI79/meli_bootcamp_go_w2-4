@@ -38,11 +38,6 @@ func (r *router) setGroup() {
 }
 
 func (r *router) buildSellerRoutes() {
-	// Example
-	// repo := seller.NewRepository(r.db)
-	// service := seller.NewService(repo)
-	// handler := handler.NewSeller(service)
-	// r.r.GET("/seller", handler.GetAll)
 }
 
 func (r *router) buildProductRoutes() {}
@@ -54,8 +49,8 @@ func (r *router) buildWarehouseRoutes() {
 	service := warehouse.NewService(repo)
 	handler := handler.NewWarehouse(service)
 	r.rg.POST("/warehouses", handler.Create())
-	r.rg.GET("/warehouses", handler.GetAll())
 	r.rg.GET("/warehouses/:id", handler.Get())
+	r.rg.GET("/warehouses", handler.GetAll())
 }
 
 func (r *router) buildEmployeeRoutes() {}
