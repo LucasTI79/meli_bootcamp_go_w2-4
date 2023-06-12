@@ -7,7 +7,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
 
-type ProductDTO struct {
+type CreateDTO struct {
 	Desc       string
 	ExpR       int
 	FreezeR    int
@@ -22,7 +22,7 @@ type ProductDTO struct {
 }
 
 type Service interface {
-	Create(c context.Context, product ProductDTO) (domain.Product, error)
+	Create(c context.Context, product CreateDTO) (domain.Product, error)
 	GetAll(c context.Context) ([]domain.Product, error)
 	Get(c context.Context, id int) (domain.Product, error)
 	Delete(c context.Context, id int) error
@@ -36,7 +36,7 @@ func NewService(repo Repository) Service {
 	return &service{repo}
 }
 
-func (s *service) Create(c context.Context, product ProductDTO) (domain.Product, error) {
+func (s *service) Create(c context.Context, product CreateDTO) (domain.Product, error) {
 	ps, err := s.repo.GetAll(c)
 	if err != nil {
 		return domain.Product{}, NewErrGeneric("error fetching products")
@@ -46,7 +46,7 @@ func (s *service) Create(c context.Context, product ProductDTO) (domain.Product,
 		return domain.Product{}, NewErrInvalidProductCode(product.Code)
 	}
 
-	p := mapToDomain(&product)
+	p := mapCreateToDomain(&product)
 	id, err := s.repo.Save(c, *p)
 	if err != nil {
 		return domain.Product{}, NewErrGeneric("error saving product")
@@ -94,7 +94,7 @@ func isUniqueProductCode(code string, ps []domain.Product) bool {
 	return true
 }
 
-func mapToDomain(product *ProductDTO) *domain.Product {
+func mapCreateToDomain(product *CreateDTO) *domain.Product {
 	return &domain.Product{
 		Description:    product.Desc,
 		ExpirationRate: product.ExpR,
