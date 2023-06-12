@@ -6,6 +6,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,23 @@ type CreateRequest struct {
 	SellerID   int     `json:"seller_id"`
 }
 
+// UpdateRequest contains pointers so that the Handler is able to
+// distinguish between omitted (nil) and given (not-nil) fields.
+// This does not affect the way the user passes the Request body.
+type UpdateRequest struct {
+	Desc       *string  `json:"description"`
+	ExpR       *int     `json:"expiration_rate"`
+	FreezeR    *int     `json:"freezing_rate"`
+	Height     *float32 `json:"height"`
+	Length     *float32 `json:"length"`
+	NetW       *float32 `json:"netweight"`
+	Code       *string  `json:"product_code"`
+	FreezeTemp *float32 `json:"recommended_freezing_temperature"`
+	Width      *float32 `json:"width"`
+	TypeID     *int     `json:"product_type_id"`
+	SellerID   *int     `json:"seller_id"`
+}
+
 func NewProduct(s product.Service) *Product {
 	return &Product{
 		productService: s,
@@ -40,8 +58,8 @@ func NewProduct(s product.Service) *Product {
 //	@Tags		Products
 //	@Accept		json
 //	@Produce	json
-//	@Success	200		{object}	responses.Response	"Returns all products"
-//	@Failure	500		{object}	responses.Response	"Could not fetch products"
+//	@Success	200	{object}	responses.Response	"Returns all products"
+//	@Failure	500	{object}	responses.Response	"Could not fetch products"
 //	@Router		/api/v1/products [get]
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -60,9 +78,9 @@ func (p *Product) GetAll() gin.HandlerFunc {
 //	@Tags		Products
 //	@Accept		json
 //	@Produce	json
-//	@Success	200		{object}	responses.Response	"Returns product"
-//	@Failure	400		{object}	responses.Response	"Invalid ID type"
-//	@Failure	404		{object}	responses.Response	"Could not find product"
+//	@Success	200	{object}	responses.Response	"Returns product"
+//	@Failure	400	{object}	responses.Response	"Invalid ID type"
+//	@Failure	404	{object}	responses.Response	"Could not find product"
 //	@Router		/api/v1/products/:id [get]
 func (p *Product) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -99,7 +117,7 @@ func (p *Product) Create() gin.HandlerFunc {
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			if errors.Is(err, product.ErrInvalidProductCode{}) {
+			if errors.Is(err, &product.ErrInvalidProductCode{}) {
 				web.Error(c, http.StatusConflict, err.Error())
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
@@ -111,8 +129,45 @@ func (p *Product) Create() gin.HandlerFunc {
 	}
 }
 
+// Update godoc
+//
+//	@Summary	Updates existing product
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Param		product	body		UpdateRequest		true	"Fields to update"
+//	@Success	200		{object}	responses.Response	"Returns updated product"
+//	@Failure	400		{object}	responses.Response	"Invalid ID type"
+//	@Failure	404		{object}	responses.Response	"Could not find product"
+//	@Failure	409		{object}	responses.Response	"`product_code` is not unique"
+//	@Failure	422		{object}	responses.Response	"Invalid field types"
+//	@Failure	500		{object}	responses.Response	"Could not save product"
+//	@Router		/api/v1/products/:id [patch]
 func (p *Product) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := web.GetIntParam(c, "id")
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
+			return
+		}
+
+		req := middleware.ParsedRequest[UpdateRequest](c)
+		dto := mapUpdateRequestToDTO(&req)
+		p, err := p.productService.Update(c.Request.Context(), id, *dto)
+
+		if err != nil {
+			if errors.Is(err, &product.ErrInvalidProductCode{}) {
+				web.Error(c, http.StatusConflict, err.Error())
+			} else if errors.Is(err, &product.ErrNotFound{}) {
+				web.Error(c, http.StatusNotFound, err.Error())
+			} else {
+				web.Error(c, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		web.Success(c, http.StatusCreated, p)
+	}
 }
 
 // Delete godoc
@@ -121,10 +176,10 @@ func (p *Product) Update() gin.HandlerFunc {
 //	@Tags		Products
 //	@Accept		json
 //	@Produce	json
-//	@Success	200		{object}	responses.Response	"Product deleted successfully"
-//	@Failure	400		{object}	responses.Response	"Invalid ID type"
-//	@Failure	404		{object}	responses.Response	"Could not find product"
-//	@Failure	500		{object}	responses.Response	"Could not delete product"
+//	@Success	200	{object}	responses.Response	"Product deleted successfully"
+//	@Failure	400	{object}	responses.Response	"Invalid ID type"
+//	@Failure	404	{object}	responses.Response	"Could not find product"
+//	@Failure	500	{object}	responses.Response	"Could not delete product"
 //	@Router		/api/v1/products/:id [delete]
 func (p *Product) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -135,7 +190,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 		}
 		err = p.productService.Delete(c.Request.Context(), id)
 		if err != nil {
-			if errors.Is(err, product.ErrNotFound{}) {
+			if errors.Is(err, &product.ErrNotFound{}) {
 				web.Error(c, http.StatusNotFound, err.Error())
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
@@ -144,6 +199,45 @@ func (p *Product) Delete() gin.HandlerFunc {
 		}
 		web.Success(c, http.StatusOK, nil)
 	}
+}
+
+func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
+	dto := product.UpdateDTO{}
+
+	if val := req.Desc; val != nil {
+		dto.Desc = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.ExpR; val != nil {
+		dto.ExpR = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.FreezeR; val != nil {
+		dto.FreezeR = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.Height; val != nil {
+		dto.Height = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.Length; val != nil {
+		dto.Length = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.NetW; val != nil {
+		dto.NetW = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.Code; val != nil {
+		dto.Code = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.FreezeTemp; val != nil {
+		dto.FreezeTemp = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.Width; val != nil {
+		dto.Width = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.TypeID; val != nil {
+		dto.TypeID = *types.NewOptionalFromVal(*val)
+	}
+	if val := req.SellerID; val != nil {
+		dto.SellerID = *types.NewOptionalFromVal(*val)
+	}
+	return &dto
 }
 
 func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
 )
 
 type CreateDTO struct {
@@ -21,10 +22,25 @@ type CreateDTO struct {
 	SellerID   int
 }
 
+type UpdateDTO struct {
+	Desc       types.Optional[string]
+	ExpR       types.Optional[int]
+	FreezeR    types.Optional[int]
+	Height     types.Optional[float32]
+	Length     types.Optional[float32]
+	NetW       types.Optional[float32]
+	Code       types.Optional[string]
+	FreezeTemp types.Optional[float32]
+	Width      types.Optional[float32]
+	TypeID     types.Optional[int]
+	SellerID   types.Optional[int]
+}
+
 type Service interface {
 	Create(c context.Context, product CreateDTO) (domain.Product, error)
 	GetAll(c context.Context) ([]domain.Product, error)
 	Get(c context.Context, id int) (domain.Product, error)
+	Update(c context.Context, id int, updates UpdateDTO) (domain.Product, error)
 	Delete(c context.Context, id int) error
 }
 
@@ -73,10 +89,33 @@ func (s *service) Get(c context.Context, id int) (domain.Product, error) {
 	return p, nil
 }
 
+func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.Product, error) {
+	ps, err := s.repo.GetAll(c)
+	if err != nil {
+		return domain.Product{}, NewErrGeneric("could not fetch products")
+	}
+
+	if updates.Code.HasVal && !isUniqueProductCode(updates.Code.Val, ps) {
+		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
+	}
+
+	p, err := s.repo.Get(c, id)
+	if err != nil {
+		return domain.Product{}, NewErrNotFound(id)
+	}
+
+	updated := applyUpdates(p, updates)
+	if err := s.repo.Update(c, updated); err != nil {
+		return domain.Product{}, NewErrGeneric("coult not save changes")
+	}
+
+	return updated, nil
+}
+
 func (s *service) Delete(c context.Context, id int) error {
 	err := s.repo.Delete(c, id)
 	if err != nil {
-		if errors.Is(err, ErrNotFound{}) {
+		if errors.Is(err, &ErrNotFound{}) {
 			return NewErrNotFound(id)
 		} else {
 			return NewErrGeneric("could not delete product")
@@ -108,4 +147,41 @@ func mapCreateToDomain(product *CreateDTO) *domain.Product {
 		ProductTypeID:  product.TypeID,
 		SellerID:       product.SellerID,
 	}
+}
+
+func applyUpdates(p domain.Product, updates UpdateDTO) domain.Product {
+	if val, hasVal := updates.Desc.Value(); hasVal {
+		p.Description = val
+	}
+	if val, hasVal := updates.ExpR.Value(); hasVal {
+		p.ExpirationRate = val
+	}
+	if val, hasVal := updates.FreezeR.Value(); hasVal {
+		p.FreezingRate = val
+	}
+	if val, hasVal := updates.Height.Value(); hasVal {
+		p.Height = val
+	}
+	if val, hasVal := updates.Length.Value(); hasVal {
+		p.Length = val
+	}
+	if val, hasVal := updates.NetW.Value(); hasVal {
+		p.Netweight = val
+	}
+	if val, hasVal := updates.Code.Value(); hasVal {
+		p.ProductCode = val
+	}
+	if val, hasVal := updates.FreezeTemp.Value(); hasVal {
+		p.RecomFreezTemp = val
+	}
+	if val, hasVal := updates.Width.Value(); hasVal {
+		p.Width = val
+	}
+	if val, hasVal := updates.TypeID.Value(); hasVal {
+		p.ProductTypeID = val
+	}
+	if val, hasVal := updates.SellerID.Value(); hasVal {
+		p.SellerID = val
+	}
+	return p
 }
