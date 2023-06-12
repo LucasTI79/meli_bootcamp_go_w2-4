@@ -9,17 +9,17 @@ import (
 
 // Errors
 var (
-	ErrNotFound = errors.New("seller not found")
-	ErrCidAlreadyExists =  errors.New("cid already registered")
-	ErrSaveSeller = errors.New("error saving seller")
+	ErrNotFound         = errors.New("seller not found")
+	ErrCidAlreadyExists = errors.New("cid already registered")
+	ErrSaveSeller       = errors.New("error saving seller")
 )
 
-type Service interface{
+type Service interface {
 	GetAll(c context.Context) ([]domain.Seller, error)
 	Save(c context.Context, s domain.Seller) (domain.Seller, error)
 }
 
-type service struct{	
+type service struct {
 	repository Repository
 }
 
@@ -29,7 +29,7 @@ func NewService(r Repository) Service {
 	}
 }
 
-func(s *service) GetAll(c context.Context) ([]domain.Seller, error){
+func (s *service) GetAll(c context.Context) ([]domain.Seller, error) {
 	users, err := s.repository.GetAll(c)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func(s *service) GetAll(c context.Context) ([]domain.Seller, error){
 	return users, nil
 }
 
-func (s *service) Save(c context.Context, seller domain.Seller)(domain.Seller, error){
+func (s *service) Save(c context.Context, seller domain.Seller) (domain.Seller, error) {
 	cidAlreadyExists := s.repository.Exists(c, seller.CID)
 	if cidAlreadyExists {
 		return domain.Seller{}, ErrCidAlreadyExists
@@ -48,4 +48,4 @@ func (s *service) Save(c context.Context, seller domain.Seller)(domain.Seller, e
 	}
 	seller.ID = userID
 	return seller, nil
-}	
+}

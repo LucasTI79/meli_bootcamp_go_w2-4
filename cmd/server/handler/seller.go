@@ -33,7 +33,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 		users, err := s.sellerService.GetAll(c.Request.Context())
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, "não há vendedores cadastrados")
-			
+
 			return
 		}
 		c.JSON(http.StatusOK, users)
@@ -59,22 +59,22 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if err := c.Bind(&req); err != nil {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
-			 })
+			})
 			return
 		}
-		if req.CID == 0{
+		if req.CID == 0 {
 			web.Error(c, http.StatusUnprocessableEntity, "cid é obrigatório")
 			return
 		}
-		if req.CompanyName == ""{
+		if req.CompanyName == "" {
 			web.Error(c, http.StatusUnprocessableEntity, "nome da empresa é obrigatório")
 			return
 		}
-		if req.Address == ""{
+		if req.Address == "" {
 			web.Error(c, http.StatusUnprocessableEntity, "endereço é obrigatório")
 			return
 		}
-		if req.Telephone == ""{
+		if req.Telephone == "" {
 			web.Error(c, http.StatusUnprocessableEntity, "telefone é obrigatório")
 			return
 		}
@@ -83,7 +83,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())
-			}else{
+			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}
 			return
