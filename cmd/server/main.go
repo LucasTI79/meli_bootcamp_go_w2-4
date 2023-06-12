@@ -8,6 +8,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// @title Warehouse API
+// @description This is a sample API for managing warehouses.
+// @version 1.0
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	// NO MODIFICAR
 	db, err := sql.Open("mysql", "meli_sprint_user:Meli_Sprint#123@/melisprint")

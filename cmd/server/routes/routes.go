@@ -6,6 +6,8 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Router interface {
@@ -48,6 +50,7 @@ func (r *router) buildWarehouseRoutes() {
 	repo := warehouse.NewRepository(r.db)
 	service := warehouse.NewService(repo)
 	handler := handler.NewWarehouse(service)
+	r.rg.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.rg.POST("/warehouses", handler.Create())
 	r.rg.GET("/warehouses", handler.GetAll())
 	r.rg.GET("/warehouses/:id", handler.Get())

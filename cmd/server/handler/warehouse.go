@@ -20,6 +20,16 @@ func NewWarehouse(w warehouse.Service) *Warehouse {
 	}
 }
 
+// Get retrieves a warehouse by ID.
+// @Summary Retrieve a warehouse
+// @Description Get a warehouse by ID
+// @Tags warehouses
+// @Param id path int true "Warehouse ID"
+// @Produce json
+// @Success 200 {object} domain.Warehouse
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "Warehouse not found"
+// @Router /warehouses/{id} [get]
 func (w *Warehouse) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -37,6 +47,14 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 	}
 }
 
+// GetAll retrieves all warehouses.
+// @Summary Retrieve all warehouses
+// @Description Get all warehouses
+// @Tags warehouses
+// @Produce json
+// @Success 200 {array} domain.Warehouse
+// @Failure 400 {string} string "Warehouse not found"
+// @Router /warehouses [get]
 func (w *Warehouse) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		warehouses, err := w.warehouseService.GetAll(c)
@@ -48,6 +66,17 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 	}
 }
 
+// Create creates a new warehouse.
+// @Summary Create a warehouse
+// @Description Create a new warehouse
+// @Tags warehouses
+// @Accept json
+// @Produce json
+// @Param warehouse body domain.Warehouse true "Warehouse object"
+// @Success 201 {object} domain.Warehouse
+// @Failure 400 {string} string "Invalid request"
+// @Failure 422 {string} string "Warehouse not created"
+// @Router /warehouses [post]
 func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var warehouse domain.Warehouse
@@ -69,6 +98,19 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 	}
 }
 
+// Update updates a warehouse.
+// @Summary Update a warehouse
+// @Description Update a warehouse by ID
+// @Tags warehouses
+// @Accept json
+// @Produce json
+// @Param id path int true "Warehouse ID"
+// @Param warehouse body domain.Warehouse true "Updated warehouse object"
+// @Success 200 {object} domain.Warehouse
+// @Failure 400 {string} string "Invalid request"
+// @Failure 404 {string} string "Invalid ID"
+// @Failure 405 {string} string "Warehouse not updated"
+// @Router /warehouses/{id} [patch]
 func (w *Warehouse) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -92,6 +134,15 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 	}
 }
 
+// Delete deletes a warehouse.
+// @Summary Delete a warehouse
+// @Description Delete a warehouse by ID
+// @Tags warehouses
+// @Param id path int true "Warehouse ID"
+// @Success 204 "No Content"
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 405 {string} string "Warehouse not deleted"
+// @Router /warehouses/{id} [delete]
 func (w *Warehouse) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
