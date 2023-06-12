@@ -6,6 +6,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,16 +24,16 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusBadRequest, "invalid id")
 			return
 		}
 
 		warehouse, err := w.warehouseService.Get(c, id)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusNotFound, "invalid id")
 			return
 		}
-		c.JSON(http.StatusOK, warehouse)
+		web.Success(c, http.StatusOK, warehouse)
 	}
 }
 
@@ -40,10 +41,10 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		warehouses, err := w.warehouseService.GetAll(c)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusBadRequest, "warehouse not found")
 			return
 		}
-		c.JSON(http.StatusOK, warehouses)
+		web.Success(c, http.StatusOK, warehouses)
 	}
 }
 
@@ -51,15 +52,15 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusBadRequest, "warehouse not created")
 			return
 		}
 		warehouse, err := w.warehouseService.Create(c, warehouse)
 		if err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusUnprocessableEntity, "warehouse not created")
 			return
 		}
-		c.JSON(http.StatusCreated, warehouse)
+		web.Success(c, http.StatusCreated, warehouse)
 	}
 }
 

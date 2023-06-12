@@ -31,10 +31,11 @@ func NewService(r Repository) Service {
 }
 
 func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error) {
+
 	wcode := s.repository.Exists(ctx, w.WarehouseCode)
 
 	if wcode {
-		return domain.Warehouse{}, errors.New("warehouse code already exists")
+		return domain.Warehouse{}, errors.New("error saving warehouse")
 	}
 
 	id, err := s.repository.Save(ctx, w)
