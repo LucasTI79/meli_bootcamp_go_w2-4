@@ -55,6 +55,11 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, "warehouse not created")
 			return
 		}
+		if warehouse.WarehouseCode == "" {
+			web.Error(c, http.StatusBadRequest, "warehouse need to be passed")
+			return
+		}
+
 		warehouse, err := w.warehouseService.Create(c, warehouse)
 		if err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, "warehouse not created")
@@ -66,14 +71,21 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 
 func (w *Warehouse) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusNotFound, "warehouse not found")
+			web.Error(c, http.StatusBadRequest, "warehouse not updated")
 			return
 		}
-		warehouse, err := w.warehouseService.Update(c, warehouse)
+		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "warehouse not updated")
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		warehouse.ID = id
+		warehouse, err = w.warehouseService.Update(c, warehouse)
+		if err != nil {
+			web.Error(c, http.StatusMethodNotAllowed, "warehouse not updated")
 			return
 		}
 		web.Success(c, http.StatusOK, warehouse)
