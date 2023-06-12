@@ -57,6 +57,7 @@ func (r *router) buildSectionRoutes() {
 		sec.GET("/", handler.GetAll())
 		sec.GET("/:id", handler.Get())
 		sec.DELETE("/:id", handler.Delete())
+		sec.PATCH(":id", handler.Update())
 	}
 
 }

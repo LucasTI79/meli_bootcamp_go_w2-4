@@ -20,6 +20,7 @@ type Service interface {
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
 	Delete(ctx context.Context, id int) error
+	Update(ctx context.Context, section domain.Section, dto domain.CreateSection) error
 }
 
 type service struct {
@@ -33,7 +34,7 @@ func NewService(r Repository) Service {
 }
 
 func (s *service) Save(ctx context.Context, createSection domain.CreateSection) (domain.Section, error) {
-	existsSectionNumber := s.repository.Exists(ctx, createSection.SectionNumber)
+	existsSectionNumber := s.repository.Exists(ctx, *createSection.SectionNumber)
 	if existsSectionNumber {
 		return domain.Section{}, ErrInvalidSectionNumber
 	}
@@ -44,14 +45,14 @@ func (s *service) Save(ctx context.Context, createSection domain.CreateSection) 
 
 	section := domain.Section{
 		ID:                 i,
-		SectionNumber:      createSection.SectionNumber,
-		CurrentTemperature: createSection.CurrentTemperature,
-		MinimumTemperature: createSection.MinimumTemperature,
-		CurrentCapacity:    createSection.CurrentCapacity,
-		MinimumCapacity:    createSection.MinimumCapacity,
-		MaximumCapacity:    createSection.MaximumCapacity,
-		WarehouseID:        createSection.WarehouseID,
-		ProductTypeID:      createSection.ProductTypeID,
+		SectionNumber:      *createSection.SectionNumber,
+		CurrentTemperature: *createSection.CurrentTemperature,
+		MinimumTemperature: *createSection.MinimumTemperature,
+		CurrentCapacity:    *createSection.CurrentCapacity,
+		MinimumCapacity:    *createSection.MinimumCapacity,
+		MaximumCapacity:    *createSection.MaximumCapacity,
+		WarehouseID:        *createSection.WarehouseID,
+		ProductTypeID:      *createSection.ProductTypeID,
 	}
 
 	return section, nil
@@ -74,4 +75,12 @@ func (s *service) Get(ctx context.Context, id int) (domain.Section, error) {
 
 func (s *service) Delete(ctx context.Context, id int) error {
 	return s.repository.Delete(ctx, id)
+}
+
+func (s *service) Update(ctx context.Context, section domain.Section, dto domain.CreateSection) error {
+	existsSectionNumber := s.repository.Exists(ctx, section.SectionNumber)
+	if existsSectionNumber && section.SectionNumber != *dto.SectionNumber {
+		return ErrInvalidSectionNumber
+	}
+	return s.repository.Update(ctx, section)
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -56,47 +57,47 @@ func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var dto domain.CreateSection
 		if err := c.ShouldBindJSON(&dto); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "invalid section number")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "current temperature invalid")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "minimum temperature invalid")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "current capacity invalid")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "minimum capacity invalid")
 			return
 
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "maximum capacity invalid")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "warehouse id invalid")
 			return
 		}
 
-		if dto.CurrentCapacity == 0 {
+		if dto.CurrentCapacity == nil {
 			web.Error(c, http.StatusBadRequest, "product type id invalid")
 			return
 		}
@@ -116,7 +117,69 @@ func (s *Section) Create() gin.HandlerFunc {
 }
 
 func (s *Section) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, errors.New("id should be a number").Error())
+		}
+		sec, err := s.sectionService.Get(c.Request.Context(), id)
+
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		var dto domain.CreateSection
+		if err := c.ShouldBindJSON(&dto); err != nil {
+			web.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if dto.SectionNumber != nil {
+			sec.SectionNumber = *dto.SectionNumber
+		}
+
+		if dto.CurrentTemperature != nil {
+			sec.CurrentTemperature = *dto.CurrentTemperature
+		}
+
+		if dto.MinimumTemperature != nil {
+			sec.MinimumTemperature = *dto.MinimumTemperature
+		}
+
+		if dto.CurrentCapacity != nil {
+			sec.CurrentCapacity = *dto.CurrentCapacity
+		}
+
+		if dto.MinimumCapacity != nil {
+			sec.MinimumCapacity = *dto.MinimumCapacity
+		}
+
+		if dto.MaximumCapacity != nil {
+			sec.MaximumCapacity = *dto.MaximumCapacity
+		}
+
+		if dto.WarehouseID != nil {
+			sec.WarehouseID = *dto.WarehouseID
+		}
+
+		if dto.ProductTypeID != nil {
+			sec.ProductTypeID = *dto.ProductTypeID
+		}
+
+		err = s.sectionService.Update(c.Request.Context(), sec, dto)
+
+		if err != nil {
+			if err == section.ErrInvalidSectionNumber {
+				web.Error(c, http.StatusConflict, err.Error())
+			} else {
+				web.Error(c, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		web.Response(c, http.StatusOK, sec)
+	}
 }
 
 func (s *Section) Delete() gin.HandlerFunc {
