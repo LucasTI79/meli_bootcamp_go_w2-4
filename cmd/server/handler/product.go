@@ -95,20 +95,8 @@ func (p *Product) Get() gin.HandlerFunc {
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := middleware.ParsedRequest[CreateRequest](c)
-		p, err := p.productService.Create(
-			c.Request.Context(),
-			req.Desc,
-			req.ExpR,
-			req.FreezeR,
-			req.Height,
-			req.Length,
-			req.NetW,
-			req.Code,
-			req.FreezeTemp,
-			req.Width,
-			req.TypeID,
-			req.SellerID,
-		)
+		dto := CreateRequestToDTO(&req)
+		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
 			if errors.Is(err, product.ErrInvalidProductCode{}) {
@@ -155,5 +143,21 @@ func (p *Product) Delete() gin.HandlerFunc {
 			return
 		}
 		web.Success(c, http.StatusOK, nil)
+	}
+}
+
+func CreateRequestToDTO(req *CreateRequest) *product.ProductDTO {
+	return &product.ProductDTO{
+		Desc:       req.Code,
+		ExpR:       req.ExpR,
+		FreezeR:    req.FreezeR,
+		Height:     req.Height,
+		Length:     req.Length,
+		NetW:       req.NetW,
+		Code:       req.Code,
+		FreezeTemp: req.FreezeTemp,
+		Width:      req.Width,
+		TypeID:     req.TypeID,
+		SellerID:   req.SellerID,
 	}
 }

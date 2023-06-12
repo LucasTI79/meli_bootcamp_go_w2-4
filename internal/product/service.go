@@ -7,8 +7,22 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
 
+type ProductDTO struct {
+	Desc       string
+	ExpR       int
+	FreezeR    int
+	Height     float32
+	Length     float32
+	NetW       float32
+	Code       string
+	FreezeTemp float32
+	Width      float32
+	TypeID     int
+	SellerID   int
+}
+
 type Service interface {
-	Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error)
+	Create(c context.Context, product ProductDTO) (domain.Product, error)
 	GetAll(c context.Context) ([]domain.Product, error)
 	Get(c context.Context, id int) (domain.Product, error)
 	Delete(c context.Context, id int) error
@@ -22,36 +36,24 @@ func NewService(repo Repository) Service {
 	return &service{repo}
 }
 
-func (s *service) Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error) {
+func (s *service) Create(c context.Context, product ProductDTO) (domain.Product, error) {
 	ps, err := s.repo.GetAll(c)
 	if err != nil {
 		return domain.Product{}, NewErrGeneric("error fetching products")
 	}
 
-	if !isUniqueProductCode(code, ps) {
-		return domain.Product{}, NewErrInvalidProductCode(code)
+	if !isUniqueProductCode(product.Code, ps) {
+		return domain.Product{}, NewErrInvalidProductCode(product.Code)
 	}
 
-	p := domain.Product{
-		Description:    desc,
-		ExpirationRate: expR,
-		FreezingRate:   freezeR,
-		Height:         height,
-		Length:         length,
-		Netweight:      netW,
-		ProductCode:    code,
-		RecomFreezTemp: freezeTemp,
-		Width:          width,
-		ProductTypeID:  typeID,
-		SellerID:       sellerID,
-	}
-	id, err := s.repo.Save(c, p)
+	p := mapToDomain(&product)
+	id, err := s.repo.Save(c, *p)
 	if err != nil {
 		return domain.Product{}, NewErrGeneric("error saving product")
 	}
 
 	p.ID = id
-	return p, nil
+	return *p, nil
 }
 
 func (s *service) GetAll(c context.Context) ([]domain.Product, error) {
@@ -90,4 +92,20 @@ func isUniqueProductCode(code string, ps []domain.Product) bool {
 		}
 	}
 	return true
+}
+
+func mapToDomain(product *ProductDTO) *domain.Product {
+	return &domain.Product{
+		Description:    product.Desc,
+		ExpirationRate: product.ExpR,
+		FreezingRate:   product.FreezeR,
+		Height:         product.Height,
+		Length:         product.Length,
+		Netweight:      product.NetW,
+		ProductCode:    product.Code,
+		RecomFreezTemp: product.FreezeTemp,
+		Width:          product.Width,
+		ProductTypeID:  product.TypeID,
+		SellerID:       product.SellerID,
+	}
 }
