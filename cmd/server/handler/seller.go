@@ -40,7 +40,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 	}
 }
 
-func (s *Seller) Get() gin.HandlerFunc {
+func (s *Seller) GetById() gin.HandlerFunc {
 	return func(c *gin.Context) {}
 }
 
@@ -81,8 +81,11 @@ func (s *Seller) Create() gin.HandlerFunc {
 
 		user, err := s.sellerService.Save(c.Request.Context(), req)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error()})
+			if err == seller.ErrCidAlreadyExists {
+				web.Error(c, http.StatusConflict, err.Error())
+			}else{
+				web.Error(c, http.StatusInternalServerError, err.Error())
+			}
 			return
 		}
 		web.Success(c, http.StatusCreated, user)

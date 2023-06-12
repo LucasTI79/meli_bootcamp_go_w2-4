@@ -10,6 +10,8 @@ import (
 // Errors
 var (
 	ErrNotFound = errors.New("seller not found")
+	ErrCidAlreadyExists =  errors.New("cid already registered")
+	ErrSaveSeller = errors.New("error saving seller")
 )
 
 type Service interface{
@@ -38,12 +40,11 @@ func(s *service) GetAll(c context.Context) ([]domain.Seller, error){
 func (s *service) Save(c context.Context, seller domain.Seller)(domain.Seller, error){
 	cidAlreadyExists := s.repository.Exists(c, seller.CID)
 	if cidAlreadyExists {
-		// web.Error(c, http.StatusConflict, "cid inserido já existe")
-		return domain.Seller{}, errors.New("cid já cadastrado")
+		return domain.Seller{}, ErrCidAlreadyExists
 	}
 	userID, err := s.repository.Save(c, seller)
 	if err != nil {
-		return domain.Seller{}, err
+		return domain.Seller{}, ErrSaveSeller
 	}
 	seller.ID = userID
 	return seller, nil
