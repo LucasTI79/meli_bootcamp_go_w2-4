@@ -16,7 +16,7 @@ func main() {
 	}
 
 	eng := gin.Default()
-
+	
 	router := routes.NewRouter(eng, db)
 	router.MapRoutes()
 

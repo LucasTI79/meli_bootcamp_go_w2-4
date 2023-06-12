@@ -87,7 +87,7 @@ func (r *repository) Save(ctx context.Context, s domain.Seller) (int, error) {
 func (r *repository) Update(ctx context.Context, s domain.Seller) error {
 	query := "UPDATE sellers SET cid=?, company_name=?, address=?, telephone=? WHERE id=?"
 	stmt, err := r.db.Prepare(query)
-	if err != nil {
+	if err != nil {	
 		return err
 	}
 
