@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
@@ -21,45 +22,64 @@ func NewSeller(s seller.Service) *Seller {
 
 // GetAll godoc
 // @Summary GetAll
-// @Tags Users
-// @Description List all users
+// @Tags Sellers
+// @Description List all sellers
 // @Accept  json
 // @Produce  json
 // @Param token header string true "token"
 // @Success 200 {object} web.Response
-// @Router /users [get]
+// @Router /sellers [get]
 func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		users, err := s.sellerService.GetAll(c.Request.Context())
+		sellers, err := s.sellerService.GetAll(c.Request.Context())
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "não há vendedores cadastrados")
-
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, users)
+		c.JSON(http.StatusOK, sellers)
 	}
 }
 
+// GetById godoc
+// @Summary GetById
+// @Tags Sellers
+// @Description List sellers by id
+// @Accept  json
+// @Produce  json
+// @Param token header string true "token"
+// @Success 200 {object} web.Response
+// @Router /sellers [get]
 func (s *Seller) GetById() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		seller, err := s.sellerService.Get(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		web.Success(c, http.StatusOK, seller)
+	}
 }
 
 // Create godoc
 // @Summary Create
-// @Tags Users
-// @Description Create user
+// @Tags Sellers
+// @Description Create sellet
 // @Accept  json
 // @Produce  json
 // @Param token header string true "token"
 // @Success 200 {object} web.Response
-// @Router /users [post]
+// @Router /sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req domain.Seller
 		if err := c.Bind(&req); err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": err.Error(),
-			})
+			web.Error(c, http.StatusNotFound, err.Error())
 			return
 		}
 		if req.CID == 0 {
@@ -79,7 +99,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 
-		user, err := s.sellerService.Save(c.Request.Context(), req)
+		sellerSaved, err := s.sellerService.Save(c.Request.Context(), req)
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())
@@ -88,7 +108,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 			}
 			return
 		}
-		web.Success(c, http.StatusCreated, user)
+		web.Success(c, http.StatusCreated, sellerSaved)
 	}
 }
 
