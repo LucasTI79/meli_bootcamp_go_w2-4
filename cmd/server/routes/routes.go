@@ -3,6 +3,9 @@ package routes
 import (
 	"database/sql"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,7 +46,16 @@ func (r *router) buildSellerRoutes() {
 	// r.r.GET("/seller", handler.GetAll)
 }
 
-func (r *router) buildProductRoutes() {}
+func (r *router) buildProductRoutes() {
+	repo := product.NewRepository(r.db)
+	service := product.NewService(repo)
+	h := handler.NewProduct(service)
+
+	productRG := r.rg.Group("/products")
+	{
+		productRG.POST("/", middleware.JSONMapper[handler.CreateProductRequest](), h.Create())
+	}
+}
 
 func (r *router) buildSectionRoutes() {}
 
