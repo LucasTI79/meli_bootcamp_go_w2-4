@@ -16,8 +16,8 @@ type Service interface {
 	GetAll(ctx context.Context) ([]domain.Warehouse, error)
 	Get(ctx context.Context, id int) (domain.Warehouse, error)
 	Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
-	// Update(w domain.Warehouse) (domain.Warehouse, error)
-	// Delete(id int) error
+	Update(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -51,7 +51,7 @@ func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Wareho
 func (s *service) GetAll(ctx context.Context) ([]domain.Warehouse, error) {
 	ware, err := s.repository.GetAll(ctx)
 	if err != nil {
-		return nil, err
+		return nil, ErrNotFound
 	}
 
 	return ware, nil
@@ -64,4 +64,22 @@ func (s *service) Get(ctx context.Context, id int) (domain.Warehouse, error) {
 	}
 
 	return w, nil
+}
+
+func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error) {
+	err := s.repository.Update(ctx, w)
+	if err != nil {
+		return domain.Warehouse{}, ErrNotFound
+	}
+
+	return w, nil
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return ErrNotFound
+	}
+
+	return nil
 }

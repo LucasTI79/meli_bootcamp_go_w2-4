@@ -65,9 +65,33 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 }
 
 func (w *Warehouse) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		var warehouse domain.Warehouse
+		if err := c.ShouldBindJSON(&warehouse); err != nil {
+			web.Error(c, http.StatusNotFound, "warehouse not found")
+			return
+		}
+		warehouse, err := w.warehouseService.Update(c, warehouse)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "warehouse not updated")
+			return
+		}
+		web.Success(c, http.StatusOK, warehouse)
+	}
 }
 
 func (w *Warehouse) Delete() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		err = w.warehouseService.Delete(c, id)
+		if err != nil {
+			web.Error(c, http.StatusMethodNotAllowed, "warehouse not deleted")
+			return
+		}
+		web.Success(c, http.StatusNoContent, nil)
+	}
 }
