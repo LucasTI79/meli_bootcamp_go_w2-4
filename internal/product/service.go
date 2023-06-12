@@ -2,7 +2,6 @@ package product
 
 import (
 	"context"
-	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -22,11 +21,11 @@ func NewService(repo Repository) Service {
 func (s *service) Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error) {
 	ps, err := s.repo.GetAll(c)
 	if err != nil {
-		return domain.Product{}, errors.New("error fetching products")
+		return domain.Product{}, NewErrGeneric("error fetching products")
 	}
 
 	if !isUniqueProductCode(code, ps) {
-		return domain.Product{}, &ErrInvalidProductCode{code}
+		return domain.Product{}, NewErrInvalidProductCode(code)
 	}
 
 	p := domain.Product{
@@ -44,7 +43,7 @@ func (s *service) Create(c context.Context, desc string, expR, freezeR int, heig
 	}
 	id, err := s.repo.Save(c, p)
 	if err != nil {
-		return domain.Product{}, errors.New("error saving product")
+		return domain.Product{}, NewErrGeneric("error saving product")
 	}
 
 	p.ID = id

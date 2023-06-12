@@ -122,7 +122,7 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 	}
 
 	if affect < 1 {
-		return ErrNotFound{id}
+		return NewErrNotFound(id)
 	}
 
 	return nil
