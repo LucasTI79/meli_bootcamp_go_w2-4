@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error)
+	GetAll(c context.Context) ([]domain.Product, error)
 }
 
 type service struct {
@@ -48,6 +49,14 @@ func (s *service) Create(c context.Context, desc string, expR, freezeR int, heig
 
 	p.ID = id
 	return p, nil
+}
+
+func (s *service) GetAll(c context.Context) ([]domain.Product, error) {
+	ps, err := s.repo.GetAll(c)
+	if err != nil {
+		return nil, NewErrGeneric("could not fetch products")
+	}
+	return ps, nil
 }
 
 func isUniqueProductCode(code string, ps []domain.Product) bool {

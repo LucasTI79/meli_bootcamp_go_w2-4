@@ -54,6 +54,7 @@ func (r *router) buildProductRoutes() {
 	productRG := r.rg.Group("/products")
 	{
 		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
+		productRG.GET("/", h.GetAll())
 	}
 }
 
