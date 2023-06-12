@@ -61,6 +61,7 @@ func (p *Product) GetAll() gin.HandlerFunc {
 //	@Accept		json
 //	@Produce	json
 //	@Success	200		{object}	responses.Response	"Returns product"
+//	@Failure	400		{object}	responses.Response	"Invalid ID type"
 //	@Failure	404		{object}	responses.Response	"Could not find product"
 //	@Router		/api/v1/products/:id [get]
 func (p *Product) Get() gin.HandlerFunc {
