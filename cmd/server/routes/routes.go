@@ -54,6 +54,7 @@ func (r *router) buildSectionRoutes() {
 	sec := r.rg.Group("sections")
 	{
 		sec.POST("/", handler.Create())
+		sec.GET("/", handler.GetAll())
 	}
 
 }

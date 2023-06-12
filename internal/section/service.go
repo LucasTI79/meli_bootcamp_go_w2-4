@@ -3,20 +3,20 @@ package section
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
-	"github.com/gin-gonic/gin"
 )
 
 // Errors
 var (
-	ErrNotFound = errors.New("section not found")
+	ErrNotFound             = errors.New("section not found")
+	ErrInvalidSectionNumber = errors.New("section number alredy exists")
+	ErrSavingSection        = errors.New("error saving section")
 )
 
 type Service interface {
-	Save(ctx context.Context, section domain.CreateSection) (int, error)
+	Save(ctx context.Context, section domain.CreateSection) (domain.Section, error)
+	GetAll(ctx context.Context) ([]domain.Section, error)
 }
 
 type service struct {
@@ -29,11 +29,32 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) Save(ctx context.Context, section domain.CreateSection) (int, error) {
-	existsSectionNumber := s.repository.Exists(ctx, section.SectionNumber)
+func (s *service) Save(ctx context.Context, createSection domain.CreateSection) (domain.Section, error) {
+	existsSectionNumber := s.repository.Exists(ctx, createSection.SectionNumber)
 	if existsSectionNumber {
-		 web.Error(&gin.Context{}, http.StatusConflict, "section number alredy exists")
-		 return 0, nil
+		return domain.Section{}, ErrInvalidSectionNumber
 	}
-	return s.repository.Save(ctx, section)
+	i, err := s.repository.Save(ctx, createSection)
+	if err != nil {
+		return domain.Section{}, ErrSavingSection
+	}
+
+	section := domain.Section{
+		ID:                 i,
+		SectionNumber:      createSection.SectionNumber,
+		CurrentTemperature: createSection.CurrentTemperature,
+		MinimumTemperature: createSection.MinimumTemperature,
+		CurrentCapacity:    createSection.CurrentCapacity,
+		MinimumCapacity:    createSection.MinimumCapacity,
+		MaximumCapacity:    createSection.MaximumCapacity,
+		WarehouseID:        createSection.WarehouseID,
+		ProductTypeID:      createSection.ProductTypeID,
+	}
+
+	return section, nil
+
+}
+
+func (s *service) GetAll(ctx context.Context) ([]domain.Section, error) {
+	return s.repository.GetAll(ctx)
 }
