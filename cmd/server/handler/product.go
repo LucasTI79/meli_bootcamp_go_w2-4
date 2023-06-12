@@ -58,6 +58,7 @@ func NewProduct(s product.Service) *Product {
 //	@Accept		json
 //	@Produce	json
 //	@Success	200	{object}	web.response		"Returns all products"
+//	@Success	204	{object}	web.response		"No products to retrieve"
 //	@Failure	500	{object}	web.errorResponse	"Could not fetch products"
 //	@Router		/api/v1/products [get]
 func (p *Product) GetAll() gin.HandlerFunc {
@@ -65,6 +66,10 @@ func (p *Product) GetAll() gin.HandlerFunc {
 		ps, err := p.productService.GetAll(c.Request.Context())
 		if err != nil {
 			web.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		if len(ps) == 0 {
+			web.Success(c, http.StatusNoContent, ps)
 			return
 		}
 		web.Success(c, http.StatusOK, ps)
