@@ -53,7 +53,7 @@ func (r *router) buildProductRoutes() {
 
 	productRG := r.rg.Group("/products")
 	{
-		productRG.POST("/", middleware.JSONMapper[handler.CreateProductRequest](), h.Create())
+		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
 	}
 }
 

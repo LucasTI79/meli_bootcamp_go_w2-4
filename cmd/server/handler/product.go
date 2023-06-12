@@ -14,7 +14,7 @@ type Product struct {
 	productService product.Service
 }
 
-type CreateProductRequest struct {
+type CreateRequest struct {
 	Desc       string  `binding:"required" json:"description"`
 	ExpR       int     `binding:"required" json:"expiration_rate"`
 	FreezeR    int     `binding:"required" json:"freezing_rate"`
@@ -45,7 +45,7 @@ func (p *Product) Get() gin.HandlerFunc {
 
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := middleware.ParsedRequest[CreateProductRequest](c)
+		req := middleware.ParsedRequest[CreateRequest](c)
 		p, err := p.productService.Create(
 			c.Request.Context(),
 			req.Desc,
