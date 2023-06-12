@@ -34,6 +34,15 @@ func NewProduct(s product.Service) *Product {
 	}
 }
 
+// GetAll godoc
+//
+//	@Summary	Get all products
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Success	200		{object}	responses.Response	"Returns all products"
+//	@Failure	500		{object}	responses.Response	"Could not fetch products"
+//	@Router		/api/v1/products [get]
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ps, err := p.productService.GetAll(c.Request.Context())
