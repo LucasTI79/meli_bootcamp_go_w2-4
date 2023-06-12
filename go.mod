@@ -1,6 +1,6 @@
 module github.com/extmatperez/meli_bootcamp_go_w2-4
 
-go 1.17
+go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.7.2
