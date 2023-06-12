@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
@@ -117,9 +116,10 @@ func (p *Product) Create() gin.HandlerFunc {
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			if errors.Is(err, &product.ErrInvalidProductCode{}) {
+			switch err.(type) {
+			case *product.ErrInvalidProductCode:
 				web.Error(c, http.StatusConflict, err.Error())
-			} else {
+			default:
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}
 			return
@@ -156,11 +156,12 @@ func (p *Product) Update() gin.HandlerFunc {
 		p, err := p.productService.Update(c.Request.Context(), id, *dto)
 
 		if err != nil {
-			if errors.Is(err, &product.ErrInvalidProductCode{}) {
+			switch err.(type) {
+			case *product.ErrInvalidProductCode:
 				web.Error(c, http.StatusConflict, err.Error())
-			} else if errors.Is(err, &product.ErrNotFound{}) {
+			case *product.ErrNotFound:
 				web.Error(c, http.StatusNotFound, err.Error())
-			} else {
+			default:
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}
 			return
@@ -190,9 +191,10 @@ func (p *Product) Delete() gin.HandlerFunc {
 		}
 		err = p.productService.Delete(c.Request.Context(), id)
 		if err != nil {
-			if errors.Is(err, &product.ErrNotFound{}) {
+			switch err.(type) {
+			case *product.ErrNotFound:
 				web.Error(c, http.StatusNotFound, err.Error())
-			} else {
+			default:
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}
 			return
