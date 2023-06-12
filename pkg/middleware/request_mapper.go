@@ -13,7 +13,7 @@ func JSONMapper[T any]() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req T
 		if err := c.ShouldBind(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": strings.Split(err.Error(), "\n")})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": strings.Split(err.Error(), "\n")})
 			return
 		}
 		c.Set(CONTEXT_BODY_VAR_NAME, req)
