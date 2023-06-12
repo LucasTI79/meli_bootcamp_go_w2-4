@@ -95,7 +95,7 @@ func (p *Product) Get() gin.HandlerFunc {
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := middleware.ParsedRequest[CreateRequest](c)
-		dto := MapCreateRequestToDTO(&req)
+		dto := mapCreateRequestToDTO(&req)
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
@@ -146,7 +146,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 	}
 }
 
-func MapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
+func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 	return &product.CreateDTO{
 		Desc:       req.Code,
 		ExpR:       req.ExpR,
