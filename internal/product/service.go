@@ -2,7 +2,6 @@ package product
 
 import (
 	"context"
-	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
@@ -115,9 +114,10 @@ func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.P
 func (s *service) Delete(c context.Context, id int) error {
 	err := s.repo.Delete(c, id)
 	if err != nil {
-		if errors.Is(err, &ErrNotFound{}) {
+		switch err.(type) {
+		case *ErrNotFound:
 			return NewErrNotFound(id)
-		} else {
+		default:
 			return NewErrGeneric("could not delete product")
 		}
 	}
