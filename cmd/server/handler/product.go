@@ -54,7 +54,7 @@ func (p *Product) Get() gin.HandlerFunc {
 //	@Failure	409		{object}	responses.Response	"`product_code` is not unique"
 //	@Failure	422		{object}	responses.Response	"Missing fields or invalid field types"
 //	@Failure	500		{object}	responses.Response	"Could not save product"
-//	@Router		/products [post]
+//	@Router		/api/v1/products [post]
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := middleware.ParsedRequest[CreateRequest](c)
