@@ -19,6 +19,7 @@ type Service interface {
 	Save(ctx context.Context, section domain.CreateSection) (domain.Section, error)
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -69,4 +70,8 @@ func (s *service) Get(ctx context.Context, id int) (domain.Section, error) {
 
 	return section, nil
 
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	return s.repository.Delete(ctx, id)
 }

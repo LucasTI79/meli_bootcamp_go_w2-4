@@ -120,5 +120,21 @@ func (s *Section) Update() gin.HandlerFunc {
 }
 
 func (s *Section) Delete() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		err = s.sectionService.Delete(c, id)
+
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "id %d not found", id)
+			return
+		}
+
+		web.Response(c, http.StatusNoContent, domain.Section{})
+
+	}
 }
