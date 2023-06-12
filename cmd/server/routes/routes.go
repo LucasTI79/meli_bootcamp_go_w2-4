@@ -4,6 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 )
 
 type Router interface {
@@ -49,6 +52,12 @@ func (r *router) buildSectionRoutes() {}
 
 func (r *router) buildWarehouseRoutes() {}
 
-func (r *router) buildEmployeeRoutes() {}
+func (r *router) buildEmployeeRoutes() {
+	repo := employee.NewRepository(r.db)
+	service := employee.NewService(repo)
+	handler := handler.NewEmployee(service)
+	r.rg.GET("/employees", handler.GetAll())
+	r.rg.POST("/employees", handler.Create())
+}
 
 func (r *router) buildBuyerRoutes() {}
