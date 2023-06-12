@@ -9,6 +9,7 @@ import (
 type Service interface {
 	Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error)
 	GetAll(c context.Context) ([]domain.Product, error)
+	Get(c context.Context, id int) (domain.Product, error)
 }
 
 type service struct {
@@ -57,6 +58,15 @@ func (s *service) GetAll(c context.Context) ([]domain.Product, error) {
 		return nil, NewErrGeneric("could not fetch products")
 	}
 	return ps, nil
+}
+
+func (s *service) Get(c context.Context, id int) (domain.Product, error) {
+	p, err := s.repo.Get(c, id)
+	if err != nil {
+		// TODO: Properly handle DB communication error differently
+		return domain.Product{}, NewErrNotFound(id)
+	}
+	return p, nil
 }
 
 func isUniqueProductCode(code string, ps []domain.Product) bool {

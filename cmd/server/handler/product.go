@@ -54,8 +54,29 @@ func (p *Product) GetAll() gin.HandlerFunc {
 	}
 }
 
+// Get godoc
+//
+//	@Summary	Get product by ID
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Success	200		{object}	responses.Response	"Returns product"
+//	@Failure	404		{object}	responses.Response	"Could not find product"
+//	@Router		/api/v1/products/:id [get]
 func (p *Product) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := web.GetIntParam(c, "id")
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
+			return
+		}
+		p, err := p.productService.Get(c.Request.Context(), id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		web.Success(c, http.StatusOK, p)
+	}
 }
 
 // Create godoc
