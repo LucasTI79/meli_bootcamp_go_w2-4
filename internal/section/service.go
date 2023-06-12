@@ -12,11 +12,13 @@ var (
 	ErrNotFound             = errors.New("section not found")
 	ErrInvalidSectionNumber = errors.New("section number alredy exists")
 	ErrSavingSection        = errors.New("error saving section")
+	ErrIdNotFound           = errors.New("section not found")
 )
 
 type Service interface {
 	Save(ctx context.Context, section domain.CreateSection) (domain.Section, error)
 	GetAll(ctx context.Context) ([]domain.Section, error)
+	Get(ctx context.Context, id int) (domain.Section, error)
 }
 
 type service struct {
@@ -57,4 +59,14 @@ func (s *service) Save(ctx context.Context, createSection domain.CreateSection) 
 
 func (s *service) GetAll(ctx context.Context) ([]domain.Section, error) {
 	return s.repository.GetAll(ctx)
+}
+
+func (s *service) Get(ctx context.Context, id int) (domain.Section, error) {
+	section, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Section{}, ErrIdNotFound
+	}
+
+	return section, nil
+
 }

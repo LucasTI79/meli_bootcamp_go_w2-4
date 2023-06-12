@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
@@ -26,12 +27,29 @@ func (s *Section) GetAll() gin.HandlerFunc {
 			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}
+		if len(sections) == 0 {
+			web.Response(c, http.StatusNoContent, sections)
+			return
+		}
 		web.Response(c, http.StatusOK, sections)
 	}
 }
 
 func (s *Section) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, err.Error())
+		}
+		sec, err := s.sectionService.Get(c.Request.Context(), id)
+
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		web.Response(c, http.StatusOK, sec)
+		return
+	}
 }
 
 func (s *Section) Create() gin.HandlerFunc {
@@ -43,7 +61,7 @@ func (s *Section) Create() gin.HandlerFunc {
 		}
 
 		if dto.CurrentCapacity == 0 {
-			web.Error(c, http.StatusBadRequest, "section number invalid")
+			web.Error(c, http.StatusBadRequest, "invalid section number")
 			return
 		}
 

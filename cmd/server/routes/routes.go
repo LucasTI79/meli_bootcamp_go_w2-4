@@ -55,6 +55,7 @@ func (r *router) buildSectionRoutes() {
 	{
 		sec.POST("/", handler.Create())
 		sec.GET("/", handler.GetAll())
+		sec.GET("/:id", handler.Get())
 	}
 
 }
