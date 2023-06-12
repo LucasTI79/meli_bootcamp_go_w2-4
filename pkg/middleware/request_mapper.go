@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ func JSONMapper[T any]() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req T
 		if err := c.ShouldBind(&req); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": strings.Split(err.Error(), "\n")})
+			web.Error(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 		c.Set(CONTEXT_BODY_VAR_NAME, req)
