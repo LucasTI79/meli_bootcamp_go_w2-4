@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -10,6 +11,7 @@ type Service interface {
 	Create(c context.Context, desc string, expR, freezeR int, height, length, netW float32, code string, freezeTemp, width float32, typeID, sellerID int) (domain.Product, error)
 	GetAll(c context.Context) ([]domain.Product, error)
 	Get(c context.Context, id int) (domain.Product, error)
+	Delete(c context.Context, id int) error
 }
 
 type service struct {
@@ -67,6 +69,18 @@ func (s *service) Get(c context.Context, id int) (domain.Product, error) {
 		return domain.Product{}, NewErrNotFound(id)
 	}
 	return p, nil
+}
+
+func (s *service) Delete(c context.Context, id int) error {
+	err := s.repo.Delete(c, id)
+	if err != nil {
+		if errors.Is(err, ErrNotFound{}) {
+			return NewErrNotFound(id)
+		} else {
+			return NewErrGeneric("could not delete product")
+		}
+	}
+	return nil
 }
 
 func isUniqueProductCode(code string, ps []domain.Product) bool {

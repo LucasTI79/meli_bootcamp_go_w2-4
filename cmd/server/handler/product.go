@@ -127,6 +127,33 @@ func (p *Product) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {}
 }
 
+// Delete godoc
+//
+//	@Summary	Delete product by ID
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Success	200		{object}	responses.Response	"Product deleted successfully"
+//	@Failure	400		{object}	responses.Response	"Invalid ID type"
+//	@Failure	404		{object}	responses.Response	"Could not find product"
+//	@Failure	500		{object}	responses.Response	"Could not delete product"
+//	@Router		/api/v1/products/:id [delete]
 func (p *Product) Delete() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := web.GetIntParam(c, "id")
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
+			return
+		}
+		err = p.productService.Delete(c.Request.Context(), id)
+		if err != nil {
+			if errors.Is(err, product.ErrNotFound{}) {
+				web.Error(c, http.StatusNotFound, err.Error())
+			} else {
+				web.Error(c, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+		web.Success(c, http.StatusOK, nil)
+	}
 }
