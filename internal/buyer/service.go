@@ -39,9 +39,17 @@ func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Bu
 	if err != nil {
 		return domain.Buyer{}, errors.New("Error geting buyer")
 	}
-	if b.FirstName != buyer.FirstName {
+	if b.FirstName != "" {
 		buyer.FirstName = b.FirstName
 	}
+	if b.LastName != buyer.LastName {
+		buyer.LastName = b.LastName
+	}
+	err = s.repository.Update(ctx, buyer)
+	if err != nil {
+		return domain.Buyer{}, ErrNotFound
+	}
+
 	return buyer, nil
 }
 

@@ -58,8 +58,8 @@ func (r *router) buildBuyerRoutes() {
 	service := buyer.NewService(repo)
 	handler := handler.NewBuyer(service)
 	r.rg.GET("/buyers", handler.GetAll())
-	r.rg.POST("/buyer", handler.Create())
-	r.rg.GET("/buyer/:id", handler.Get())
-	r.rg.DELETE("/buyer/:id", handler.Delete())
-	r.rg.PATCH("/buyer/:id", handler.Update())
+	r.rg.POST("/buyers", handler.Create())
+	r.rg.GET("/buyers/:id", handler.Get())
+	r.rg.DELETE("/buyers/:id", handler.Delete())
+	r.rg.PATCH("/buyers/:id", handler.Update())
 }
