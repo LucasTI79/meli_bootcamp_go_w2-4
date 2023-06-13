@@ -80,7 +80,8 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 // @Param warehouse body domain.Warehouse true "Warehouse object"
 // @Success 201 {object} domain.Warehouse
 // @Failure 400 {string} string "Invalid request"
-// @Failure 422 {string} string "Warehouse not created"
+// @Failure 422 {string} string "action could not be processed correctly due to invalid data provided"
+// @Failure 405 {string} string "Warehouse not created"
 // @Router /warehouses [post]
 func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -96,7 +97,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 
 		warehouse, err := w.warehouseService.Create(c, warehouse)
 		if err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "warehouse not created")
+			web.Error(c, http.StatusMethodNotAllowed, "warehouse not created")
 			return
 		}
 		web.Success(c, http.StatusCreated, warehouse)
@@ -112,7 +113,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 // @Param id path int true "Warehouse ID"
 // @Param warehouse body domain.Warehouse true "Updated warehouse object"
 // @Success 200 {object} domain.Warehouse
-// @Failure 400 {string} string "Invalid request"
+// @Failure 422 {string} string "action could not be processed correctly due to invalid data provided"
 // @Failure 404 {string} string "Invalid ID"
 // @Failure 405 {string} string "Warehouse not updated"
 // @Router /warehouses/{id} [patch]
