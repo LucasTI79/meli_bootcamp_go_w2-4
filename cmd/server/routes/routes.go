@@ -51,4 +51,6 @@ func (r *router) buildWarehouseRoutes() {}
 
 func (r *router) buildEmployeeRoutes() {}
 
-func (r *router) buildBuyerRoutes() {}
+func (r *router) buildBuyerRoutes() {
+	
+}
