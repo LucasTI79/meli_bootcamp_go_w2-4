@@ -9,7 +9,10 @@ import (
 
 // Errors
 var (
-	ErrNotFound = errors.New("warehouse not found")
+	ErrNotFound             = errors.New("warehouse not found")
+	ErrInvalidWarehouseCode = errors.New("warehouse code has to be unique")
+	ErrorSavingWarehouse    = errors.New("error saving warehouse")
+	ErrorProcessedData      = errors.New("action could not be processed correctly due to invalid data provided")
 )
 
 // Service is the interface for warehouse operations.
@@ -33,6 +36,7 @@ func NewService(r Repository) Service {
 }
 
 // Create creates a new warehouse.
+//
 //	@summary	Creates a new warehouse.
 //	@param		warehouse	body	domain.Warehouse	true	"Warehouse object"
 //	@return		201 {object} domain.Warehouse
@@ -41,12 +45,12 @@ func NewService(r Repository) Service {
 func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error) {
 	wcode := s.repository.Exists(ctx, w.WarehouseCode)
 	if wcode {
-		return domain.Warehouse{}, errors.New("warehouse to be single")
+		return domain.Warehouse{}, ErrInvalidWarehouseCode
 	}
 
 	id, err := s.repository.Save(ctx, w)
 	if err != nil {
-		return domain.Warehouse{}, errors.New("error saving warehouse")
+		return domain.Warehouse{}, ErrorSavingWarehouse
 	}
 
 	w.ID = id
@@ -55,19 +59,21 @@ func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Wareho
 }
 
 // GetAll retrieves all warehouses.
+//
 //	@summary	Retrieves all warehouses.
 //	@return		200 {array} Warehouse
 //	@tags		Warehouse
 func (s *service) GetAll(ctx context.Context) ([]domain.Warehouse, error) {
 	ware, err := s.repository.GetAll(ctx)
 	if err != nil {
-		return nil, ErrNotFound
+		return nil, ErrorProcessedData
 	}
 
 	return ware, nil
 }
 
 // Get retrieves a warehouse by its ID.
+//
 //	@summary	Retrieves a warehouse by ID.
 //	@param		id	path	int	true	"Warehouse ID"
 //	@return		200 {object} domain.Warehouse
@@ -83,6 +89,7 @@ func (s *service) Get(ctx context.Context, id int) (domain.Warehouse, error) {
 }
 
 // Update updates an existing warehouse.
+//
 //	@summary	Updates an existing warehouse.
 //	@param		id			path	int					true	"Warehouse ID"
 //	@param		warehouse	body	domain.Warehouse	true	"Updated warehouse object"
@@ -106,7 +113,7 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 
 		wcode := s.repository.Exists(ctx, w.WarehouseCode)
 		if wcode {
-			return domain.Warehouse{}, errors.New("warehouse code must be unique")
+			return domain.Warehouse{}, ErrInvalidWarehouseCode
 		}
 		currentWarehouse.WarehouseCode = w.WarehouseCode
 	}
@@ -119,13 +126,14 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 
 	err = s.repository.Update(ctx, currentWarehouse)
 	if err != nil {
-		return domain.Warehouse{}, ErrNotFound
+		return domain.Warehouse{}, ErrorProcessedData
 	}
 
 	return currentWarehouse, nil
 }
 
 // Delete deletes a warehouse by its ID.
+//
 //	@summary	Deletes a warehouse by ID.
 //	@param		id	path	int	true	"Warehouse ID"
 //	@return		204 "No Content"
