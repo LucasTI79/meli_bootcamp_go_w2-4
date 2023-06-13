@@ -25,7 +25,13 @@ type service struct {
 	repository Repository
 }
 
+//arrumar as validaçoes
+//arrumar os errors fazendo um pkg
+//fazer uma struct pro update com card nao required
+//swagger
+
 func (s *service) Create(ctx context.Context, b domain.Buyer) (domain.Buyer, error) {
+	//TODO fazer o exist do create
 	id, err := s.repository.Save(ctx, b)
 	if err != nil {
 		return domain.Buyer{}, errors.New("Error saving buyer")
