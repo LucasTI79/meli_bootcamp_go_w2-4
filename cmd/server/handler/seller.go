@@ -131,3 +131,18 @@ func (s *Seller) Update() gin.HandlerFunc {
 		web.Success(c, http.StatusOK, sellerUpdated)
 	}
 }
+
+func (s *Seller) Delete() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		errDelete := s.sellerService.Delete(c, id)
+		if errDelete != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+		}
+		web.Success(c, http.StatusNoContent, nil)
+	}
+}	

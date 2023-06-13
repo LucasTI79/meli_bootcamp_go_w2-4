@@ -20,6 +20,7 @@ type Service interface {
 	Get(ctx context.Context, id int) (domain.Seller, error)
 	Save(c context.Context, s domain.Seller) (domain.Seller, error)
 	Update(ctx context.Context, idn int, s domain.Seller) (domain.Seller, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -93,4 +94,12 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 		return domain.Seller{}, errUpdate
 	}
 	return seller, nil
+}
+
+func (s *service) Delete(c context.Context, id int) error{
+	err := s.repository.Delete(c, id)	
+	if err != nil {
+		return ErrNotFound
+	}
+	return nil
 }
