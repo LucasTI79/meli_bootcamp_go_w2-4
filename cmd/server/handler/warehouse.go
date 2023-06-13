@@ -86,11 +86,11 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusBadRequest, "warehouse not created")
+			web.Error(c, http.StatusUnprocessableEntity, "action could not be processed correctly due to invalid data provided")
 			return
 		}
 		if warehouse.WarehouseCode == "" {
-			web.Error(c, http.StatusBadRequest, "warehouse need to be passed, it can't be empty")
+			web.Error(c, http.StatusBadRequest, "warehousecode need to be passed, it can't be empty")
 			return
 		}
 
@@ -121,7 +121,7 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusBadRequest, "warehouse not updated")
+			web.Error(c, http.StatusUnprocessableEntity, "action could not be processed correctly due to invalid data provided")
 			return
 		}
 		id, err := strconv.Atoi(c.Param("id"))
