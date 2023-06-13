@@ -106,7 +106,7 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 
 		wcode := s.repository.Exists(ctx, w.WarehouseCode)
 		if wcode {
-			return domain.Warehouse{}, errors.New("warehouse must be unique")
+			return domain.Warehouse{}, errors.New("warehouse code must be unique")
 		}
 		currentWarehouse.WarehouseCode = w.WarehouseCode
 	}

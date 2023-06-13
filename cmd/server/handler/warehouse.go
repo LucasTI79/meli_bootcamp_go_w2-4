@@ -115,7 +115,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 // @Success 200 {object} domain.Warehouse
 // @Failure 422 {string} string "action could not be processed correctly due to invalid data provided"
 // @Failure 404 {string} string "Invalid ID"
-// @Failure 405 {string} string "Warehouse not updated"
+// @Failure 409 {string} string "Warehouse code must be unique"
 // @Router /warehouses/{id} [patch]
 func (w *Warehouse) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -133,7 +133,7 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 		warehouse.ID = id
 		warehouse, err = w.warehouseService.Update(c, warehouse)
 		if err != nil {
-			web.Error(c, http.StatusMethodNotAllowed, "warehouse not updated")
+			web.Error(c, http.StatusConflict, "warehouse code must be unique")
 			return
 		}
 		web.Success(c, http.StatusOK, warehouse)
