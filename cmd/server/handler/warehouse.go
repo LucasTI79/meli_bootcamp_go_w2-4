@@ -53,13 +53,18 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 // @Tags warehouses
 // @Produce json
 // @Success 200 {array} domain.Warehouse
+// @Success 204 "No Content"
 // @Failure 400 {string} string "Warehouse not found"
 // @Router /warehouses [get]
 func (w *Warehouse) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		warehouses, err := w.warehouseService.GetAll(c)
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "warehouse not found")
+			web.Error(c, http.StatusBadRequest, "something went wrong with the request")
+			return
+		}
+		if len(warehouses) == 0 {
+			web.Error(c, http.StatusNoContent, "warehouses not found")
 			return
 		}
 		web.Success(c, http.StatusOK, warehouses)
@@ -85,7 +90,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 			return
 		}
 		if warehouse.WarehouseCode == "" {
-			web.Error(c, http.StatusBadRequest, "warehouse need to be passed")
+			web.Error(c, http.StatusBadRequest, "warehouse need to be passed, it can't be empty")
 			return
 		}
 
