@@ -6,6 +6,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,20 @@ func NewEmployee(e employee.Service) *Employee {
 }
 
 func (e *Employee) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "invalid id")
+			return
+		}
+
+		employee, err := e.employeeService.Get(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		web.Success(c, http.StatusOK, employee)
+	}
 }
 
 func (e *Employee) GetAll() gin.HandlerFunc {

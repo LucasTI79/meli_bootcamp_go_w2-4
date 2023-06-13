@@ -15,6 +15,7 @@ var (
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Employee, error)
 	Create(ctx context.Context, w domain.Employee) (domain.Employee, error)
+	Get(ctx context.Context, id int) (domain.Employee, error)
 }
 
 type service struct {
@@ -50,4 +51,13 @@ func (s *service) GetAll(ctx context.Context) ([]domain.Employee, error) {
 		return nil, ErrNotFound
 	}
 	return empl, nil
+}
+
+func (s *service) Get(ctx context.Context, id int) (domain.Employee, error) {
+	e, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Employee{}, ErrNotFound
+	}
+
+	return e, nil
 }
