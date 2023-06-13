@@ -16,6 +16,7 @@ type Service interface {
 	GetAll(ctx context.Context) ([]domain.Employee, error)
 	Create(ctx context.Context, w domain.Employee) (domain.Employee, error)
 	Get(ctx context.Context, id int) (domain.Employee, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -60,4 +61,12 @@ func (s *service) Get(ctx context.Context, id int) (domain.Employee, error) {
 	}
 
 	return e, nil
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return ErrNotFound
+	}
+	return nil
 }
