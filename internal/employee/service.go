@@ -12,6 +12,7 @@ var (
 	ErrNotFound = errors.New("employee not found")
 )
 
+// Service define a interface para o serviço de funcionários.
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Employee, error)
 	Create(ctx context.Context, e domain.Employee) (domain.Employee, error)
@@ -24,12 +25,14 @@ type service struct {
 	repository Repository
 }
 
+// NewService cria uma nova instância do serviço de funcionários.
 func NewService(r Repository) Service {
 	return &service{
 		repository: r,
 	}
 }
 
+// Create cria um novo funcionário.
 func (s *service) Create(ctx context.Context, e domain.Employee) (domain.Employee, error) {
 	eid := s.repository.Exists(ctx, e.CardNumberID)
 
@@ -47,6 +50,7 @@ func (s *service) Create(ctx context.Context, e domain.Employee) (domain.Employe
 	return e, nil
 }
 
+// GetAll obtém todas as informações dos funcionários.
 func (s *service) GetAll(ctx context.Context) ([]domain.Employee, error) {
 	empl, err := s.repository.GetAll(ctx)
 	if err != nil {
@@ -55,6 +59,7 @@ func (s *service) GetAll(ctx context.Context) ([]domain.Employee, error) {
 	return empl, nil
 }
 
+// Get obtém as informações de um funcionário pelo ID.
 func (s *service) Get(ctx context.Context, id int) (domain.Employee, error) {
 	e, err := s.repository.Get(ctx, id)
 	if err != nil {
@@ -64,6 +69,7 @@ func (s *service) Get(ctx context.Context, id int) (domain.Employee, error) {
 	return e, nil
 }
 
+// Delete remove um funcionário.
 func (s *service) Delete(ctx context.Context, id int) error {
 	err := s.repository.Delete(ctx, id)
 	if err != nil {
@@ -72,6 +78,7 @@ func (s *service) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
+// Update atualiza as informações de um funcionário.
 func (s *service) Update(ctx context.Context, e domain.Employee) (domain.Employee, error) {
 	currentEmployee, err := s.repository.Get(ctx, e.ID)
 
