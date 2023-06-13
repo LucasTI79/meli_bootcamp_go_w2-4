@@ -33,7 +33,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sellers, err := s.sellerService.GetAll(c)
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
+			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 		if len(sellers) == 0 {
@@ -56,7 +56,7 @@ func (s *Seller) GetById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		seller, errGetSeller := s.sellerService.Get(c, id)
@@ -131,7 +131,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		var seller domain.Seller
@@ -141,7 +141,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 		}
 		sellerUpdated, err := s.sellerService.Update(c, id, seller)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, sellerUpdated)
@@ -160,13 +160,13 @@ func (s *Seller) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		errDelete := s.sellerService.Delete(c, id)
 		if errDelete != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusInternalServerError, err.Error())
 		}
 		web.Success(c, http.StatusNoContent, nil)
 	}
-}	
+}

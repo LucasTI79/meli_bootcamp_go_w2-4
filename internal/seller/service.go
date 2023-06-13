@@ -9,10 +9,10 @@ import (
 
 // Errors
 var (
-	ErrNotFound             = errors.New("seller not found")
-	ErrCidAlreadyExists     = errors.New("cid already registered")
-	ErrSaveSeller           = errors.New("error saving seller")
-	ErrSellersNotRegistered = errors.New("there are no registered sellers")
+	ErrNotFound         = errors.New("seller not found")
+	ErrCidAlreadyExists = errors.New("cid already registered")
+	ErrSaveSeller       = errors.New("error saving seller")
+	ErrFindSellers      = errors.New("there are no registered sellers")
 )
 
 type Service interface {
@@ -36,7 +36,7 @@ func NewService(r Repository) Service {
 func (s *service) GetAll(c context.Context) ([]domain.Seller, error) {
 	sellers, err := s.repository.GetAll(c)
 	if err != nil {
-		return []domain.Seller{}, ErrSellersNotRegistered
+		return []domain.Seller{}, ErrFindSellers
 	}
 	return sellers, nil
 }
@@ -68,7 +68,7 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 		return domain.Seller{}, ErrNotFound
 	}
 	//Validates when CID is sent
-	if newSeller.CID != 0{
+	if newSeller.CID != 0 {
 		//Validates if the past CID is different from the current one
 		if newSeller.CID != seller.CID {
 			cidAlreadyExists := s.repository.Exists(c, newSeller.CID)
@@ -80,26 +80,27 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 		seller.CID = newSeller.CID
 	}
 	if newSeller.Address != "" {
-		seller.Address = newSeller.Address 
+		seller.Address = newSeller.Address
 	}
 	if newSeller.CompanyName != "" {
-		seller.CompanyName = newSeller.CompanyName 
+		seller.CompanyName = newSeller.CompanyName
 	}
 	if newSeller.Telephone != "" {
-		seller.Telephone = newSeller.Telephone 
+		seller.Telephone = newSeller.Telephone
 	}
 
-	errUpdate:= s.repository.Update(c, seller)
+	errUpdate := s.repository.Update(c, seller)
 	if errUpdate != nil {
 		return domain.Seller{}, errUpdate
 	}
 	return seller, nil
 }
 
-func (s *service) Delete(c context.Context, id int) error{
-	err := s.repository.Delete(c, id)	
+func (s *service) Delete(c context.Context, id int) error {
+	err := s.repository.Delete(c, id)
+	//TODO TRATAR ERRO CASO ID NÃO SEJA ENCONTRADO
 	if err != nil {
-		return ErrNotFound
+		return err
 	}
 	return nil
 }

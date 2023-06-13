@@ -41,11 +41,15 @@ func (r *router) buildSellerRoutes() {
 	repo := seller.NewRepository(r.db)
 	service := seller.NewService(repo)
 	handler := handler.NewSeller(service)
-	r.rg.GET("/sellers", handler.GetAll())
-	r.rg.GET("/sellers/:id", handler.GetById())
-	r.rg.POST("/sellers", handler.Create())
-	r.rg.PATCH("/sellers/:id", handler.Update())
-	r.rg.DELETE("/sellers/:id", handler.Delete())
+
+	sellerGroup := r.rg.Group("/sellers")
+	{
+		sellerGroup.GET("/", handler.GetAll())
+		sellerGroup.GET("/:id", handler.GetById())
+		sellerGroup.POST("/", handler.Create())
+		sellerGroup.PATCH("/:id", handler.Update())
+		sellerGroup.DELETE("/:id", handler.Delete())
+	}
 }
 
 func (r *router) buildProductRoutes() {}
