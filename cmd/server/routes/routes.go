@@ -3,6 +3,8 @@ package routes
 import (
 	"database/sql"
 
+	// _ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
+
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
 	"github.com/gin-gonic/gin"
@@ -26,6 +28,7 @@ func NewRouter(eng *gin.Engine, db *sql.DB) Router {
 
 func (r *router) MapRoutes() {
 	r.setGroup()
+	r.buildDocumentationRoutes()
 
 	r.buildSellerRoutes()
 	r.buildProductRoutes()
@@ -39,6 +42,10 @@ func (r *router) setGroup() {
 	r.rg = r.eng.Group("/api/v1")
 }
 
+func (r *router) buildDocumentationRoutes() {
+	r.rg.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+}
+
 func (r *router) buildSellerRoutes() {
 }
 
@@ -50,7 +57,6 @@ func (r *router) buildWarehouseRoutes() {
 	repo := warehouse.NewRepository(r.db)
 	service := warehouse.NewService(repo)
 	handler := handler.NewWarehouse(service)
-	r.rg.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.rg.POST("/warehouses", handler.Create())
 	r.rg.GET("/warehouses", handler.GetAll())
 	r.rg.GET("/warehouses/:id", handler.Get())

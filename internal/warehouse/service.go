@@ -33,11 +33,11 @@ func NewService(r Repository) Service {
 }
 
 // Create creates a new warehouse.
-// @summary Creates a new warehouse.
-// @param warehouse body Warehouse true "Warehouse object"
-// @return 201 {object} Warehouse
-// @return 400 {object} BadRequestError "Invalid request"
-// @tags Warehouse
+//	@summary	Creates a new warehouse.
+//	@param		warehouse	body	domain.Warehouse	true	"Warehouse object"
+//	@return		201 {object} domain.Warehouse
+//	@return		400 {object} BadRequestError "Invalid request"
+//	@tags		Warehouse
 func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error) {
 	wcode := s.repository.Exists(ctx, w.WarehouseCode)
 	if wcode {
@@ -55,9 +55,9 @@ func (s *service) Create(ctx context.Context, w domain.Warehouse) (domain.Wareho
 }
 
 // GetAll retrieves all warehouses.
-// @summary Retrieves all warehouses.
-// @return 200 {array} Warehouse
-// @tags Warehouse
+//	@summary	Retrieves all warehouses.
+//	@return		200 {array} Warehouse
+//	@tags		Warehouse
 func (s *service) GetAll(ctx context.Context) ([]domain.Warehouse, error) {
 	ware, err := s.repository.GetAll(ctx)
 	if err != nil {
@@ -68,11 +68,11 @@ func (s *service) GetAll(ctx context.Context) ([]domain.Warehouse, error) {
 }
 
 // Get retrieves a warehouse by its ID.
-// @summary Retrieves a warehouse by ID.
-// @param id path int true "Warehouse ID"
-// @return 200 {object} Warehouse
-// @return 404 {object} NotFoundError "Warehouse not found"
-// @tags Warehouse
+//	@summary	Retrieves a warehouse by ID.
+//	@param		id	path	int	true	"Warehouse ID"
+//	@return		200 {object} domain.Warehouse
+//	@return		404 {object} NotFoundError "Warehouse not found"
+//	@tags		Warehouse
 func (s *service) Get(ctx context.Context, id int) (domain.Warehouse, error) {
 	w, err := s.repository.Get(ctx, id)
 	if err != nil {
@@ -83,13 +83,13 @@ func (s *service) Get(ctx context.Context, id int) (domain.Warehouse, error) {
 }
 
 // Update updates an existing warehouse.
-// @summary Updates an existing warehouse.
-// @param id path int true "Warehouse ID"
-// @param warehouse body Warehouse true "Updated warehouse object"
-// @return 200 {object} Warehouse
-// @return 400 {object} BadRequestError "Invalid request"
-// @return 404 {object} NotFoundError "Warehouse not found"
-// @tags Warehouse
+//	@summary	Updates an existing warehouse.
+//	@param		id			path	int					true	"Warehouse ID"
+//	@param		warehouse	body	domain.Warehouse	true	"Updated warehouse object"
+//	@return		200 {object} domain.Warehouse
+//	@return		400 {object} BadRequestError "Invalid request"
+//	@return		404 {object} NotFoundError "Warehouse not found"
+//	@tags		Warehouse
 func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error) {
 	currentWarehouse, err := s.repository.Get(ctx, w.ID)
 	if err != nil {
@@ -126,11 +126,11 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 }
 
 // Delete deletes a warehouse by its ID.
-// @summary Deletes a warehouse by ID.
-// @param id path int true "Warehouse ID"
-// @return 204 "No Content"
-// @return 404 {object} NotFoundError "Warehouse not found"
-// @tags Warehouse
+//	@summary	Deletes a warehouse by ID.
+//	@param		id	path	int	true	"Warehouse ID"
+//	@return		204 "No Content"
+//	@return		404 {object} NotFoundError "Warehouse not found"
+//	@tags		Warehouse
 func (s *service) Delete(ctx context.Context, id int) error {
 	err := s.repository.Delete(ctx, id)
 	if err != nil {
