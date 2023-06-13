@@ -20,14 +20,14 @@ func NewSeller(s seller.Service) *Seller {
 	}
 }
 
-// GetAll godoc
-// @Summary GetAll
-// @Tags Sellers
-// @Description List all sellers
-// @Accept  json
-// @Produce  json
-// @Param token header string true "token"
-// @Success 200 {object} web.Response
+// GetAll retrieves all sellers.
+// @Summary Get all sellers
+// @Description Retrieves all sellers
+// @Produce json
+// @Success 200 {array} domain.Seller "Successfully retrieved sellers"
+// @Success 204 "No Content"
+// @Failure 400 {object} errorResponse "Bad Request"
+// @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers [get]
 func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -36,19 +36,22 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, sellers)
+		if len(sellers) == 0 {
+			web.Success(c, http.StatusNoContent, sellers)
+		}
+		web.Success(c, http.StatusOK, sellers)
 	}
 }
 
-// GetById godoc
-// @Summary GetById
-// @Tags Sellers
-// @Description List sellers by id
-// @Accept  json
-// @Produce  json
-// @Param token header string true "token"
-// @Success 200 {object} web.Response
-// @Router /sellers [get]
+// GetById retrieves a seller by ID.
+// @Summary Get a seller by ID
+// @Description Retrieves a seller based on the provided ID
+// @Produce json
+// @Param id path int true "Seller ID"
+// @Success 200 {object} domain.Seller "Successfully retrieved seller"
+// @Failure 400 {object} errorResponse "Bad Request"
+// @Failure 404 {object} errorResponse "Not Found"
+// @Router /sellers/{id} [get]
 func (s *Seller) GetById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -56,24 +59,26 @@ func (s *Seller) GetById() gin.HandlerFunc {
 			web.Error(c, http.StatusNotFound, err.Error())
 			return
 		}
-
-		seller, err := s.sellerService.Get(c, id)
-		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+		seller, errGetSeller := s.sellerService.Get(c, id)
+		if errGetSeller != nil {
+			web.Error(c, http.StatusNotFound, errGetSeller.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, seller)
 	}
 }
 
-// Create godoc
-// @Summary Create
-// @Tags Sellers
-// @Description Create sellet
-// @Accept  json
-// @Produce  json
-// @Param token header string true "token"
-// @Success 200 {object} web.Response
+// Create creates a new seller.
+// @Summary Create a seller
+// @Description Create a new seller with the given information
+// @Accept json
+// @Produce json
+// @Param seller body domain.Seller true "Seller object"
+// @Success 201 {object} domain.Seller "Successfully created seller"
+// @Failure 404 {object} errorResponse "Not Found"
+// @Failure 422 {object} errorResponse "Unprocessable Entity"
+// @Failure 409 {object} errorResponse "Conflict"
+// @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -111,6 +116,17 @@ func (s *Seller) Create() gin.HandlerFunc {
 	}
 }
 
+// Update updates a seller by ID.
+// @Summary Update a seller by ID
+// @Description Updates a seller with the given ID and information
+// @Accept json
+// @Produce json
+// @Param id path int true "Seller ID"
+// @Param seller body domain.Seller true "Seller object"
+// @Success 200 {object} domain.Seller "Successfully updated seller"
+// @Failure 404 {object} errorResponse "Not Found"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /sellers/{id} [put]
 func (s *Seller) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -132,6 +148,14 @@ func (s *Seller) Update() gin.HandlerFunc {
 	}
 }
 
+// Delete deletes a seller by ID.
+// @Summary Delete a seller by ID
+// @Description Deletes a seller with the given ID
+// @Produce plain
+// @Param id path int true "Seller ID"
+// @Success 204 "No Content"
+// @Failure 404 {object} errorResponse "Not Found"
+// @Router /sellers/{id} [delete]
 func (s *Seller) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
