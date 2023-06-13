@@ -106,16 +106,28 @@ func (s *Seller) Create() gin.HandlerFunc {
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}
-			return
 		}
 		web.Success(c, http.StatusCreated, sellerSaved)
 	}
 }
 
 func (s *Seller) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
-}
-
-func (s *Seller) Delete() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		var seller domain.Seller
+		if err := c.ShouldBindJSON(&seller); err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		sellerUpdated, err := s.sellerService.Update(c, id, seller)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+		web.Success(c, http.StatusOK, sellerUpdated)
+	}
 }
