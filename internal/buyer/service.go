@@ -10,14 +10,15 @@ import (
 // Errors
 var (
 	ErrNotFound = errors.New("buyer not found")
+	ErrGeneric  = errors.New("")
 )
 
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
-	//Get(ctx context.Context, id int) (domain.Buyer, error)
+	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Create(ctx context.Context, b domain.Buyer) (domain.Buyer, error)
 	//Update(ctx context.Context, b domain.Buyer) (domain.Buyer, error)
-	//Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -40,6 +41,24 @@ func (s *service) GetAll(ctx context.Context) ([]domain.Buyer, error) {
 	}
 
 	return b, nil
+}
+
+func (s *service) Get(ctx context.Context, id int) (domain.Buyer, error) {
+	b, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Buyer{}, ErrNotFound
+	}
+
+	return b, nil
+}
+
+func (s *service) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
+	if err != nil {
+		return ErrNotFound
+	}
+
+	return nil
 }
 
 func NewService(r Repository) Service {

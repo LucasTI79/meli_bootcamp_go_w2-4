@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
@@ -20,7 +21,35 @@ func NewBuyer(b buyer.Service) *Buyer {
 }
 
 func (b *Buyer) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "invalid id")
+			return
+		}
+		buyer, err := b.buyerService.Get(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		web.Success(c, http.StatusOK, buyer)
+	}
+}
+
+func (b *Buyer) Delete() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "invalid id")
+			return
+		}
+		err = b.buyerService.Delete(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		web.Success(c, http.StatusOK, err)
+	}
 }
 
 func (b *Buyer) GetAll() gin.HandlerFunc {
@@ -55,9 +84,5 @@ func (b *Buyer) Create() gin.HandlerFunc {
 }
 
 func (b *Buyer) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
-}
-
-func (b *Buyer) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {}
 }
