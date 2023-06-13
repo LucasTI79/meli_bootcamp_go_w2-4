@@ -14,9 +14,10 @@ var (
 
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Employee, error)
-	Create(ctx context.Context, w domain.Employee) (domain.Employee, error)
+	Create(ctx context.Context, e domain.Employee) (domain.Employee, error)
 	Get(ctx context.Context, id int) (domain.Employee, error)
 	Delete(ctx context.Context, id int) error
+	Update(ctx context.Context, e domain.Employee) (domain.Employee, error)
 }
 
 type service struct {
@@ -29,21 +30,21 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) Create(ctx context.Context, w domain.Employee) (domain.Employee, error) {
-	eid := s.repository.Exists(ctx, w.CardNumberID)
+func (s *service) Create(ctx context.Context, e domain.Employee) (domain.Employee, error) {
+	eid := s.repository.Exists(ctx, e.CardNumberID)
 
 	if eid {
 		return domain.Employee{}, errors.New("employee id already exists")
 	}
 
-	id, err := s.repository.Save(ctx, w)
+	id, err := s.repository.Save(ctx, e)
 	if err != nil {
 		return domain.Employee{}, errors.New("error saving employee")
 	}
 
-	w.ID = id
+	e.ID = id
 
-	return w, nil
+	return e, nil
 }
 
 func (s *service) GetAll(ctx context.Context) ([]domain.Employee, error) {
@@ -69,4 +70,39 @@ func (s *service) Delete(ctx context.Context, id int) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (s *service) Update(ctx context.Context, e domain.Employee) (domain.Employee, error) {
+	currentEmployee, err := s.repository.Get(ctx, e.ID)
+
+	if err != nil {
+		return domain.Employee{}, ErrNotFound
+	}
+
+	if e.FirstName != "" {
+		currentEmployee.FirstName = e.FirstName
+	}
+
+	if e.LastName != "" {
+		currentEmployee.LastName = e.LastName
+	}
+
+	if e.CardNumberID != "" {
+
+		ecode := s.repository.Exists(ctx, e.CardNumberID)
+		if ecode {
+			return domain.Employee{}, errors.New("employee card id must be unique")
+		}
+		currentEmployee.CardNumberID = e.CardNumberID
+	}
+
+	if e.WarehouseID != 0 {
+		currentEmployee.WarehouseID = e.WarehouseID
+	}
+
+	err = s.repository.Update(ctx, currentEmployee)
+	if err != nil {
+		return domain.Employee{}, ErrNotFound
+	}
+	return currentEmployee, nil
 }

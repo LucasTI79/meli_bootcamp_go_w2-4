@@ -71,7 +71,26 @@ func (e *Employee) Create() gin.HandlerFunc {
 }
 
 func (e *Employee) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+
+		var employee domain.Employee
+		if err := c.ShouldBindJSON(&employee); err != nil {
+			web.Error(c, http.StatusUnprocessableEntity, "action could not be processed correctly due to invalid data provided")
+			return
+		}
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		employee.ID = id
+		employee, err = e.employeeService.Update(c, employee)
+		if err != nil {
+			web.Error(c, http.StatusConflict, "employee code id must be unique")
+			return
+		}
+		web.Success(c, http.StatusOK, employee)
+	}
 }
 
 func (e *Employee) Delete() gin.HandlerFunc {
