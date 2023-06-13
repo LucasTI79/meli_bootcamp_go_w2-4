@@ -42,7 +42,7 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		employees, err := e.employeeService.GetAll(c)
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "warehouse not found")
+			web.Error(c, http.StatusBadRequest, "employee not found")
 			return
 		}
 		web.Success(c, http.StatusOK, employees)
