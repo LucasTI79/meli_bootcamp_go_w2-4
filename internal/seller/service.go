@@ -67,12 +67,12 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 	if err != nil {
 		return domain.Seller{}, ErrNotFound
 	}
-	// caso o CID enviado
+	//Validates when CID is sent
 	if newSeller.CID != 0{
-		// se o cid for diferente do anterior
+		//Validates if the past CID is different from the current one
 		if newSeller.CID != seller.CID {
 			cidAlreadyExists := s.repository.Exists(c, newSeller.CID)
-			// valida se o cid está disponivel
+			// Validates if the CID already exists
 			if cidAlreadyExists {
 				return domain.Seller{}, ErrCidAlreadyExists
 			}

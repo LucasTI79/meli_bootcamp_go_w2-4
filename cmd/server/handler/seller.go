@@ -31,7 +31,7 @@ func NewSeller(s seller.Service) *Seller {
 // @Router /sellers [get]
 func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sellers, err := s.sellerService.GetAll(c.Request.Context())
+		sellers, err := s.sellerService.GetAll(c)
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, err.Error())
 			return
@@ -104,7 +104,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 
-		sellerSaved, err := s.sellerService.Save(c.Request.Context(), req)
+		sellerSaved, err := s.sellerService.Save(c, req)
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())
