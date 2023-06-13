@@ -20,6 +20,16 @@ func NewSection(s section.Service) *Section {
 	}
 }
 
+// GetAll godoc
+//
+//	@Summary	Get all sections
+//	@Tags		Sections
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns all sections"
+//	@Success	204	{object}	web.response		"No sections to retrieve"
+//	@Failure	500	{object}	web.errorResponse	"Could not fetch sections"
+//	@Router		/api/v1/sections [get]
 func (s *Section) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sections, err := s.sectionService.GetAll(c.Request.Context())
@@ -35,6 +45,16 @@ func (s *Section) GetAll() gin.HandlerFunc {
 	}
 }
 
+// Get godoc
+//
+//	@Summary	Get section by ID
+//	@Tags		Sections
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns section"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find section"
+//	@Router		/api/v1/sections/:id [get]
 func (s *Section) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -52,6 +72,18 @@ func (s *Section) Get() gin.HandlerFunc {
 	}
 }
 
+// Create godoc
+//
+//	@Summary	Create new section
+//	@Tags		Sections
+//	@Accept		json
+//	@Produce	json
+//	@Param		product	body		section.CreateSection	true	"section to be added"
+//	@Success	201		{object}	web.response			"Returns created section"
+//	@Failure	409		{object}	web.errorResponse		"`section_number` is not unique"
+//	@Failure	422		{object}	web.errorResponse		"Missing fields or invalid field types"
+//	@Failure	500		{object}	web.errorResponse		"Could not save section"
+//	@Router		/api/v1/sections [post]
 func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var dto section.CreateSection
@@ -74,6 +106,20 @@ func (s *Section) Create() gin.HandlerFunc {
 	}
 }
 
+// Update godoc
+//
+//	@Summary	Updates existing section
+//	@Tags		Sections
+//	@Accept		json
+//	@Produce	json
+//	@Param		section	body		section.UpdateSection	true	"Fields to update"
+//	@Success	200		{object}	web.response			"Returns updated section"
+//	@Failure	400		{object}	web.errorResponse		"Invalid ID type"
+//	@Failure	404		{object}	web.errorResponse		"Could not find section"
+//	@Failure	409		{object}	web.errorResponse		"`section_number` is not unique"
+//	@Failure	422		{object}	web.errorResponse		"Invalid field types"
+//	@Failure	500		{object}	web.errorResponse		"Could not save section"
+//	@Router		/api/v1/sections/:id [patch]
 func (s *Section) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -102,6 +148,17 @@ func (s *Section) Update() gin.HandlerFunc {
 	}
 }
 
+// Delete godoc
+//
+//	@Summary	Delete section by ID
+//	@Tags		Sections
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Section deleted successfully"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find section"
+//	@Failure	500	{object}	web.errorResponse	"Could not delete section"
+//	@Router		/api/v1/sections/:id [delete]
 func (s *Section) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
