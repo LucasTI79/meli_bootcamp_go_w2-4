@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -29,10 +28,10 @@ func (s *Section) GetAll() gin.HandlerFunc {
 			return
 		}
 		if len(sections) == 0 {
-			web.Response(c, http.StatusNoContent, sections)
+			web.Success(c, http.StatusNoContent, sections)
 			return
 		}
-		web.Response(c, http.StatusOK, sections)
+		web.Success(c, http.StatusOK, sections)
 	}
 }
 
@@ -48,57 +47,16 @@ func (s *Section) Get() gin.HandlerFunc {
 			web.Error(c, http.StatusNotFound, err.Error())
 			return
 		}
-		web.Response(c, http.StatusOK, sec)
+		web.Success(c, http.StatusOK, sec)
 		return
 	}
 }
 
 func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var dto domain.CreateSection
+		var dto section.CreateSection
 		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "invalid section number")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "current temperature invalid")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "minimum temperature invalid")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "current capacity invalid")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "minimum capacity invalid")
-			return
-
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "maximum capacity invalid")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "warehouse id invalid")
-			return
-		}
-
-		if dto.CurrentCapacity == nil {
-			web.Error(c, http.StatusBadRequest, "product type id invalid")
+			web.Error(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
@@ -111,7 +69,7 @@ func (s *Section) Create() gin.HandlerFunc {
 			}
 			return
 		}
-		web.Response(c, http.StatusCreated, sec)
+		web.Success(c, http.StatusCreated, sec)
 
 	}
 }
@@ -120,54 +78,16 @@ func (s *Section) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, errors.New("id should be a number").Error())
-		}
-		sec, err := s.sectionService.Get(c.Request.Context(), id)
-
-		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
-			return
+			web.Error(c, http.StatusBadRequest, "id should be a number")
 		}
 
-		var dto domain.CreateSection
+		var dto section.UpdateSection
 		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
+			web.Error(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
-		if dto.SectionNumber != nil {
-			sec.SectionNumber = *dto.SectionNumber
-		}
-
-		if dto.CurrentTemperature != nil {
-			sec.CurrentTemperature = *dto.CurrentTemperature
-		}
-
-		if dto.MinimumTemperature != nil {
-			sec.MinimumTemperature = *dto.MinimumTemperature
-		}
-
-		if dto.CurrentCapacity != nil {
-			sec.CurrentCapacity = *dto.CurrentCapacity
-		}
-
-		if dto.MinimumCapacity != nil {
-			sec.MinimumCapacity = *dto.MinimumCapacity
-		}
-
-		if dto.MaximumCapacity != nil {
-			sec.MaximumCapacity = *dto.MaximumCapacity
-		}
-
-		if dto.WarehouseID != nil {
-			sec.WarehouseID = *dto.WarehouseID
-		}
-
-		if dto.ProductTypeID != nil {
-			sec.ProductTypeID = *dto.ProductTypeID
-		}
-
-		err = s.sectionService.Update(c.Request.Context(), sec, dto)
+		sec, err := s.sectionService.Update(c.Request.Context(), dto, id)
 
 		if err != nil {
 			if err == section.ErrInvalidSectionNumber {
@@ -178,7 +98,7 @@ func (s *Section) Update() gin.HandlerFunc {
 			return
 		}
 
-		web.Response(c, http.StatusOK, sec)
+		web.Success(c, http.StatusOK, sec)
 	}
 }
 
@@ -197,7 +117,7 @@ func (s *Section) Delete() gin.HandlerFunc {
 			return
 		}
 
-		web.Response(c, http.StatusNoContent, domain.Section{})
+		web.Success(c, http.StatusNoContent, domain.Section{})
 
 	}
 }
