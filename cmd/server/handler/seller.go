@@ -165,7 +165,11 @@ func (s *Seller) Delete() gin.HandlerFunc {
 		}
 		errDelete := s.sellerService.Delete(c, id)
 		if errDelete != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
+			if errDelete == seller.ErrNotFound {
+				web.Error(c, http.StatusNotFound, errDelete.Error())
+			} else {
+				web.Error(c, http.StatusInternalServerError, errDelete.Error())
+			}
 		}
 		web.Success(c, http.StatusNoContent, nil)
 	}

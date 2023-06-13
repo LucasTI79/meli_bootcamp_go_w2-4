@@ -97,10 +97,13 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 }
 
 func (s *service) Delete(c context.Context, id int) error {
-	err := s.repository.Delete(c, id)
-	//TODO TRATAR ERRO CASO ID NÃO SEJA ENCONTRADO
+	_, err := s.repository.Get(c, id)
 	if err != nil {
-		return err
+		return ErrNotFound
+	}
+	errDelete := s.repository.Delete(c, id)
+	if errDelete != nil {
+		return errDelete
 	}
 	return nil
 }
