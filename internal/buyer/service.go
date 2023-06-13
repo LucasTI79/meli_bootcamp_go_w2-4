@@ -16,7 +16,7 @@ var (
 type Service interface {
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
-	Create(ctx context.Context, b domain.Buyer) (domain.Buyer, error)
+	Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error)
 	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -30,11 +30,14 @@ type service struct {
 //fazer uma struct pro update com card nao required
 //swagger
 
-func (s *service) Create(ctx context.Context, b domain.Buyer) (domain.Buyer, error) {
-	//TODO fazer o exist do create
+func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error) {
+	ex := s.repository.Exists(ctx, b.CardNumberID)
+	if ex {
+		return domain.BuyerCreate{}, errors.New("Error saving buyer")
+	}
 	id, err := s.repository.Save(ctx, b)
 	if err != nil {
-		return domain.Buyer{}, errors.New("Error saving buyer")
+		return domain.BuyerCreate{}, errors.New("Error saving buyer")
 	}
 	b.ID = id
 	return b, nil
@@ -48,7 +51,7 @@ func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Bu
 	if b.FirstName != "" {
 		buyer.FirstName = b.FirstName
 	}
-	if b.LastName != buyer.LastName {
+	if b.LastName != "" {
 		buyer.LastName = b.LastName
 	}
 	err = s.repository.Update(ctx, buyer)

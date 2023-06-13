@@ -69,7 +69,7 @@ func (b *Buyer) GetAll() gin.HandlerFunc {
 
 func (b *Buyer) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var buyer domain.Buyer
+		var buyer domain.BuyerCreate
 		if err := c.ShouldBindJSON(&buyer); err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
 			return
@@ -90,6 +90,13 @@ func (b *Buyer) Update() gin.HandlerFunc {
 			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
 			return
 		}
+		/*cardID := c.Param(("card_number_id"))
+		fmt.Println(" ", cardID)
+		if cardID != "" {
+			fmt.Println("a ...any")
+			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
+			return
+		}*/
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, "invalid id")
