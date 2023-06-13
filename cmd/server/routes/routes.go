@@ -3,6 +3,8 @@ package routes
 import (
 	"database/sql"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,5 +54,9 @@ func (r *router) buildWarehouseRoutes() {}
 func (r *router) buildEmployeeRoutes() {}
 
 func (r *router) buildBuyerRoutes() {
-	
+	repo := buyer.NewRepository(r.db)
+	service := buyer.NewService(repo)
+	handler := handler.NewBuyer(service)
+	r.rg.GET("/buyers", handler.GetAll())
+	r.rg.POST("/buyer", handler.Create())
 }
