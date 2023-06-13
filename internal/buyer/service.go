@@ -17,7 +17,7 @@ type Service interface {
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Create(ctx context.Context, b domain.Buyer) (domain.Buyer, error)
-	//Update(ctx context.Context, b domain.Buyer) (domain.Buyer, error)
+	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
 	Delete(ctx context.Context, id int) error
 }
 
@@ -32,6 +32,17 @@ func (s *service) Create(ctx context.Context, b domain.Buyer) (domain.Buyer, err
 	}
 	b.ID = id
 	return b, nil
+}
+
+func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error) {
+	buyer, err := s.repository.Get(ctx, id)
+	if err != nil {
+		return domain.Buyer{}, errors.New("Error geting buyer")
+	}
+	if b.FirstName != buyer.FirstName {
+		buyer.FirstName = b.FirstName
+	}
+	return buyer, nil
 }
 
 func (s *service) GetAll(ctx context.Context) ([]domain.Buyer, error) {

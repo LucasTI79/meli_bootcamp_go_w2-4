@@ -84,5 +84,22 @@ func (b *Buyer) Create() gin.HandlerFunc {
 }
 
 func (b *Buyer) Update() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		var buyer domain.Buyer
+		if err := c.ShouldBindJSON(&buyer); err != nil {
+			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
+			return
+		}
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			web.Error(c, http.StatusBadRequest, "invalid id")
+			return
+		}
+		buyerUpdated, err := b.buyerService.Update(c, buyer, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "Buyer not updated")
+			return
+		}
+		web.Success(c, http.StatusOK, buyerUpdated)
+	}
 }
