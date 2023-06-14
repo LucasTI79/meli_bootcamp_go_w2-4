@@ -191,6 +191,272 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/buyers:
+    get:
+      description: Get all buyers
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Buyer'
+            type: array
+        "204":
+          description: No buyers found
+          schema:
+            type: string
+        "500":
+          description: Buyer not found
+          schema:
+            type: string
+      summary: Get all buyers
+      tags:
+      - Buyers
+    post:
+      consumes:
+      - application/json
+      description: Create a new buyer
+      parameters:
+      - description: Buyer object
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/domain.BuyerCreate'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Buyer'
+        "422":
+          description: Buyer not created
+          schema:
+            type: string
+      summary: Create a new buyer
+      tags:
+      - Buyers
+  /api/v1/buyers/{id}:
+    delete:
+      description: Delete a buyer by ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Buyer deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Buyer not found
+          schema:
+            type: string
+      summary: Delete a buyer by ID
+      tags:
+      - Buyers
+    get:
+      description: Get a buyer by ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Buyer'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Buyer not found
+          schema:
+            type: string
+      summary: Get a buyer by ID
+      tags:
+      - Buyers
+    put:
+      consumes:
+      - application/json
+      description: Update a buyer by ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Buyer object
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Buyer'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Buyer'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Buyer not updated
+          schema:
+            type: string
+      summary: Update a buyer by ID
+      tags:
+      - Buyers
+  /api/v1/employees:
+    get:
+      consumes:
+      - application/json
+      description: Retorna uma lista com todas as informações dos funcionários cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Employee'
+            type: array
+        "400":
+          description: employee not found
+          schema:
+            type: string
+      summary: Obtém todas as informações dos funcionários
+      tags:
+      - Employees
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo funcionário com base nos dados fornecidos
+      parameters:
+      - description: Novo funcionário a ser criado
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Employee'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Employee'
+        "422":
+          description: employee card ID need to be only
+          schema:
+            type: string
+        "500":
+          description: employee not created
+          schema:
+            type: string
+      summary: Cria um novo funcionário
+      tags:
+      - Employees
+  /api/v1/employees/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove um funcionário com base no ID fornecido
+      parameters:
+      - description: ID do funcionário a ser removido
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid id
+          schema:
+            type: string
+        "405":
+          description: employee not deleted
+          schema:
+            type: string
+      summary: Remove um funcionário
+      tags:
+      - Employees
+    get:
+      consumes:
+      - application/json
+      description: Retorna as informações de um funcionário com base no ID fornecido
+      parameters:
+      - description: ID do funcionário a ser obtido
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Employee'
+        "400":
+          description: invalid card id
+          schema:
+            type: string
+        "404":
+          description: invalid id
+          schema:
+            type: string
+      summary: Obtém as informações de um funcionário pelo ID
+      tags:
+      - Employees
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza as informações de um funcionário com base no ID fornecido
+        e nos dados enviados
+      parameters:
+      - description: ID do funcionário a ser atualizado
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados do funcionário a serem atualizados
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Employee'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Employee'
+        "400":
+          description: invalid id
+          schema:
+            type: string
+        "404":
+          description: action could not be processed correctly due to invalid data
+            provided
+          schema:
+            type: string
+      summary: Atualiza as informações de um funcionário
+      tags:
+      - Employees
   /api/v1/products:
     get:
       consumes:
@@ -473,6 +739,151 @@ paths:
       summary: Updates existing section
       tags:
       - Sections
+  /api/v1/sellers:
+    get:
+      description: Retrieves all sellers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved sellers
+          schema:
+            items:
+              $ref: '#/definitions/domain.Seller'
+            type: array
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get all sellers
+      tags:
+      - Sellers
+    post:
+      consumes:
+      - application/json
+      description: Creates a new seller with the provided data
+      parameters:
+      - description: Seller object
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Seller'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created seller
+          schema:
+            $ref: '#/definitions/domain.Seller'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create a new seller
+      tags:
+      - Sellers
+  /api/v1/sellers/{id}:
+    delete:
+      description: Deletes a seller based on the provided ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Delete a seller by ID
+      tags:
+      - Sellers
+    get:
+      description: Retrieves a seller based on the provided ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved seller
+          schema:
+            $ref: '#/definitions/domain.Seller'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get a seller by ID
+      tags:
+      - Sellers
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing seller with the provided data
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Seller object
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Seller'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated seller
+          schema:
+            $ref: '#/definitions/domain.Seller'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Update an existing seller
+      tags:
+      - Sellers
   /api/v1/warehouses:
     get:
       description: Get all warehouses
@@ -615,415 +1026,4 @@ paths:
       summary: Update a warehouse
       tags:
       - Warehouses
-  /buyers:
-    get:
-      description: Get all buyers
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.Buyer'
-            type: array
-        "204":
-          description: No buyers found
-          schema:
-            type: string
-        "500":
-          description: Buyer not found
-          schema:
-            type: string
-      summary: Get all buyers
-      tags:
-      - Buyers
-    post:
-      consumes:
-      - application/json
-      description: Create a new buyer
-      parameters:
-      - description: Buyer object
-        in: body
-        name: buyer
-        required: true
-        schema:
-          $ref: '#/definitions/domain.BuyerCreate'
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/domain.Buyer'
-        "422":
-          description: Buyer not created
-          schema:
-            type: string
-      summary: Create a new buyer
-      tags:
-      - Buyers
-  /buyers/{id}:
-    delete:
-      description: Delete a buyer by ID
-      parameters:
-      - description: Buyer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: Buyer deleted
-          schema:
-            type: string
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "404":
-          description: Buyer not found
-          schema:
-            type: string
-      summary: Delete a buyer by ID
-      tags:
-      - Buyers
-    get:
-      description: Get a buyer by ID
-      parameters:
-      - description: Buyer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Buyer'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "404":
-          description: Buyer not found
-          schema:
-            type: string
-      summary: Get a buyer by ID
-      tags:
-      - Buyers
-    put:
-      consumes:
-      - application/json
-      description: Update a buyer by ID
-      parameters:
-      - description: Buyer ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Buyer object
-        in: body
-        name: buyer
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Buyer'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Buyer'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "404":
-          description: Buyer not updated
-          schema:
-            type: string
-      summary: Update a buyer by ID
-      tags:
-      - Buyers
-  /employees:
-    get:
-      consumes:
-      - application/json
-      description: Retorna uma lista com todas as informações dos funcionários cadastrados
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.Employee'
-            type: array
-        "400":
-          description: employee not found
-          schema:
-            type: string
-      summary: Obtém todas as informações dos funcionários
-      tags:
-      - Employees
-    post:
-      consumes:
-      - application/json
-      description: Cria um novo funcionário com base nos dados fornecidos
-      parameters:
-      - description: Novo funcionário a ser criado
-        in: body
-        name: employee
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Employee'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/domain.Employee'
-        "422":
-          description: employee card ID need to be only
-          schema:
-            type: string
-        "500":
-          description: employee not created
-          schema:
-            type: string
-      summary: Cria um novo funcionário
-      tags:
-      - Employees
-  /employees/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Remove um funcionário com base no ID fornecido
-      parameters:
-      - description: ID do funcionário a ser removido
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: invalid id
-          schema:
-            type: string
-        "405":
-          description: employee not deleted
-          schema:
-            type: string
-      summary: Remove um funcionário
-      tags:
-      - Employees
-    get:
-      consumes:
-      - application/json
-      description: Retorna as informações de um funcionário com base no ID fornecido
-      parameters:
-      - description: ID do funcionário a ser obtido
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Employee'
-        "400":
-          description: invalid card id
-          schema:
-            type: string
-        "404":
-          description: invalid id
-          schema:
-            type: string
-      summary: Obtém as informações de um funcionário pelo ID
-      tags:
-      - Employees
-    patch:
-      consumes:
-      - application/json
-      description: Atualiza as informações de um funcionário com base no ID fornecido
-        e nos dados enviados
-      parameters:
-      - description: ID do funcionário a ser atualizado
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Dados do funcionário a serem atualizados
-        in: body
-        name: employee
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Employee'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Employee'
-        "400":
-          description: invalid id
-          schema:
-            type: string
-        "404":
-          description: action could not be processed correctly due to invalid data
-            provided
-          schema:
-            type: string
-      summary: Atualiza as informações de um funcionário
-      tags:
-      - Employees
-  /sellers:
-    get:
-      description: Retrieves all sellers
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved sellers
-          schema:
-            items:
-              $ref: '#/definitions/domain.Seller'
-            type: array
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: Get all sellers
-      tags:
-      - Sellers
-    post:
-      consumes:
-      - application/json
-      description: Creates a new seller with the provided data
-      parameters:
-      - description: Seller object
-        in: body
-        name: seller
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Seller'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Successfully created seller
-          schema:
-            $ref: '#/definitions/domain.Seller'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: Create a new seller
-      tags:
-      - Sellers
-  /sellers/{id}:
-    delete:
-      description: Deletes a seller based on the provided ID
-      parameters:
-      - description: Seller ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: Delete a seller by ID
-      tags:
-      - Sellers
-    get:
-      description: Retrieves a seller based on the provided ID
-      parameters:
-      - description: Seller ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully retrieved seller
-          schema:
-            $ref: '#/definitions/domain.Seller'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: Get a seller by ID
-      tags:
-      - Sellers
-    put:
-      consumes:
-      - application/json
-      description: Updates an existing seller with the provided data
-      parameters:
-      - description: Seller ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Seller object
-        in: body
-        name: seller
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Seller'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated seller
-          schema:
-            $ref: '#/definitions/domain.Seller'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.errorResponse'
-      summary: Update an existing seller
-      tags:
-      - Sellers
 swagger: "2.0"

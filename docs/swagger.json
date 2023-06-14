@@ -4,6 +4,405 @@
         "contact": {}
     },
     "paths": {
+        "/api/v1/buyers": {
+            "get": {
+                "description": "Get all buyers",
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Get all buyers",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Buyer"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No buyers found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Buyer not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new buyer",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Create a new buyer",
+                "parameters": [
+                    {
+                        "description": "Buyer object",
+                        "name": "buyer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.BuyerCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Buyer"
+                        }
+                    },
+                    "422": {
+                        "description": "Buyer not created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/buyers/{id}": {
+            "get": {
+                "description": "Get a buyer by ID",
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Get a buyer by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Buyer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Buyer"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a buyer by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Update a buyer by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Buyer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Buyer object",
+                        "name": "buyer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Buyer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Buyer"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not updated",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a buyer by ID",
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Delete a buyer by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Buyer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Buyer deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/employees": {
+            "get": {
+                "description": "Retorna uma lista com todas as informações dos funcionários cadastrados",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Obtém todas as informações dos funcionários",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Employee"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "employee not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Cria um novo funcionário com base nos dados fornecidos",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Cria um novo funcionário",
+                "parameters": [
+                    {
+                        "description": "Novo funcionário a ser criado",
+                        "name": "employee",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Employee"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Employee"
+                        }
+                    },
+                    "422": {
+                        "description": "employee card ID need to be only",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "employee not created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/employees/{id}": {
+            "get": {
+                "description": "Retorna as informações de um funcionário com base no ID fornecido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Obtém as informações de um funcionário pelo ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do funcionário a ser obtido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Employee"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid card id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "invalid id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove um funcionário com base no ID fornecido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Remove um funcionário",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do funcionário a ser removido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "invalid id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "405": {
+                        "description": "employee not deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Atualiza as informações de um funcionário com base no ID fornecido e nos dados enviados",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Atualiza as informações de um funcionário",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID do funcionário a ser atualizado",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do funcionário a serem atualizados",
+                        "name": "employee",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Employee"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Employee"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "action could not be processed correctly due to invalid data provided",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/products": {
             "get": {
                 "consumes": [
@@ -436,6 +835,225 @@
                 }
             }
         },
+        "/api/v1/sellers": {
+            "get": {
+                "description": "Retrieves all sellers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "Get all sellers",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved sellers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Seller"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new seller with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "Create a new seller",
+                "parameters": [
+                    {
+                        "description": "Seller object",
+                        "name": "seller",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Seller"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created seller",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Seller"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sellers/{id}": {
+            "get": {
+                "description": "Retrieves a seller based on the provided ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "Get a seller by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Seller ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved seller",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Seller"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing seller with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "Update an existing seller",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Seller ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Seller object",
+                        "name": "seller",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Seller"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully updated seller",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Seller"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a seller based on the provided ID",
+                "tags": [
+                    "Sellers"
+                ],
+                "summary": "Delete a seller by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Seller ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/warehouses": {
             "get": {
                 "description": "Get all warehouses",
@@ -644,624 +1262,6 @@
                         "description": "action could not be processed correctly due to invalid data provided",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/buyers": {
-            "get": {
-                "description": "Get all buyers",
-                "tags": [
-                    "Buyers"
-                ],
-                "summary": "Get all buyers",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Buyer"
-                            }
-                        }
-                    },
-                    "204": {
-                        "description": "No buyers found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Buyer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new buyer",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Buyers"
-                ],
-                "summary": "Create a new buyer",
-                "parameters": [
-                    {
-                        "description": "Buyer object",
-                        "name": "buyer",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.BuyerCreate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Buyer"
-                        }
-                    },
-                    "422": {
-                        "description": "Buyer not created",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/buyers/{id}": {
-            "get": {
-                "description": "Get a buyer by ID",
-                "tags": [
-                    "Buyers"
-                ],
-                "summary": "Get a buyer by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Buyer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Buyer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Buyer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a buyer by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Buyers"
-                ],
-                "summary": "Update a buyer by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Buyer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Buyer object",
-                        "name": "buyer",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Buyer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Buyer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Buyer not updated",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a buyer by ID",
-                "tags": [
-                    "Buyers"
-                ],
-                "summary": "Delete a buyer by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Buyer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Buyer deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Buyer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/employees": {
-            "get": {
-                "description": "Retorna uma lista com todas as informações dos funcionários cadastrados",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Obtém todas as informações dos funcionários",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Employee"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "employee not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Cria um novo funcionário com base nos dados fornecidos",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Cria um novo funcionário",
-                "parameters": [
-                    {
-                        "description": "Novo funcionário a ser criado",
-                        "name": "employee",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Employee"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Employee"
-                        }
-                    },
-                    "422": {
-                        "description": "employee card ID need to be only",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "employee not created",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/employees/{id}": {
-            "get": {
-                "description": "Retorna as informações de um funcionário com base no ID fornecido",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Obtém as informações de um funcionário pelo ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID do funcionário a ser obtido",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Employee"
-                        }
-                    },
-                    "400": {
-                        "description": "invalid card id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "invalid id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Remove um funcionário com base no ID fornecido",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Remove um funcionário",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID do funcionário a ser removido",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "invalid id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "405": {
-                        "description": "employee not deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Atualiza as informações de um funcionário com base no ID fornecido e nos dados enviados",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Employees"
-                ],
-                "summary": "Atualiza as informações de um funcionário",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID do funcionário a ser atualizado",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Dados do funcionário a serem atualizados",
-                        "name": "employee",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Employee"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Employee"
-                        }
-                    },
-                    "400": {
-                        "description": "invalid id",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "action could not be processed correctly due to invalid data provided",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/sellers": {
-            "get": {
-                "description": "Retrieves all sellers",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sellers"
-                ],
-                "summary": "Get all sellers",
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved sellers",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Seller"
-                            }
-                        }
-                    },
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creates a new seller with the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sellers"
-                ],
-                "summary": "Create a new seller",
-                "parameters": [
-                    {
-                        "description": "Seller object",
-                        "name": "seller",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Seller"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Successfully created seller",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Seller"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/sellers/{id}": {
-            "get": {
-                "description": "Retrieves a seller based on the provided ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sellers"
-                ],
-                "summary": "Get a seller by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Seller ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved seller",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Seller"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Updates an existing seller with the provided data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sellers"
-                ],
-                "summary": "Update an existing seller",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Seller ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Seller object",
-                        "name": "seller",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/domain.Seller"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully updated seller",
-                        "schema": {
-                            "$ref": "#/definitions/domain.Seller"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes a seller based on the provided ID",
-                "tags": [
-                    "Sellers"
-                ],
-                "summary": "Delete a seller by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Seller ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
                         }
                     }
                 }

@@ -32,7 +32,7 @@ func NewEmployee(e employee.Service) *Employee {
 //	@Success		200	{object}	domain.Employee
 //	@Failure		400	{string}	string	"invalid card id"
 //	@Failure		404	{string}	string	"invalid id"
-//	@Router			/employees/{id} [get]
+//	@Router			/api/v1/employees/{id} [get]
 func (e *Employee) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -59,7 +59,7 @@ func (e *Employee) Get() gin.HandlerFunc {
 //	@Produce		json
 //	@Success		200	{array}		domain.Employee
 //	@Failure		400	{string}	string	"employee not found"
-//	@Router			/employees [get]
+//	@Router			/api/v1/employees [get]
 func (e *Employee) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		employees, err := e.employeeService.GetAll(c)
@@ -82,7 +82,7 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 //	@Success		201			{object}	domain.Employee
 //	@Failure		500			{string}	string	"employee not created"
 //	@Failure		422			{string}	string	"employee card ID need to be only"
-//	@Router			/employees [post]
+//	@Router			/api/v1/employees [post]
 func (e *Employee) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var employee domain.Employee
@@ -116,7 +116,7 @@ func (e *Employee) Create() gin.HandlerFunc {
 //	@Success		200			{object}	domain.Employee
 //	@Failure		404			{string}	string	"action could not be processed correctly due to invalid data provided"
 //	@Failure		400			{string}	string	"invalid id"
-//	@Router			/employees/{id} [patch]
+//	@Router			/api/v1/employees/{id} [patch]
 func (e *Employee) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -151,7 +151,7 @@ func (e *Employee) Update() gin.HandlerFunc {
 //	@Success		204	"No Content"
 //	@Failure		400	{string}	string	"invalid id"
 //	@Failure		405	{string}	string	"employee not deleted"
-//	@Router			/employees/{id} [delete]
+//	@Router			/api/v1/employees/{id} [delete]
 func (e *Employee) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))

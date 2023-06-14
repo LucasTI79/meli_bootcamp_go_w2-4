@@ -29,7 +29,7 @@ func NewSeller(s seller.Service) *Seller {
 //	@Success		200	{array}	domain.Seller	"Successfully retrieved sellers"
 //	@Success		204	"No Content"
 //	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
-//	@Router			/sellers [get]
+//	@Router			/api/v1/sellers [get]
 func (s *Seller) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sellers, err := s.sellerService.GetAll(c)
@@ -54,7 +54,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 //	@Success		200	{object}	domain.Seller		"Successfully retrieved seller"
 //	@Failure		400	{object}	web.errorResponse	"Bad Request"
 //	@Failure		404	{object}	web.errorResponse	"Not Found"
-//	@Router			/sellers/{id} [get]
+//	@Router			/api/v1/sellers/{id} [get]
 func (s *Seller) GetById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -83,7 +83,7 @@ func (s *Seller) GetById() gin.HandlerFunc {
 //	@Failure		404	{object}	web.errorResponse	"Not Found"
 //	@Failure		422	{object}	web.errorResponse	"Unprocessable Entity"
 //	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
-//	@Router			/sellers [post]
+//	@Router			/api/v1/sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req domain.Seller
@@ -133,7 +133,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 //	@Failure		400	{object}	web.errorResponse	"Bad Request"
 //	@Failure		404	{object}	web.errorResponse	"Not Found"
 //	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
-//	@Router			/sellers/{id} [put]
+//	@Router			/api/v1/sellers/{id} [put]
 func (s *Seller) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -165,7 +165,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 //	@Failure		400	{object}	web.errorResponse	"Bad Request"
 //	@Failure		404	{object}	web.errorResponse	"Not Found"
 //	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
-//	@Router			/sellers/{id} [delete]
+//	@Router			/api/v1/sellers/{id} [delete]
 func (s *Seller) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
