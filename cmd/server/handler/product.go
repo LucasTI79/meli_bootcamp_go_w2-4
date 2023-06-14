@@ -174,7 +174,7 @@ func (p *Product) Update() gin.HandlerFunc {
 			return
 		}
 
-		web.Success(c, http.StatusCreated, p)
+		web.Success(c, http.StatusOK, p)
 	}
 }
 
