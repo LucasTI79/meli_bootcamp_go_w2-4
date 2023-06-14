@@ -6,6 +6,7 @@ import (
 	// _ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
@@ -107,4 +108,13 @@ func (r *router) buildWarehouseRoutes() {
 
 func (r *router) buildEmployeeRoutes() {}
 
-func (r *router) buildBuyerRoutes() {}
+func (r *router) buildBuyerRoutes() {
+	repo := buyer.NewRepository(r.db)
+	service := buyer.NewService(repo)
+	handler := handler.NewBuyer(service)
+	r.rg.GET("/buyers", handler.GetAll())
+	r.rg.POST("/buyers", handler.Create())
+	r.rg.GET("/buyers/:id", handler.Get())
+	r.rg.DELETE("/buyers/:id", handler.Delete())
+	r.rg.PATCH("/buyers/:id", handler.Update())
+}
