@@ -20,14 +20,14 @@ func NewBuyer(b buyer.Service) *Buyer {
 	}
 }
 
-// @Summary Get a buyer by ID
-// @Description Get a buyer by ID
-// @Tags buyers
-// @Param id path int true "Buyer ID"
-// @Success 200 {object} domain.Buyer
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Buyer not found"
-// @Router /buyers/{id} [get]
+//	@Summary		Get a buyer by ID
+//	@Description	Get a buyer by ID
+//	@Tags			buyers
+//	@Param			id	path		int	true	"Buyer ID"
+//	@Success		200	{object}	domain.Buyer
+//	@Failure		400	{string}	string	"Invalid ID"
+//	@Failure		404	{string}	string	"Buyer not found"
+//	@Router			/buyers/{id} [get]
 func (b *Buyer) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -44,14 +44,14 @@ func (b *Buyer) Get() gin.HandlerFunc {
 	}
 }
 
-// @Summary Delete a buyer by ID
-// @Description Delete a buyer by ID
-// @Tags buyers
-// @Param id path int true "Buyer ID"
-// @Success 200 {string} string "Buyer deleted"
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Buyer not found"
-// @Router /buyers/{id} [delete]
+//	@Summary		Delete a buyer by ID
+//	@Description	Delete a buyer by ID
+//	@Tags			buyers
+//	@Param			id	path		int		true	"Buyer ID"
+//	@Success		200	{string}	string	"Buyer deleted"
+//	@Failure		400	{string}	string	"Invalid ID"
+//	@Failure		404	{string}	string	"Buyer not found"
+//	@Router			/buyers/{id} [delete]
 func (b *Buyer) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -68,13 +68,13 @@ func (b *Buyer) Delete() gin.HandlerFunc {
 	}
 }
 
-// @Summary Get all buyers
-// @Description Get all buyers
-// @Tags buyers
-// @Success 200 {array} domain.Buyer
-// @Failure 500 {string} string "Buyer not found"
-// @Failure 204 {string} string "No buyers found"
-// @Router /buyers [get]
+//	@Summary		Get all buyers
+//	@Description	Get all buyers
+//	@Tags			buyers
+//	@Success		200	{array}		domain.Buyer
+//	@Failure		500	{string}	string	"Buyer not found"
+//	@Failure		204	{string}	string	"No buyers found"
+//	@Router			/buyers [get]
 func (b *Buyer) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		buyers, err := b.buyerService.GetAll(c)
@@ -90,14 +90,14 @@ func (b *Buyer) GetAll() gin.HandlerFunc {
 	}
 }
 
-// @Summary Create a new buyer
-// @Description Create a new buyer
-// @Tags buyers
-// @Accept json
-// @Param buyer body domain.BuyerCreate true "Buyer object"
-// @Success 201 {object} domain.Buyer
-// @Failure 422 {string} string "Buyer not created"
-// @Router /buyers [post]
+//	@Summary		Create a new buyer
+//	@Description	Create a new buyer
+//	@Tags			buyers
+//	@Accept			json
+//	@Param			buyer	body		domain.BuyerCreate	true	"Buyer object"
+//	@Success		201		{object}	domain.Buyer
+//	@Failure		422		{string}	string	"Buyer not created"
+//	@Router			/buyers [post]
 func (b *Buyer) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buyer domain.BuyerCreate
@@ -118,16 +118,16 @@ func (b *Buyer) Create() gin.HandlerFunc {
 	}
 }
 
-// @Summary Update a buyer by ID
-// @Description Update a buyer by ID
-// @Tags buyers
-// @Accept json
-// @Param id path int true "Buyer ID"
-// @Param buyer body domain.Buyer true "Buyer object"
-// @Success 200 {object} domain.Buyer
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Buyer not updated"
-// @Router /buyers/{id} [put]
+//	@Summary		Update a buyer by ID
+//	@Description	Update a buyer by ID
+//	@Tags			buyers
+//	@Accept			json
+//	@Param			id		path		int				true	"Buyer ID"
+//	@Param			buyer	body		domain.Buyer	true	"Buyer object"
+//	@Success		200		{object}	domain.Buyer
+//	@Failure		400		{string}	string	"Invalid ID"
+//	@Failure		404		{string}	string	"Buyer not updated"
+//	@Router			/buyers/{id} [put]
 func (b *Buyer) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buyer domain.Buyer

@@ -22,16 +22,16 @@ func NewEmployee(e employee.Service) *Employee {
 }
 
 // Get obtém as informações de um funcionário pelo ID.
-// @Summary Obtém as informações de um funcionário pelo ID
-// @Description Retorna as informações de um funcionário com base no ID fornecido
-// @Tags employees
-// @Accept  json
-// @Produce  json
-// @Param id path int true "ID do funcionário a ser obtido"
-// @Success 200 {object} domain.Employee
-// @Failure 400 {string} string "invalid card id"
-// @Failure 404 {string} string "invalid id"
-// @Router /employees/{id} [get]
+//	@Summary		Obtém as informações de um funcionário pelo ID
+//	@Description	Retorna as informações de um funcionário com base no ID fornecido
+//	@Tags			employees
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"ID do funcionário a ser obtido"
+//	@Success		200	{object}	domain.Employee
+//	@Failure		400	{string}	string	"invalid card id"
+//	@Failure		404	{string}	string	"invalid id"
+//	@Router			/employees/{id} [get]
 func (e *Employee) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -50,14 +50,14 @@ func (e *Employee) Get() gin.HandlerFunc {
 }
 
 // GetAll obtém todas as informações dos funcionários.
-// @Summary Obtém todas as informações dos funcionários
-// @Description Retorna uma lista com todas as informações dos funcionários cadastrados
-// @Tags employees
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} domain.Employee
-// @Failure 400 {string} string "employee not found"
-// @Router /employees [get]
+//	@Summary		Obtém todas as informações dos funcionários
+//	@Description	Retorna uma lista com todas as informações dos funcionários cadastrados
+//	@Tags			employees
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{array}		domain.Employee
+//	@Failure		400	{string}	string	"employee not found"
+//	@Router			/employees [get]
 func (e *Employee) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		employees, err := e.employeeService.GetAll(c)
@@ -70,16 +70,16 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 }
 
 // Create cria um novo funcionário.
-// @Summary Cria um novo funcionário
-// @Description Cria um novo funcionário com base nos dados fornecidos
-// @Tags employees
-// @Accept  json
-// @Produce  json
-// @Param employee body domain.Employee true "Novo funcionário a ser criado"
-// @Success 201 {object} domain.Employee
-// @Failure 500 {string} string "employee not created"
-// @Failure 422 {string} string "employee card ID need to be only"
-// @Router /employees [post]
+//	@Summary		Cria um novo funcionário
+//	@Description	Cria um novo funcionário com base nos dados fornecidos
+//	@Tags			employees
+//	@Accept			json
+//	@Produce		json
+//	@Param			employee	body		domain.Employee	true	"Novo funcionário a ser criado"
+//	@Success		201			{object}	domain.Employee
+//	@Failure		500			{string}	string	"employee not created"
+//	@Failure		422			{string}	string	"employee card ID need to be only"
+//	@Router			/employees [post]
 func (e *Employee) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var employee domain.Employee
@@ -102,17 +102,17 @@ func (e *Employee) Create() gin.HandlerFunc {
 }
 
 // Update atualiza as informações de um funcionário.
-// @Summary Atualiza as informações de um funcionário
-// @Description Atualiza as informações de um funcionário com base no ID fornecido e nos dados enviados
-// @Tags employees
-// @Accept  json
-// @Produce  json
-// @Param id path int true "ID do funcionário a ser atualizado"
-// @Param employee body domain.Employee true "Dados do funcionário a serem atualizados"
-// @Success 200 {object} domain.Employee
-// @Failure 404 {string} string "action could not be processed correctly due to invalid data provided"
-// @Failure 400 {string} string "invalid id"
-// @Router /employees/{id} [patch]
+//	@Summary		Atualiza as informações de um funcionário
+//	@Description	Atualiza as informações de um funcionário com base no ID fornecido e nos dados enviados
+//	@Tags			employees
+//	@Accept			json
+//	@Produce		json
+//	@Param			id			path		int				true	"ID do funcionário a ser atualizado"
+//	@Param			employee	body		domain.Employee	true	"Dados do funcionário a serem atualizados"
+//	@Success		200			{object}	domain.Employee
+//	@Failure		404			{string}	string	"action could not be processed correctly due to invalid data provided"
+//	@Failure		400			{string}	string	"invalid id"
+//	@Router			/employees/{id} [patch]
 func (e *Employee) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -137,16 +137,16 @@ func (e *Employee) Update() gin.HandlerFunc {
 }
 
 // Delete remove um funcionário.
-// @Summary Remove um funcionário
-// @Description Remove um funcionário com base no ID fornecido
-// @Tags employees
-// @Accept  json
-// @Produce  json
-// @Param id path int true "ID do funcionário a ser removido"
-// @Success 204 "No Content"
-// @Failure 400 {string} string "invalid id"
-// @Failure 405 {string} string "employee not deleted"
-// @Router /employees/{id} [delete]
+//	@Summary		Remove um funcionário
+//	@Description	Remove um funcionário com base no ID fornecido
+//	@Tags			employees
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	int	true	"ID do funcionário a ser removido"
+//	@Success		204	"No Content"
+//	@Failure		400	{string}	string	"invalid id"
+//	@Failure		405	{string}	string	"employee not deleted"
+//	@Router			/employees/{id} [delete]
 func (e *Employee) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
