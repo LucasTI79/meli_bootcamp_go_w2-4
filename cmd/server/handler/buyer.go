@@ -118,16 +118,6 @@ func (b *Buyer) Create() gin.HandlerFunc {
 	}
 }
 
-//TODO
-//pkg errors
-/*cardID := c.Param(("card_number_id"))
-fmt.Println(" ", cardID)
-if cardID != "" {
-	fmt.Println("a ...any")
-	web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
-	return
-}*/
-
 // @Summary Update a buyer by ID
 // @Description Update a buyer by ID
 // @Tags buyers
