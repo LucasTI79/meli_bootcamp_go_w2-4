@@ -99,7 +99,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/products/:id": {
+        "/api/v1/products/{id}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -315,7 +315,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/sections/:id": {
+        "/api/v1/sections/{id}": {
             "get": {
                 "consumes": [
                     "application/json"

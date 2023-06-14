@@ -245,7 +245,7 @@ paths:
       summary: Create new product
       tags:
       - Products
-  /api/v1/products/:id:
+  /api/v1/products/{id}:
     delete:
       consumes:
       - application/json
@@ -386,7 +386,7 @@ paths:
       summary: Create new section
       tags:
       - Sections
-  /api/v1/sections/:id:
+  /api/v1/sections/{id}:
     delete:
       consumes:
       - application/json
