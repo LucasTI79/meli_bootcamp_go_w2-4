@@ -8,6 +8,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
 	"github.com/gin-gonic/gin"
@@ -45,11 +46,23 @@ func (r *router) setGroup() {
 	r.rg = r.eng.Group("/api/v1")
 }
 
-func (r *router) buildDocumentationRoutes() {
-	r.rg.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+func (r *router) buildSellerRoutes() {
+	repo := seller.NewRepository(r.db)
+	service := seller.NewService(repo)
+	handler := handler.NewSeller(service)
+
+	sellerGroup := r.rg.Group("/sellers")
+	{
+		sellerGroup.GET("/", handler.GetAll())
+		sellerGroup.GET("/:id", handler.GetById())
+		sellerGroup.POST("/", handler.Create())
+		sellerGroup.PATCH("/:id", handler.Update())
+		sellerGroup.DELETE("/:id", handler.Delete())
+	}
 }
 
-func (r *router) buildSellerRoutes() {
+func (r *router) buildDocumentationRoutes() {
+	r.rg.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func (r *router) buildProductRoutes() {
@@ -79,7 +92,6 @@ func (r *router) buildSectionRoutes() {
 		sec.DELETE("/:id", handler.Delete())
 		sec.PATCH(":id", handler.Update())
 	}
-
 }
 
 func (r *router) buildWarehouseRoutes() {
