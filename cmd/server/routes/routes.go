@@ -6,7 +6,9 @@ import (
 	// _ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -49,7 +51,20 @@ func (r *router) buildDocumentationRoutes() {
 func (r *router) buildSellerRoutes() {
 }
 
-func (r *router) buildProductRoutes() {}
+func (r *router) buildProductRoutes() {
+	repo := product.NewRepository(r.db)
+	service := product.NewService(repo)
+	h := handler.NewProduct(service)
+
+	productRG := r.rg.Group("/products")
+	{
+		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
+		productRG.GET("/", h.GetAll())
+		productRG.GET("/:id", h.Get())
+		productRG.PATCH("/:id", middleware.JSONMapper[handler.UpdateRequest](), h.Update())
+		productRG.DELETE("/:id", h.Delete())
+	}
+}
 
 func (r *router) buildSectionRoutes() {}
 
