@@ -86,19 +86,19 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 		if req.CID == 0 {
-			web.Error(c, http.StatusUnprocessableEntity, "cid é obrigatório")
+			web.Error(c, http.StatusUnprocessableEntity, "cid is required")
 			return
 		}
 		if req.CompanyName == "" {
-			web.Error(c, http.StatusUnprocessableEntity, "nome da empresa é obrigatório")
+			web.Error(c, http.StatusUnprocessableEntity, "company name is required")
 			return
 		}
 		if req.Address == "" {
-			web.Error(c, http.StatusUnprocessableEntity, "endereço é obrigatório")
+			web.Error(c, http.StatusUnprocessableEntity, "address is required")
 			return
 		}
 		if req.Telephone == "" {
-			web.Error(c, http.StatusUnprocessableEntity, "telefone é obrigatório")
+			web.Error(c, http.StatusUnprocessableEntity, "phone is required")
 			return
 		}
 
