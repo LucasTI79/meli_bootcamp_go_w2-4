@@ -26,7 +26,6 @@ func NewSeller(s seller.Service) *Seller {
 // @Produce json
 // @Success 200 {array} domain.Seller "Successfully retrieved sellers"
 // @Success 204 "No Content"
-// @Failure 400 {object} errorResponse "Bad Request"
 // @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers [get]
 func (s *Seller) GetAll() gin.HandlerFunc {
@@ -69,15 +68,14 @@ func (s *Seller) GetById() gin.HandlerFunc {
 }
 
 // Create creates a new seller.
-// @Summary Create a seller
-// @Description Create a new seller with the given information
+// @Summary Create a new seller
+// @Description Creates a new seller with the provided data
 // @Accept json
 // @Produce json
 // @Param seller body domain.Seller true "Seller object"
 // @Success 201 {object} domain.Seller "Successfully created seller"
 // @Failure 404 {object} errorResponse "Not Found"
 // @Failure 422 {object} errorResponse "Unprocessable Entity"
-// @Failure 409 {object} errorResponse "Conflict"
 // @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
@@ -116,14 +114,15 @@ func (s *Seller) Create() gin.HandlerFunc {
 	}
 }
 
-// Update updates a seller by ID.
-// @Summary Update a seller by ID
-// @Description Updates a seller with the given ID and information
+// Update updates an existing seller.
+// @Summary Update an existing seller
+// @Description Updates an existing seller with the provided data
 // @Accept json
 // @Produce json
 // @Param id path int true "Seller ID"
 // @Param seller body domain.Seller true "Seller object"
 // @Success 200 {object} domain.Seller "Successfully updated seller"
+// @Failure 400 {object} errorResponse "Bad Request"
 // @Failure 404 {object} errorResponse "Not Found"
 // @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers/{id} [put]
@@ -150,11 +149,12 @@ func (s *Seller) Update() gin.HandlerFunc {
 
 // Delete deletes a seller by ID.
 // @Summary Delete a seller by ID
-// @Description Deletes a seller with the given ID
-// @Produce plain
+// @Description Deletes a seller based on the provided ID
 // @Param id path int true "Seller ID"
 // @Success 204 "No Content"
+// @Failure 400 {object} errorResponse "Bad Request"
 // @Failure 404 {object} errorResponse "Not Found"
+// @Failure 500 {object} errorResponse "Internal Server Error"
 // @Router /sellers/{id} [delete]
 func (s *Seller) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
