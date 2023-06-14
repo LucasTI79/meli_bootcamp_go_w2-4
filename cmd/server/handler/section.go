@@ -51,10 +51,11 @@ func (s *Section) GetAll() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Section ID"
 //	@Success	200	{object}	web.response		"Returns section"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"
-//	@Router		/api/v1/sections/:id [get]
+//	@Router		/api/v1/sections/{id} [get]
 func (s *Section) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -112,6 +113,7 @@ func (s *Section) Create() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id		path		int						true	"Section ID"
 //	@Param		section	body		section.UpdateSection	true	"Fields to update"
 //	@Success	200		{object}	web.response			"Returns updated section"
 //	@Failure	400		{object}	web.errorResponse		"Invalid ID type"
@@ -119,7 +121,7 @@ func (s *Section) Create() gin.HandlerFunc {
 //	@Failure	409		{object}	web.errorResponse		"`section_number` is not unique"
 //	@Failure	422		{object}	web.errorResponse		"Invalid field types"
 //	@Failure	500		{object}	web.errorResponse		"Could not save section"
-//	@Router		/api/v1/sections/:id [patch]
+//	@Router		/api/v1/sections/{id} [patch]
 func (s *Section) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -154,11 +156,12 @@ func (s *Section) Update() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Section ID"
 //	@Success	200	{object}	web.response		"Section deleted successfully"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"
 //	@Failure	500	{object}	web.errorResponse	"Could not delete section"
-//	@Router		/api/v1/sections/:id [delete]
+//	@Router		/api/v1/sections/{id} [delete]
 func (s *Section) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))

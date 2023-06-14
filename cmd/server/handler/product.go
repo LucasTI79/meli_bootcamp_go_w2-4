@@ -82,10 +82,11 @@ func (p *Product) GetAll() gin.HandlerFunc {
 //	@Tags		Products
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Product ID"
 //	@Success	200	{object}	web.response		"Returns product"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find product"
-//	@Router		/api/v1/products/:id [get]
+//	@Router		/api/v1/products/{id} [get]
 func (p *Product) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := web.GetIntParam(c, "id")
@@ -139,6 +140,7 @@ func (p *Product) Create() gin.HandlerFunc {
 //	@Summary	Updates existing product
 //	@Tags		Products
 //	@Accept		json
+//	@Param		id	path	int	true	"Product ID"
 //	@Produce	json
 //	@Param		product	body		UpdateRequest		true	"Fields to update"
 //	@Success	200		{object}	web.response		"Returns updated product"
@@ -147,7 +149,7 @@ func (p *Product) Create() gin.HandlerFunc {
 //	@Failure	409		{object}	web.errorResponse	"`product_code` is not unique"
 //	@Failure	422		{object}	web.errorResponse	"Invalid field types"
 //	@Failure	500		{object}	web.errorResponse	"Could not save product"
-//	@Router		/api/v1/products/:id [patch]
+//	@Router		/api/v1/products/{id} [patch]
 func (p *Product) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := web.GetIntParam(c, "id")
@@ -182,11 +184,12 @@ func (p *Product) Update() gin.HandlerFunc {
 //	@Tags		Products
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Product ID"
 //	@Success	200	{object}	web.response		"Product deleted successfully"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find product"
 //	@Failure	500	{object}	web.errorResponse	"Could not delete product"
-//	@Router		/api/v1/products/:id [delete]
+//	@Router		/api/v1/products/{id} [delete]
 func (p *Product) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := web.GetIntParam(c, "id")

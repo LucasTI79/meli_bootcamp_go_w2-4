@@ -3,7 +3,7 @@ package routes
 import (
 	"database/sql"
 
-	// _ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
+	_ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
