@@ -1,4 +1,4 @@
-sPACKAGES_PATH = $(shell go list -f '{{ .Dir }}' ./...)
+PACKAGES_PATH = $(shell go list -f '{{ .Dir }}' ./...)
 
 .PHONY: all
 all: ensure-deps fmt test
