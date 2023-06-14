@@ -9,7 +9,7 @@ import (
 
 // Error definitions
 var (
-	ErrNotFound = errors.New("Buyer not found")
+	ErrNotFound = errors.New("buyer not found")
 	ErrGeneric  = errors.New("")
 )
 
@@ -29,11 +29,11 @@ type service struct {
 func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error) {
 	ex := s.repository.Exists(ctx, b.CardNumberID)
 	if ex {
-		return domain.BuyerCreate{}, errors.New("Buyer already exists")
+		return domain.BuyerCreate{}, errors.New("buyer already exists")
 	}
 	id, err := s.repository.Save(ctx, b)
 	if err != nil {
-		return domain.BuyerCreate{}, errors.New("Error saving buyer")
+		return domain.BuyerCreate{}, errors.New("error saving buyer")
 	}
 	b.ID = id
 	return b, nil
@@ -42,7 +42,7 @@ func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.Buye
 func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error) {
 	buyer, err := s.repository.Get(ctx, id)
 	if err != nil {
-		return domain.Buyer{}, errors.New("Error getting buyer")
+		return domain.Buyer{}, errors.New("error getting buyer")
 	}
 	if b.FirstName != "" {
 		buyer.FirstName = b.FirstName
