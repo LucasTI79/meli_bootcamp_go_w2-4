@@ -515,6 +515,12 @@ paths:
     delete:
       consumes:
       - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -540,6 +546,12 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -562,6 +574,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: Fields to update
         in: body
         name: product
@@ -656,6 +673,12 @@ paths:
     delete:
       consumes:
       - application/json
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -681,6 +704,12 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -703,6 +732,11 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: Fields to update
         in: body
         name: section

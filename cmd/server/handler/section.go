@@ -51,6 +51,7 @@ func (s *Section) GetAll() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Section ID"
 //	@Success	200	{object}	web.response		"Returns section"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"
@@ -112,6 +113,7 @@ func (s *Section) Create() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id		path		int						true	"Section ID"
 //	@Param		section	body		section.UpdateSection	true	"Fields to update"
 //	@Success	200		{object}	web.response			"Returns updated section"
 //	@Failure	400		{object}	web.errorResponse		"Invalid ID type"
@@ -154,6 +156,7 @@ func (s *Section) Update() gin.HandlerFunc {
 //	@Tags		Sections
 //	@Accept		json
 //	@Produce	json
+//	@Param		id	path		int					true	"Section ID"
 //	@Success	200	{object}	web.response		"Section deleted successfully"
 //	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"

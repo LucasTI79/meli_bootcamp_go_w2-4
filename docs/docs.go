@@ -510,6 +510,15 @@ const docTemplate = `{
                     "Products"
                 ],
                 "summary": "Get product by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Returns product",
@@ -542,6 +551,15 @@ const docTemplate = `{
                     "Products"
                 ],
                 "summary": "Delete product by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Product deleted successfully",
@@ -581,6 +599,13 @@ const docTemplate = `{
                 ],
                 "summary": "Updates existing product",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Fields to update",
                         "name": "product",
@@ -726,6 +751,15 @@ const docTemplate = `{
                     "Sections"
                 ],
                 "summary": "Get section by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Returns section",
@@ -758,6 +792,15 @@ const docTemplate = `{
                     "Sections"
                 ],
                 "summary": "Delete section by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Section deleted successfully",
@@ -797,6 +840,13 @@ const docTemplate = `{
                 ],
                 "summary": "Updates existing section",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Fields to update",
                         "name": "section",
