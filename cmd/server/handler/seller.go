@@ -77,12 +77,12 @@ func (s *Seller) GetById() gin.HandlerFunc {
 //	@Description	Creates a new seller with the provided data
 //	@Accept			json
 //	@Produce		json
-//	@Param			seller	body		domain.Seller		true	"Seller object"
+//	@Param			seller	body	domain.Seller	true	"Seller object"
 //	@Tags			Sellers
-//	@Success		201		{object}	domain.Seller		"Successfully created seller"
-//	@Failure		404		{object}	web.errorResponse	"Not Found"
-//	@Failure		422		{object}	web.errorResponse	"Unprocessable Entity"
-//	@Failure		500		{object}	web.errorResponse	"Internal Server Error"
+//	@Success		201	{object}	domain.Seller		"Successfully created seller"
+//	@Failure		404	{object}	web.errorResponse	"Not Found"
+//	@Failure		422	{object}	web.errorResponse	"Unprocessable Entity"
+//	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
 //	@Router			/sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -126,13 +126,13 @@ func (s *Seller) Create() gin.HandlerFunc {
 //	@Description	Updates an existing seller with the provided data
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int					true	"Seller ID"
-//	@Param			seller	body		domain.Seller		true	"Seller object"
+//	@Param			id		path	int				true	"Seller ID"
+//	@Param			seller	body	domain.Seller	true	"Seller object"
 //	@Tags			Sellers
-//	@Success		200		{object}	domain.Seller		"Successfully updated seller"
-//	@Failure		400		{object}	web.errorResponse	"Bad Request"
-//	@Failure		404		{object}	web.errorResponse	"Not Found"
-//	@Failure		500		{object}	web.errorResponse	"Internal Server Error"
+//	@Success		200	{object}	domain.Seller		"Successfully updated seller"
+//	@Failure		400	{object}	web.errorResponse	"Bad Request"
+//	@Failure		404	{object}	web.errorResponse	"Not Found"
+//	@Failure		500	{object}	web.errorResponse	"Internal Server Error"
 //	@Router			/sellers/{id} [put]
 func (s *Seller) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -22,7 +22,7 @@ func NewBuyer(b buyer.Service) *Buyer {
 
 //	@Summary		Get a buyer by ID
 //	@Description	Get a buyer by ID
-//	@Tags			buyers
+//	@Tags			Buyers
 //	@Param			id	path		int	true	"Buyer ID"
 //	@Success		200	{object}	domain.Buyer
 //	@Failure		400	{string}	string	"Invalid ID"
@@ -46,7 +46,7 @@ func (b *Buyer) Get() gin.HandlerFunc {
 
 //	@Summary		Delete a buyer by ID
 //	@Description	Delete a buyer by ID
-//	@Tags			buyers
+//	@Tags			Buyers
 //	@Param			id	path		int		true	"Buyer ID"
 //	@Success		200	{string}	string	"Buyer deleted"
 //	@Failure		400	{string}	string	"Invalid ID"
@@ -70,7 +70,7 @@ func (b *Buyer) Delete() gin.HandlerFunc {
 
 //	@Summary		Get all buyers
 //	@Description	Get all buyers
-//	@Tags			buyers
+//	@Tags			Buyers
 //	@Success		200	{array}		domain.Buyer
 //	@Failure		500	{string}	string	"Buyer not found"
 //	@Failure		204	{string}	string	"No buyers found"
@@ -92,7 +92,7 @@ func (b *Buyer) GetAll() gin.HandlerFunc {
 
 //	@Summary		Create a new buyer
 //	@Description	Create a new buyer
-//	@Tags			buyers
+//	@Tags			Buyers
 //	@Accept			json
 //	@Param			buyer	body		domain.BuyerCreate	true	"Buyer object"
 //	@Success		201		{object}	domain.Buyer
@@ -120,7 +120,7 @@ func (b *Buyer) Create() gin.HandlerFunc {
 
 //	@Summary		Update a buyer by ID
 //	@Description	Update a buyer by ID
-//	@Tags			buyers
+//	@Tags			Buyers
 //	@Accept			json
 //	@Param			id		path		int				true	"Buyer ID"
 //	@Param			buyer	body		domain.Buyer	true	"Buyer object"

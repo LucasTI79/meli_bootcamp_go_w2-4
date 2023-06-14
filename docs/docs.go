@@ -455,7 +455,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "warehouses"
+                    "Warehouses"
                 ],
                 "summary": "Retrieve all warehouses",
                 "responses": {
@@ -488,7 +488,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "warehouses"
+                    "Warehouses"
                 ],
                 "summary": "Create a warehouse",
                 "parameters": [
@@ -537,7 +537,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "warehouses"
+                    "Warehouses"
                 ],
                 "summary": "Retrieve a warehouse",
                 "parameters": [
@@ -573,7 +573,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Delete a warehouse by ID",
                 "tags": [
-                    "warehouses"
+                    "Warehouses"
                 ],
                 "summary": "Delete a warehouse",
                 "parameters": [
@@ -612,7 +612,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "warehouses"
+                    "Warehouses"
                 ],
                 "summary": "Update a warehouse",
                 "parameters": [
@@ -665,7 +665,7 @@ const docTemplate = `{
             "get": {
                 "description": "Get all buyers",
                 "tags": [
-                    "buyers"
+                    "Buyers"
                 ],
                 "summary": "Get all buyers",
                 "responses": {
@@ -698,7 +698,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "buyers"
+                    "Buyers"
                 ],
                 "summary": "Create a new buyer",
                 "parameters": [
@@ -732,7 +732,7 @@ const docTemplate = `{
             "get": {
                 "description": "Get a buyer by ID",
                 "tags": [
-                    "buyers"
+                    "Buyers"
                 ],
                 "summary": "Get a buyer by ID",
                 "parameters": [
@@ -771,7 +771,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "buyers"
+                    "Buyers"
                 ],
                 "summary": "Update a buyer by ID",
                 "parameters": [
@@ -816,7 +816,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Delete a buyer by ID",
                 "tags": [
-                    "buyers"
+                    "Buyers"
                 ],
                 "summary": "Delete a buyer by ID",
                 "parameters": [
@@ -860,7 +860,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "employees"
+                    "Employees"
                 ],
                 "summary": "Obtém todas as informações dos funcionários",
                 "responses": {
@@ -890,7 +890,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "employees"
+                    "Employees"
                 ],
                 "summary": "Cria um novo funcionário",
                 "parameters": [
@@ -936,7 +936,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "employees"
+                    "Employees"
                 ],
                 "summary": "Obtém as informações de um funcionário pelo ID",
                 "parameters": [
@@ -978,7 +978,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "employees"
+                    "Employees"
                 ],
                 "summary": "Remove um funcionário",
                 "parameters": [
@@ -1017,7 +1017,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "employees"
+                    "Employees"
                 ],
                 "summary": "Atualiza as informações de um funcionário",
                 "parameters": [

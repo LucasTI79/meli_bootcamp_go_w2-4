@@ -493,7 +493,7 @@ paths:
             type: string
       summary: Retrieve all warehouses
       tags:
-      - warehouses
+      - Warehouses
     post:
       consumes:
       - application/json
@@ -526,7 +526,7 @@ paths:
             type: string
       summary: Create a warehouse
       tags:
-      - warehouses
+      - Warehouses
   /api/v1/warehouses/{id}:
     delete:
       description: Delete a warehouse by ID
@@ -549,7 +549,7 @@ paths:
             type: string
       summary: Delete a warehouse
       tags:
-      - warehouses
+      - Warehouses
     get:
       description: Get a warehouse by ID
       parameters:
@@ -575,7 +575,7 @@ paths:
             type: string
       summary: Retrieve a warehouse
       tags:
-      - warehouses
+      - Warehouses
     patch:
       consumes:
       - application/json
@@ -614,7 +614,7 @@ paths:
             type: string
       summary: Update a warehouse
       tags:
-      - warehouses
+      - Warehouses
   /buyers:
     get:
       description: Get all buyers
@@ -635,7 +635,7 @@ paths:
             type: string
       summary: Get all buyers
       tags:
-      - buyers
+      - Buyers
     post:
       consumes:
       - application/json
@@ -658,7 +658,7 @@ paths:
             type: string
       summary: Create a new buyer
       tags:
-      - buyers
+      - Buyers
   /buyers/{id}:
     delete:
       description: Delete a buyer by ID
@@ -683,7 +683,7 @@ paths:
             type: string
       summary: Delete a buyer by ID
       tags:
-      - buyers
+      - Buyers
     get:
       description: Get a buyer by ID
       parameters:
@@ -707,7 +707,7 @@ paths:
             type: string
       summary: Get a buyer by ID
       tags:
-      - buyers
+      - Buyers
     put:
       consumes:
       - application/json
@@ -739,7 +739,7 @@ paths:
             type: string
       summary: Update a buyer by ID
       tags:
-      - buyers
+      - Buyers
   /employees:
     get:
       consumes:
@@ -760,7 +760,7 @@ paths:
             type: string
       summary: Obtém todas as informações dos funcionários
       tags:
-      - employees
+      - Employees
     post:
       consumes:
       - application/json
@@ -789,7 +789,7 @@ paths:
             type: string
       summary: Cria um novo funcionário
       tags:
-      - employees
+      - Employees
   /employees/{id}:
     delete:
       consumes:
@@ -816,7 +816,7 @@ paths:
             type: string
       summary: Remove um funcionário
       tags:
-      - employees
+      - Employees
     get:
       consumes:
       - application/json
@@ -844,7 +844,7 @@ paths:
             type: string
       summary: Obtém as informações de um funcionário pelo ID
       tags:
-      - employees
+      - Employees
     patch:
       consumes:
       - application/json
@@ -880,7 +880,7 @@ paths:
             type: string
       summary: Atualiza as informações de um funcionário
       tags:
-      - employees
+      - Employees
   /sellers:
     get:
       description: Retrieves all sellers

@@ -22,9 +22,10 @@ func NewEmployee(e employee.Service) *Employee {
 }
 
 // Get obtém as informações de um funcionário pelo ID.
+//
 //	@Summary		Obtém as informações de um funcionário pelo ID
 //	@Description	Retorna as informações de um funcionário com base no ID fornecido
-//	@Tags			employees
+//	@Tags			Employees
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		int	true	"ID do funcionário a ser obtido"
@@ -50,9 +51,10 @@ func (e *Employee) Get() gin.HandlerFunc {
 }
 
 // GetAll obtém todas as informações dos funcionários.
+//
 //	@Summary		Obtém todas as informações dos funcionários
 //	@Description	Retorna uma lista com todas as informações dos funcionários cadastrados
-//	@Tags			employees
+//	@Tags			Employees
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}		domain.Employee
@@ -70,9 +72,10 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 }
 
 // Create cria um novo funcionário.
+//
 //	@Summary		Cria um novo funcionário
 //	@Description	Cria um novo funcionário com base nos dados fornecidos
-//	@Tags			employees
+//	@Tags			Employees
 //	@Accept			json
 //	@Produce		json
 //	@Param			employee	body		domain.Employee	true	"Novo funcionário a ser criado"
@@ -102,9 +105,10 @@ func (e *Employee) Create() gin.HandlerFunc {
 }
 
 // Update atualiza as informações de um funcionário.
+//
 //	@Summary		Atualiza as informações de um funcionário
 //	@Description	Atualiza as informações de um funcionário com base no ID fornecido e nos dados enviados
-//	@Tags			employees
+//	@Tags			Employees
 //	@Accept			json
 //	@Produce		json
 //	@Param			id			path		int				true	"ID do funcionário a ser atualizado"
@@ -137,9 +141,10 @@ func (e *Employee) Update() gin.HandlerFunc {
 }
 
 // Delete remove um funcionário.
+//
 //	@Summary		Remove um funcionário
 //	@Description	Remove um funcionário com base no ID fornecido
-//	@Tags			employees
+//	@Tags			Employees
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	int	true	"ID do funcionário a ser removido"

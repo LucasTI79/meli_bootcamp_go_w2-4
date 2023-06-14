@@ -24,7 +24,7 @@ func NewWarehouse(w warehouse.Service) *Warehouse {
 //
 //	@Summary		Retrieve a warehouse
 //	@Description	Get a warehouse by ID
-//	@Tags			warehouses
+//	@Tags			Warehouses
 //	@Param			id	path	int	true	"Warehouse ID"
 //	@Produce		json
 //	@Success		200	{object}	domain.Warehouse
@@ -52,7 +52,7 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 //
 //	@Summary		Retrieve all warehouses
 //	@Description	Get all warehouses
-//	@Tags			warehouses
+//	@Tags			Warehouses
 //	@Produce		json
 //	@Success		200	{array}	domain.Warehouse
 //	@Success		204	"warehouses is empty"
@@ -77,7 +77,7 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 //
 //	@Summary		Create a warehouse
 //	@Description	Create a new warehouse
-//	@Tags			warehouses
+//	@Tags			Warehouses
 //	@Accept			json
 //	@Produce		json
 //	@Param			warehouse	body		domain.Warehouse	true	"Warehouse object"
@@ -111,7 +111,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 //
 //	@Summary		Update a warehouse
 //	@Description	Update a warehouse by ID
-//	@Tags			warehouses
+//	@Tags			Warehouses
 //	@Accept			json
 //	@Produce		json
 //	@Param			id			path		int					true	"Warehouse ID"
@@ -148,7 +148,7 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 //
 //	@Summary		Delete a warehouse
 //	@Description	Delete a warehouse by ID
-//	@Tags			warehouses
+//	@Tags			Warehouses
 //	@Param			id	path	int	true	"Warehouse ID"
 //	@Success		204	"No Content"
 //	@Failure		400	{string}	string	"Invalid ID"
