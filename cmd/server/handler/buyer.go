@@ -105,6 +105,10 @@ func (b *Buyer) Create() gin.HandlerFunc {
 			web.Error(c, http.StatusUnprocessableEntity, "Buyer not created")
 			return
 		}
+		if buyer.CardNumberID == "" {
+			web.Error(c, http.StatusBadRequest, "CardID must be passed")
+			return
+		}
 		buyerF, err := b.buyerService.Create(c.Request.Context(), buyer)
 		if err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, "Buyer not created")
@@ -113,6 +117,16 @@ func (b *Buyer) Create() gin.HandlerFunc {
 		web.Response(c, http.StatusCreated, buyerF)
 	}
 }
+
+//TODO
+//pkg errors
+/*cardID := c.Param(("card_number_id"))
+fmt.Println(" ", cardID)
+if cardID != "" {
+	fmt.Println("a ...any")
+	web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
+	return
+}*/
 
 // @Summary Update a buyer by ID
 // @Description Update a buyer by ID
