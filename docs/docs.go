@@ -1066,6 +1066,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Sellers"
+                ],
                 "summary": "Get all sellers",
                 "responses": {
                     "200": {
@@ -1095,6 +1098,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Sellers"
                 ],
                 "summary": "Create a new seller",
                 "parameters": [
@@ -1142,6 +1148,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Sellers"
+                ],
                 "summary": "Get a seller by ID",
                 "parameters": [
                     {
@@ -1180,6 +1189,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Sellers"
                 ],
                 "summary": "Update an existing seller",
                 "parameters": [
@@ -1229,6 +1241,9 @@ const docTemplate = `{
             },
             "delete": {
                 "description": "Deletes a seller based on the provided ID",
+                "tags": [
+                    "Sellers"
+                ],
                 "summary": "Delete a seller by ID",
                 "parameters": [
                     {

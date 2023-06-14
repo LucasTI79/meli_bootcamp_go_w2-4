@@ -900,6 +900,8 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Get all sellers
+      tags:
+      - Sellers
     post:
       consumes:
       - application/json
@@ -931,6 +933,8 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Create a new seller
+      tags:
+      - Sellers
   /sellers/{id}:
     delete:
       description: Deletes a seller based on the provided ID
@@ -956,6 +960,8 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Delete a seller by ID
+      tags:
+      - Sellers
     get:
       description: Retrieves a seller based on the provided ID
       parameters:
@@ -980,6 +986,8 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Get a seller by ID
+      tags:
+      - Sellers
     put:
       consumes:
       - application/json
@@ -1016,4 +1024,6 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Update an existing seller
+      tags:
+      - Sellers
 swagger: "2.0"
