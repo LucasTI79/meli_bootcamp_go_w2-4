@@ -77,7 +77,7 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 // @Produce  json
 // @Param employee body domain.Employee true "Novo funcionário a ser criado"
 // @Success 201 {object} domain.Employee
-// @Failure 400 {string} string "employee not created"
+// @Failure 500 {string} string "employee not created"
 // @Failure 422 {string} string "employee card ID need to be only"
 // @Router /employees [post]
 func (e *Employee) Create() gin.HandlerFunc {
@@ -94,7 +94,7 @@ func (e *Employee) Create() gin.HandlerFunc {
 
 		employee, err := e.employeeService.Create(c, employee)
 		if err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "employee not created")
+			web.Error(c, http.StatusInternalServerError, "employee not created")
 			return
 		}
 		web.Success(c, http.StatusCreated, employee)
@@ -111,7 +111,7 @@ func (e *Employee) Create() gin.HandlerFunc {
 // @Param employee body domain.Employee true "Dados do funcionário a serem atualizados"
 // @Success 200 {object} domain.Employee
 // @Failure 404 {string} string "action could not be processed correctly due to invalid data provided"
-// @Failure 409 {string} string "invalid id"
+// @Failure 400 {string} string "invalid id"
 // @Router /employees/{id} [patch]
 func (e *Employee) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -123,7 +123,7 @@ func (e *Employee) Update() gin.HandlerFunc {
 		}
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "invalid id")
+			web.Error(c, http.StatusBadRequest, "invalid id")
 			return
 		}
 		employee.ID = id
@@ -144,14 +144,14 @@ func (e *Employee) Update() gin.HandlerFunc {
 // @Produce  json
 // @Param id path int true "ID do funcionário a ser removido"
 // @Success 204 "No Content"
-// @Failure 404 {string} string "invalid id"
+// @Failure 400 {string} string "invalid id"
 // @Failure 405 {string} string "employee not deleted"
 // @Router /employees/{id} [delete]
 func (e *Employee) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "invalid id")
+			web.Error(c, http.StatusBadRequest, "invalid id")
 			return
 		}
 		err = e.employeeService.Delete(c, id)
