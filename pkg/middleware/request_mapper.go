@@ -14,6 +14,7 @@ func JSONMapper[T any]() gin.HandlerFunc {
 		var req T
 		if err := c.ShouldBind(&req); err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, err.Error())
+			c.Abort()
 			return
 		}
 		c.Set(CONTEXT_BODY_VAR_NAME, req)
