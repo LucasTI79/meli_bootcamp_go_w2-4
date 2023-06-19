@@ -3,9 +3,9 @@ package main
 import (
 	"database/sql"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/routes"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/routes"
 )
 
 func main() {
@@ -16,7 +16,6 @@ func main() {
 	}
 
 	eng := gin.Default()
-
 	router := routes.NewRouter(eng, db)
 	router.MapRoutes()
 

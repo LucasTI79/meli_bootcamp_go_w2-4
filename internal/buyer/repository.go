@@ -12,7 +12,7 @@ type Repository interface {
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Exists(ctx context.Context, cardNumberID string) bool
-	Save(ctx context.Context, b domain.Buyer) (int, error)
+	Save(ctx context.Context, b domain.BuyerCreate) (int, error)
 	Update(ctx context.Context, b domain.Buyer) error
 	Delete(ctx context.Context, id int) error
 }
@@ -64,7 +64,7 @@ func (r *repository) Exists(ctx context.Context, cardNumberID string) bool {
 	return err == nil
 }
 
-func (r *repository) Save(ctx context.Context, b domain.Buyer) (int, error) {
+func (r *repository) Save(ctx context.Context, b domain.BuyerCreate) (int, error) {
 	query := "INSERT INTO buyers(card_number_id,first_name,last_name) VALUES (?,?,?)"
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
