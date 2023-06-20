@@ -105,7 +105,7 @@ func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.P
 
 	updated := applyUpdates(p, updates)
 	if err := s.repo.Update(c, updated); err != nil {
-		return domain.Product{}, NewErrGeneric("coult not save changes")
+		return domain.Product{}, NewErrGeneric("could not save changes")
 	}
 
 	return updated, nil
