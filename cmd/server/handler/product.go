@@ -5,7 +5,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
@@ -215,37 +215,37 @@ func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 	dto := product.UpdateDTO{}
 
 	if val := req.Desc; val != nil {
-		dto.Desc = *types.NewOptionalFromVal(*val)
+		dto.Desc = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.ExpR; val != nil {
-		dto.ExpR = *types.NewOptionalFromVal(*val)
+		dto.ExpR = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.FreezeR; val != nil {
-		dto.FreezeR = *types.NewOptionalFromVal(*val)
+		dto.FreezeR = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.Height; val != nil {
-		dto.Height = *types.NewOptionalFromVal(*val)
+		dto.Height = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.Length; val != nil {
-		dto.Length = *types.NewOptionalFromVal(*val)
+		dto.Length = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.NetW; val != nil {
-		dto.NetW = *types.NewOptionalFromVal(*val)
+		dto.NetW = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.Code; val != nil {
-		dto.Code = *types.NewOptionalFromVal(*val)
+		dto.Code = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.FreezeTemp; val != nil {
-		dto.FreezeTemp = *types.NewOptionalFromVal(*val)
+		dto.FreezeTemp = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.Width; val != nil {
-		dto.Width = *types.NewOptionalFromVal(*val)
+		dto.Width = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.TypeID; val != nil {
-		dto.TypeID = *types.NewOptionalFromVal(*val)
+		dto.TypeID = *optional.NewOptionalFromVal(*val)
 	}
 	if val := req.SellerID; val != nil {
-		dto.SellerID = *types.NewOptionalFromVal(*val)
+		dto.SellerID = *optional.NewOptionalFromVal(*val)
 	}
 	return &dto
 }

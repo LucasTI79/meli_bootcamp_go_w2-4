@@ -1,4 +1,4 @@
-package types
+package optional
 
 type Optional[T any] struct {
 	Val    T

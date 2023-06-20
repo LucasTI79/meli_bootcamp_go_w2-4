@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 )
 
 type CreateDTO struct {
@@ -22,17 +22,17 @@ type CreateDTO struct {
 }
 
 type UpdateDTO struct {
-	Desc       types.Optional[string]
-	ExpR       types.Optional[int]
-	FreezeR    types.Optional[int]
-	Height     types.Optional[float32]
-	Length     types.Optional[float32]
-	NetW       types.Optional[float32]
-	Code       types.Optional[string]
-	FreezeTemp types.Optional[float32]
-	Width      types.Optional[float32]
-	TypeID     types.Optional[int]
-	SellerID   types.Optional[int]
+	Desc       optional.Optional[string]
+	ExpR       optional.Optional[int]
+	FreezeR    optional.Optional[int]
+	Height     optional.Optional[float32]
+	Length     optional.Optional[float32]
+	NetW       optional.Optional[float32]
+	Code       optional.Optional[string]
+	FreezeTemp optional.Optional[float32]
+	Width      optional.Optional[float32]
+	TypeID     optional.Optional[int]
+	SellerID   optional.Optional[int]
 }
 
 type Service interface {
