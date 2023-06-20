@@ -112,9 +112,14 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 	if w.WarehouseCode != "" {
 
 		wcode := s.repository.Exists(ctx, w.WarehouseCode)
-		if wcode {
-			return domain.Warehouse{}, ErrInvalidWarehouseCode
+		if w.WarehouseCode == currentWarehouse.WarehouseCode {
+			currentWarehouse.WarehouseCode = w.WarehouseCode
+		} else {
+			if wcode {
+				return domain.Warehouse{}, ErrInvalidWarehouseCode
+			}
 		}
+
 		currentWarehouse.WarehouseCode = w.WarehouseCode
 	}
 	if w.MinimumCapacity != 0 {
