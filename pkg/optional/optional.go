@@ -1,19 +1,19 @@
 package optional
 
-type Optional[T any] struct {
+type Opt[T any] struct {
 	Val    T
 	HasVal bool
 }
 
-func NewOptional[T any]() *Optional[T] {
+func New[T any]() *Opt[T] {
 	var zero T
-	return &Optional[T]{zero, false}
+	return &Opt[T]{zero, false}
 }
 
-func NewOptionalFromVal[T any](val T) *Optional[T] {
-	return &Optional[T]{val, true}
+func FromVal[T any](val T) *Opt[T] {
+	return &Opt[T]{val, true}
 }
 
-func (x *Optional[T]) Value() (T, bool) {
+func (x *Opt[T]) Value() (T, bool) {
 	return x.Val, x.HasVal
 }

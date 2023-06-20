@@ -215,37 +215,37 @@ func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 	dto := product.UpdateDTO{}
 
 	if val := req.Desc; val != nil {
-		dto.Desc = *optional.NewOptionalFromVal(*val)
+		dto.Desc = *optional.FromVal(*val)
 	}
 	if val := req.ExpR; val != nil {
-		dto.ExpR = *optional.NewOptionalFromVal(*val)
+		dto.ExpR = *optional.FromVal(*val)
 	}
 	if val := req.FreezeR; val != nil {
-		dto.FreezeR = *optional.NewOptionalFromVal(*val)
+		dto.FreezeR = *optional.FromVal(*val)
 	}
 	if val := req.Height; val != nil {
-		dto.Height = *optional.NewOptionalFromVal(*val)
+		dto.Height = *optional.FromVal(*val)
 	}
 	if val := req.Length; val != nil {
-		dto.Length = *optional.NewOptionalFromVal(*val)
+		dto.Length = *optional.FromVal(*val)
 	}
 	if val := req.NetW; val != nil {
-		dto.NetW = *optional.NewOptionalFromVal(*val)
+		dto.NetW = *optional.FromVal(*val)
 	}
 	if val := req.Code; val != nil {
-		dto.Code = *optional.NewOptionalFromVal(*val)
+		dto.Code = *optional.FromVal(*val)
 	}
 	if val := req.FreezeTemp; val != nil {
-		dto.FreezeTemp = *optional.NewOptionalFromVal(*val)
+		dto.FreezeTemp = *optional.FromVal(*val)
 	}
 	if val := req.Width; val != nil {
-		dto.Width = *optional.NewOptionalFromVal(*val)
+		dto.Width = *optional.FromVal(*val)
 	}
 	if val := req.TypeID; val != nil {
-		dto.TypeID = *optional.NewOptionalFromVal(*val)
+		dto.TypeID = *optional.FromVal(*val)
 	}
 	if val := req.SellerID; val != nil {
-		dto.SellerID = *optional.NewOptionalFromVal(*val)
+		dto.SellerID = *optional.FromVal(*val)
 	}
 	return &dto
 }

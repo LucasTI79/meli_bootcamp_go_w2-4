@@ -22,17 +22,17 @@ type CreateDTO struct {
 }
 
 type UpdateDTO struct {
-	Desc       optional.Optional[string]
-	ExpR       optional.Optional[int]
-	FreezeR    optional.Optional[int]
-	Height     optional.Optional[float32]
-	Length     optional.Optional[float32]
-	NetW       optional.Optional[float32]
-	Code       optional.Optional[string]
-	FreezeTemp optional.Optional[float32]
-	Width      optional.Optional[float32]
-	TypeID     optional.Optional[int]
-	SellerID   optional.Optional[int]
+	Desc       optional.Opt[string]
+	ExpR       optional.Opt[int]
+	FreezeR    optional.Opt[int]
+	Height     optional.Opt[float32]
+	Length     optional.Opt[float32]
+	NetW       optional.Opt[float32]
+	Code       optional.Opt[string]
+	FreezeTemp optional.Opt[float32]
+	Width      optional.Opt[float32]
+	TypeID     optional.Opt[int]
+	SellerID   optional.Opt[int]
 }
 
 type Service interface {
