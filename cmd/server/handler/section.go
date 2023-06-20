@@ -69,7 +69,6 @@ func (s *Section) Get() gin.HandlerFunc {
 			return
 		}
 		web.Success(c, http.StatusOK, sec)
-		return
 	}
 }
 

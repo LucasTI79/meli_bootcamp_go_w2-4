@@ -119,7 +119,7 @@ func (b *Buyer) Create() gin.HandlerFunc {
 		}
 		buyerF, err := b.buyerService.Create(c.Request.Context(), buyer)
 		if err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "Buyer not created")
+			web.Error(c, http.StatusConflict, "Buyer not created")
 			return
 		}
 		web.Response(c, http.StatusCreated, buyerF)
