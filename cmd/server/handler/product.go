@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
@@ -65,7 +66,8 @@ func (p *Product) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ps, err := p.productService.GetAll(c.Request.Context())
 		if err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 		if len(ps) == 0 {
@@ -96,7 +98,8 @@ func (p *Product) Get() gin.HandlerFunc {
 		}
 		p, err := p.productService.Get(c.Request.Context(), id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, p)
@@ -122,12 +125,8 @@ func (p *Product) Create() gin.HandlerFunc {
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			switch err.(type) {
-			case *product.ErrInvalidProductCode:
-				web.Error(c, http.StatusConflict, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 
@@ -163,14 +162,8 @@ func (p *Product) Update() gin.HandlerFunc {
 		p, err := p.productService.Update(c.Request.Context(), id, *dto)
 
 		if err != nil {
-			switch err.(type) {
-			case *product.ErrInvalidProductCode:
-				web.Error(c, http.StatusConflict, err.Error())
-			case *product.ErrNotFound:
-				web.Error(c, http.StatusNotFound, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 
@@ -199,16 +192,25 @@ func (p *Product) Delete() gin.HandlerFunc {
 		}
 		err = p.productService.Delete(c.Request.Context(), id)
 		if err != nil {
-			switch err.(type) {
-			case *product.ErrNotFound:
-				web.Error(c, http.StatusNotFound, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, nil)
 	}
+}
+
+func mapErrorToStatus(err error) int {
+	var invalidProductCode *product.ErrInvalidProductCode
+	var notFound *product.ErrNotFound
+
+	if errors.As(err, &invalidProductCode) {
+		return http.StatusConflict
+	}
+	if errors.As(err, &notFound) {
+		return http.StatusNotFound
+	}
+	return http.StatusInternalServerError
 }
 
 func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
