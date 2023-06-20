@@ -120,7 +120,7 @@ func (p *Product) Get() gin.HandlerFunc {
 //	@Router		/api/v1/products [post]
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := middleware.ParsedRequest[CreateRequest](c)
+		req := middleware.GetBody[CreateRequest](c)
 		dto := mapCreateRequestToDTO(&req)
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
@@ -153,7 +153,7 @@ func (p *Product) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetInt("id")
 
-		req := middleware.ParsedRequest[UpdateRequest](c)
+		req := middleware.GetBody[UpdateRequest](c)
 		dto := mapUpdateRequestToDTO(&req)
 		p, err := p.productService.Update(c.Request.Context(), id, *dto)
 

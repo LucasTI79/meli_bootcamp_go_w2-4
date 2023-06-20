@@ -74,10 +74,10 @@ func (r *router) buildProductRoutes() {
 
 	productRG := r.rg.Group("/products")
 	{
-		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
+		productRG.POST("/", middleware.Body[handler.CreateRequest](), h.Create())
 		productRG.GET("/", h.GetAll())
 		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
-		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.JSONMapper[handler.UpdateRequest](), h.Update())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[handler.UpdateRequest](), h.Update())
 		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
 }
