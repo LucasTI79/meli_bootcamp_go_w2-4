@@ -34,12 +34,12 @@ func (b *Buyer) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "Invalid ID")
+			web.Error(c, http.StatusBadRequest, "invalid ID")
 			return
 		}
 		buyer, err := b.buyerService.Get(c, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "Buyer not found")
+			web.Error(c, http.StatusNotFound, "buyer not found")
 			return
 		}
 		web.Success(c, http.StatusOK, buyer)
@@ -60,15 +60,15 @@ func (b *Buyer) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "Invalid ID")
+			web.Error(c, http.StatusBadRequest, "invalid ID")
 			return
 		}
 		err = b.buyerService.Delete(c, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "Buyer not found")
+			web.Error(c, http.StatusNotFound, "buyer not found")
 			return
 		}
-		web.Success(c, http.StatusOK, "Buyer deleted")
+		web.Success(c, http.StatusOK, "buyer deleted")
 	}
 }
 
@@ -85,7 +85,7 @@ func (b *Buyer) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		buyers, err := b.buyerService.GetAll(c)
 		if err != nil {
-			web.Error(c, http.StatusInternalServerError, "Buyer not found")
+			web.Error(c, http.StatusInternalServerError, "buyer not found")
 			return
 		}
 		if len(buyers) == 0 {
@@ -110,16 +110,16 @@ func (b *Buyer) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buyer domain.BuyerCreate
 		if err := c.ShouldBindJSON(&buyer); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "Buyer not created")
+			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
 			return
 		}
 		if buyer.CardNumberID == "" {
-			web.Error(c, http.StatusBadRequest, "CardID must be passed")
+			web.Error(c, http.StatusBadRequest, "cardID must be passed")
 			return
 		}
 		buyerF, err := b.buyerService.Create(c.Request.Context(), buyer)
 		if err != nil {
-			web.Error(c, http.StatusConflict, "Buyer not created")
+			web.Error(c, http.StatusConflict, "buyer not created")
 			return
 		}
 		web.Response(c, http.StatusCreated, buyerF)
@@ -142,17 +142,17 @@ func (b *Buyer) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buyer domain.Buyer
 		if err := c.ShouldBindJSON(&buyer); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "Buyer not created")
+			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
 			return
 		}
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "Invalid ID")
+			web.Error(c, http.StatusBadRequest, "invalid ID")
 			return
 		}
 		buyerUpdated, err := b.buyerService.Update(c, buyer, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "Buyer not updated")
+			web.Error(c, http.StatusNotFound, "buyer not updated")
 			return
 		}
 		web.Success(c, http.StatusOK, buyerUpdated)
