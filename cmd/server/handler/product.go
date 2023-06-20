@@ -174,7 +174,7 @@ func (p *Product) Update() gin.HandlerFunc {
 			return
 		}
 
-		web.Success(c, http.StatusCreated, p)
+		web.Success(c, http.StatusOK, p)
 	}
 }
 
@@ -252,7 +252,7 @@ func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 
 func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 	return &product.CreateDTO{
-		Desc:       req.Code,
+		Desc:       req.Desc,
 		ExpR:       req.ExpR,
 		FreezeR:    req.FreezeR,
 		Height:     req.Height,

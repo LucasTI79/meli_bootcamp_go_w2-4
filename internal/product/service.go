@@ -94,18 +94,18 @@ func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.P
 		return domain.Product{}, NewErrGeneric("could not fetch products")
 	}
 
-	if updates.Code.HasVal && !isUniqueProductCode(updates.Code.Val, ps) {
-		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
-	}
-
 	p, err := s.repo.Get(c, id)
 	if err != nil {
 		return domain.Product{}, NewErrNotFound(id)
 	}
 
+	if code, hasVal := updates.Code.Value(); hasVal && p.ProductCode != code && !isUniqueProductCode(code, ps) {
+		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
+	}
+
 	updated := applyUpdates(p, updates)
 	if err := s.repo.Update(c, updated); err != nil {
-		return domain.Product{}, NewErrGeneric("coult not save changes")
+		return domain.Product{}, NewErrGeneric("could not save changes")
 	}
 
 	return updated, nil
