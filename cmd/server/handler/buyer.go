@@ -137,7 +137,7 @@ func (b *Buyer) Create() gin.HandlerFunc {
 //	@Success		200		{object}	domain.Buyer
 //	@Failure		400		{string}	string	"Invalid ID"
 //	@Failure		404		{string}	string	"Buyer not updated"
-//	@Router			/api/v1/buyers/{id} [put]
+//	@Router			/api/v1/buyers/{id} [patch]
 func (b *Buyer) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var buyer domain.Buyer
