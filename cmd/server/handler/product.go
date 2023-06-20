@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 

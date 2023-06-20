@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,7 +22,7 @@ func IntPathParam() gin.HandlerFunc {
 		p := c.Params[0]
 		val64, err := strconv.ParseInt(p.Value, 10, 0)
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, errors.New("path parameter should be an int"))
+			web.Error(c, http.StatusBadRequest, "path parameter %s should be an int", p.Key)
 			return
 		}
 
