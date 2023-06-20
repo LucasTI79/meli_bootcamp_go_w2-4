@@ -65,11 +65,13 @@ func NewProduct(s product.Service) *Product {
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ps, err := p.productService.GetAll(c.Request.Context())
+
 		if err != nil {
 			errStatus := mapErrorToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
+
 		if len(ps) == 0 {
 			web.Success(c, http.StatusNoContent, ps)
 			return
@@ -96,7 +98,9 @@ func (p *Product) Get() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
 			return
 		}
+
 		p, err := p.productService.Get(c.Request.Context(), id)
+
 		if err != nil {
 			errStatus := mapErrorToStatus(err)
 			web.Error(c, errStatus, err.Error())
@@ -190,7 +194,9 @@ func (p *Product) Delete() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
 			return
 		}
+
 		err = p.productService.Delete(c.Request.Context(), id)
+
 		if err != nil {
 			errStatus := mapErrorToStatus(err)
 			web.Error(c, errStatus, err.Error())
