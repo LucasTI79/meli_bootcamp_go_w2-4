@@ -213,40 +213,17 @@ func (p *Product) Delete() gin.HandlerFunc {
 
 func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 	dto := product.UpdateDTO{}
-
-	if val := req.Desc; val != nil {
-		dto.Desc = *optional.FromVal(*val)
-	}
-	if val := req.ExpR; val != nil {
-		dto.ExpR = *optional.FromVal(*val)
-	}
-	if val := req.FreezeR; val != nil {
-		dto.FreezeR = *optional.FromVal(*val)
-	}
-	if val := req.Height; val != nil {
-		dto.Height = *optional.FromVal(*val)
-	}
-	if val := req.Length; val != nil {
-		dto.Length = *optional.FromVal(*val)
-	}
-	if val := req.NetW; val != nil {
-		dto.NetW = *optional.FromVal(*val)
-	}
-	if val := req.Code; val != nil {
-		dto.Code = *optional.FromVal(*val)
-	}
-	if val := req.FreezeTemp; val != nil {
-		dto.FreezeTemp = *optional.FromVal(*val)
-	}
-	if val := req.Width; val != nil {
-		dto.Width = *optional.FromVal(*val)
-	}
-	if val := req.TypeID; val != nil {
-		dto.TypeID = *optional.FromVal(*val)
-	}
-	if val := req.SellerID; val != nil {
-		dto.SellerID = *optional.FromVal(*val)
-	}
+	dto.Desc = *optional.FromPtr(req.Desc)
+	dto.ExpR = *optional.FromPtr(req.ExpR)
+	dto.FreezeR = *optional.FromPtr(req.FreezeR)
+	dto.Height = *optional.FromPtr(req.Height)
+	dto.Length = *optional.FromPtr(req.Length)
+	dto.NetW = *optional.FromPtr(req.NetW)
+	dto.Code = *optional.FromPtr(req.Code)
+	dto.FreezeTemp = *optional.FromPtr(req.FreezeTemp)
+	dto.Width = *optional.FromPtr(req.Width)
+	dto.TypeID = *optional.FromPtr(req.TypeID)
+	dto.SellerID = *optional.FromPtr(req.SellerID)
 	return &dto
 }
 

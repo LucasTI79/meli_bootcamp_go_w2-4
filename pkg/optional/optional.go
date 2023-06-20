@@ -14,6 +14,13 @@ func FromVal[T any](val T) *Opt[T] {
 	return &Opt[T]{val, true}
 }
 
+func FromPtr[T any](ptr *T) *Opt[T] {
+	if ptr == nil {
+		return New[T]()
+	}
+	return FromVal(*ptr)
+}
+
 func (x *Opt[T]) Value() (T, bool) {
 	return x.Val, x.HasVal
 }
