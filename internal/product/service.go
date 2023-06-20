@@ -150,38 +150,16 @@ func mapCreateToDomain(product *CreateDTO) *domain.Product {
 }
 
 func applyUpdates(p domain.Product, updates UpdateDTO) domain.Product {
-	if val, hasVal := updates.Desc.Value(); hasVal {
-		p.Description = val
-	}
-	if val, hasVal := updates.ExpR.Value(); hasVal {
-		p.ExpirationRate = val
-	}
-	if val, hasVal := updates.FreezeR.Value(); hasVal {
-		p.FreezingRate = val
-	}
-	if val, hasVal := updates.Height.Value(); hasVal {
-		p.Height = val
-	}
-	if val, hasVal := updates.Length.Value(); hasVal {
-		p.Length = val
-	}
-	if val, hasVal := updates.NetW.Value(); hasVal {
-		p.Netweight = val
-	}
-	if val, hasVal := updates.Code.Value(); hasVal {
-		p.ProductCode = val
-	}
-	if val, hasVal := updates.FreezeTemp.Value(); hasVal {
-		p.RecomFreezTemp = val
-	}
-	if val, hasVal := updates.Width.Value(); hasVal {
-		p.Width = val
-	}
-	if val, hasVal := updates.TypeID.Value(); hasVal {
-		p.ProductTypeID = val
-	}
-	if val, hasVal := updates.SellerID.Value(); hasVal {
-		p.SellerID = val
-	}
+	p.Description = updates.Desc.Or(p.Description)
+	p.ExpirationRate = updates.ExpR.Or(p.ExpirationRate)
+	p.FreezingRate = updates.FreezeR.Or(p.FreezingRate)
+	p.Height = updates.Height.Or(p.Height)
+	p.Length = updates.Length.Or(p.Length)
+	p.Netweight = updates.NetW.Or(p.Netweight)
+	p.ProductCode = updates.Code.Or(p.ProductCode)
+	p.RecomFreezTemp = updates.FreezeTemp.Or(p.RecomFreezTemp)
+	p.Width = updates.Width.Or(p.Width)
+	p.ProductTypeID = updates.TypeID.Or(p.ProductTypeID)
+	p.SellerID = updates.SellerID.Or(p.SellerID)
 	return p
 }

@@ -17,3 +17,12 @@ func FromVal[T any](val T) *Opt[T] {
 func (x *Opt[T]) Value() (T, bool) {
 	return x.Val, x.HasVal
 }
+
+// If the optional has a value, return it;
+// otherwise, return the specified val.
+func (x *Opt[T]) Or(val T) T {
+	if x.HasVal {
+		return x.Val
+	}
+	return val
+}
