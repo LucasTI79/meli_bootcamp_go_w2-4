@@ -76,9 +76,9 @@ func (r *router) buildProductRoutes() {
 	{
 		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
 		productRG.GET("/", h.GetAll())
-		productRG.GET("/:id", h.Get())
-		productRG.PATCH("/:id", middleware.JSONMapper[handler.UpdateRequest](), h.Update())
-		productRG.DELETE("/:id", h.Delete())
+		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.JSONMapper[handler.UpdateRequest](), h.Update())
+		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
 }
 

@@ -93,11 +93,7 @@ func (p *Product) GetAll() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [get]
 func (p *Product) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
+		id := c.GetInt("id")
 
 		p, err := p.productService.Get(c.Request.Context(), id)
 
@@ -155,11 +151,7 @@ func (p *Product) Create() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [patch]
 func (p *Product) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
+		id := c.GetInt("id")
 
 		req := middleware.ParsedRequest[UpdateRequest](c)
 		dto := mapUpdateRequestToDTO(&req)
@@ -189,13 +181,9 @@ func (p *Product) Update() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [delete]
 func (p *Product) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
+		id := c.GetInt("id")
 
-		err = p.productService.Delete(c.Request.Context(), id)
+		err := p.productService.Delete(c.Request.Context(), id)
 
 		if err != nil {
 			errStatus := mapErrorToStatus(err)
