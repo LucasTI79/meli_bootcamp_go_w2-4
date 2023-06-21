@@ -19,7 +19,7 @@ type Service interface {
 	GetAll(c context.Context) ([]domain.Seller, error)
 	Get(ctx context.Context, id int) (domain.Seller, error)
 	Save(c context.Context, s domain.Seller) (domain.Seller, error)
-	Update(ctx context.Context, idn int, s domain.Seller) (domain.Seller, error)
+	Update(ctx context.Context, id int, s domain.Seller) (domain.Seller, error)
 	Delete(ctx context.Context, id int) error
 }
 
