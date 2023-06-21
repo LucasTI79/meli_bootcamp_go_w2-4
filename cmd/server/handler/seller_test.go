@@ -42,6 +42,25 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, expected, received.Data)
 		fmt.Println(received)
 	})
+
+	t.Run("Returns 400 when receives invalid field type", func(t *testing.T) {
+		svcMock := ServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(BASE_URL, sellerHandler.Create())
+
+		body := map[string]any{
+			"cid":          "123", // passing CID as string instead of int
+			"company_name": "TEST",
+			"address":      "test street",
+			"telephone":    "9999999",
+		}
+		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, body)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusBadRequest, response.Code)
+	})
 }
 
 type ServiceMock struct {

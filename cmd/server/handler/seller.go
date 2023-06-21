@@ -87,8 +87,8 @@ func (s *Seller) GetById() gin.HandlerFunc {
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req domain.Seller
-		if err := c.Bind(&req); err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+		if err := c.ShouldBind(&req); err != nil {
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		if req.CID == 0 {
