@@ -32,4 +32,24 @@ func TestCreateSeller(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, seller, received)
 	})
+
+	t.Run("Create seller with conflict", func(t *testing.T) {
+		repositoryMock := mocks.RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+
+		repositoryMock.On("Exists", mock.Anything, 123).Return(true)
+
+		_, err := svc.Save(context.TODO(), expected)
+
+		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
+		assert.ErrorIs(t, err, seller.ErrCidAlreadyExists)
+	})
 }
