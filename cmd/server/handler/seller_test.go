@@ -9,6 +9,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -76,6 +77,28 @@ func TestCreate(t *testing.T) {
 
 		fmt.Println(response.Code)
 		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
+	})
+
+	t.Run("Returns 409 if CID already exists", func(t *testing.T) {
+		svcMock := ServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(BASE_URL, sellerHandler.Create())
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		svcMock.On("Save", mock.Anything, expected).Return(domain.Seller{}, seller.ErrCidAlreadyExists)
+
+		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, expected)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusConflict, response.Code)
 	})
 }
 
