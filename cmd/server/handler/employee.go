@@ -80,14 +80,14 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 //	@Produce		json
 //	@Param			employee	body		domain.Employee	true	"Novo funcionário a ser criado"
 //	@Success		201			{object}	domain.Employee
-//	@Failure		500			{string}	string	"employee not created"
+//	@Failure		409			{string}	string	"employee not created"
 //	@Failure		422			{string}	string	"employee card ID need to be only"
 //	@Router			/api/v1/employees [post]
 func (e *Employee) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var employee domain.Employee
 		if err := c.ShouldBindJSON(&employee); err != nil {
-			web.Error(c, http.StatusBadRequest, "employee not created")
+			web.Error(c, http.StatusConflict, "employee not created")
 			return
 		}
 		if employee.CardNumberID == "" {
@@ -97,7 +97,7 @@ func (e *Employee) Create() gin.HandlerFunc {
 
 		employee, err := e.employeeService.Create(c, employee)
 		if err != nil {
-			web.Error(c, http.StatusInternalServerError, "employee not created")
+			web.Error(c, http.StatusConflict, "employee not created")
 			return
 		}
 		web.Success(c, http.StatusCreated, employee)
@@ -150,7 +150,7 @@ func (e *Employee) Update() gin.HandlerFunc {
 //	@Param			id	path	int	true	"ID do funcionário a ser removido"
 //	@Success		204	"No Content"
 //	@Failure		400	{string}	string	"invalid id"
-//	@Failure		405	{string}	string	"employee not deleted"
+//	@Failure		404	{string}	string	"employee not deleted"
 //	@Router			/api/v1/employees/{id} [delete]
 func (e *Employee) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -161,7 +161,7 @@ func (e *Employee) Delete() gin.HandlerFunc {
 		}
 		err = e.employeeService.Delete(c, id)
 		if err != nil {
-			web.Error(c, http.StatusMethodNotAllowed, "employee not deleted")
+			web.Error(c, http.StatusNotFound, "employee not deleted")
 			return
 		}
 		web.Success(c, http.StatusNoContent, nil)
