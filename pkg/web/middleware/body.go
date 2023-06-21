@@ -7,13 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const CONTEXT_BODY_VAR_NAME = "body"
+const CONTEXT_BODY_VAR_NAME = "__body"
 
-func JSONMapper[T any]() gin.HandlerFunc {
+func Body[T any]() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req T
 		if err := c.ShouldBind(&req); err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, err.Error())
+			c.Abort()
 			return
 		}
 		c.Set(CONTEXT_BODY_VAR_NAME, req)
@@ -21,6 +22,6 @@ func JSONMapper[T any]() gin.HandlerFunc {
 	}
 }
 
-func ParsedRequest[T any](c *gin.Context) T {
+func GetBody[T any](c *gin.Context) T {
 	return c.MustGet(CONTEXT_BODY_VAR_NAME).(T)
 }

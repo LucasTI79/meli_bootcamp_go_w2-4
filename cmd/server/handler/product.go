@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -64,10 +65,13 @@ func NewProduct(s product.Service) *Product {
 func (p *Product) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ps, err := p.productService.GetAll(c.Request.Context())
+
 		if err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
+
 		if len(ps) == 0 {
 			web.Success(c, http.StatusNoContent, ps)
 			return
@@ -89,14 +93,13 @@ func (p *Product) GetAll() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [get]
 func (p *Product) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
+		id := c.GetInt("id")
+
 		p, err := p.productService.Get(c.Request.Context(), id)
+
 		if err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, p)
@@ -117,17 +120,13 @@ func (p *Product) Get() gin.HandlerFunc {
 //	@Router		/api/v1/products [post]
 func (p *Product) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := middleware.ParsedRequest[CreateRequest](c)
+		req := middleware.GetBody[CreateRequest](c)
 		dto := mapCreateRequestToDTO(&req)
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			switch err.(type) {
-			case *product.ErrInvalidProductCode:
-				web.Error(c, http.StatusConflict, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 
@@ -152,29 +151,19 @@ func (p *Product) Create() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [patch]
 func (p *Product) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
+		id := c.GetInt("id")
 
-		req := middleware.ParsedRequest[UpdateRequest](c)
+		req := middleware.GetBody[UpdateRequest](c)
 		dto := mapUpdateRequestToDTO(&req)
 		p, err := p.productService.Update(c.Request.Context(), id, *dto)
 
 		if err != nil {
-			switch err.(type) {
-			case *product.ErrInvalidProductCode:
-				web.Error(c, http.StatusConflict, err.Error())
-			case *product.ErrNotFound:
-				web.Error(c, http.StatusNotFound, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 
-		web.Success(c, http.StatusCreated, p)
+		web.Success(c, http.StatusOK, p)
 	}
 }
 
@@ -192,67 +181,51 @@ func (p *Product) Update() gin.HandlerFunc {
 //	@Router		/api/v1/products/{id} [delete]
 func (p *Product) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := web.GetIntParam(c, "id")
+		id := c.GetInt("id")
+
+		err := p.productService.Delete(c.Request.Context(), id)
+
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id path parameter should be an int")
-			return
-		}
-		err = p.productService.Delete(c.Request.Context(), id)
-		if err != nil {
-			switch err.(type) {
-			case *product.ErrNotFound:
-				web.Error(c, http.StatusNotFound, err.Error())
-			default:
-				web.Error(c, http.StatusInternalServerError, err.Error())
-			}
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
 			return
 		}
 		web.Success(c, http.StatusOK, nil)
 	}
 }
 
+func mapErrorToStatus(err error) int {
+	var invalidProductCode *product.ErrInvalidProductCode
+	var notFound *product.ErrNotFound
+
+	if errors.As(err, &invalidProductCode) {
+		return http.StatusConflict
+	}
+	if errors.As(err, &notFound) {
+		return http.StatusNotFound
+	}
+	return http.StatusInternalServerError
+}
+
 func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 	dto := product.UpdateDTO{}
-
-	if val := req.Desc; val != nil {
-		dto.Desc = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.ExpR; val != nil {
-		dto.ExpR = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.FreezeR; val != nil {
-		dto.FreezeR = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.Height; val != nil {
-		dto.Height = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.Length; val != nil {
-		dto.Length = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.NetW; val != nil {
-		dto.NetW = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.Code; val != nil {
-		dto.Code = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.FreezeTemp; val != nil {
-		dto.FreezeTemp = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.Width; val != nil {
-		dto.Width = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.TypeID; val != nil {
-		dto.TypeID = *types.NewOptionalFromVal(*val)
-	}
-	if val := req.SellerID; val != nil {
-		dto.SellerID = *types.NewOptionalFromVal(*val)
-	}
+	dto.Desc = *optional.FromPtr(req.Desc)
+	dto.ExpR = *optional.FromPtr(req.ExpR)
+	dto.FreezeR = *optional.FromPtr(req.FreezeR)
+	dto.Height = *optional.FromPtr(req.Height)
+	dto.Length = *optional.FromPtr(req.Length)
+	dto.NetW = *optional.FromPtr(req.NetW)
+	dto.Code = *optional.FromPtr(req.Code)
+	dto.FreezeTemp = *optional.FromPtr(req.FreezeTemp)
+	dto.Width = *optional.FromPtr(req.Width)
+	dto.TypeID = *optional.FromPtr(req.TypeID)
+	dto.SellerID = *optional.FromPtr(req.SellerID)
 	return &dto
 }
 
 func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 	return &product.CreateDTO{
-		Desc:       req.Code,
+		Desc:       req.Desc,
 		ExpR:       req.ExpR,
 		FreezeR:    req.FreezeR,
 		Height:     req.Height,

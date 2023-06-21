@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/types"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 )
 
 type CreateDTO struct {
@@ -22,17 +22,17 @@ type CreateDTO struct {
 }
 
 type UpdateDTO struct {
-	Desc       types.Optional[string]
-	ExpR       types.Optional[int]
-	FreezeR    types.Optional[int]
-	Height     types.Optional[float32]
-	Length     types.Optional[float32]
-	NetW       types.Optional[float32]
-	Code       types.Optional[string]
-	FreezeTemp types.Optional[float32]
-	Width      types.Optional[float32]
-	TypeID     types.Optional[int]
-	SellerID   types.Optional[int]
+	Desc       optional.Opt[string]
+	ExpR       optional.Opt[int]
+	FreezeR    optional.Opt[int]
+	Height     optional.Opt[float32]
+	Length     optional.Opt[float32]
+	NetW       optional.Opt[float32]
+	Code       optional.Opt[string]
+	FreezeTemp optional.Opt[float32]
+	Width      optional.Opt[float32]
+	TypeID     optional.Opt[int]
+	SellerID   optional.Opt[int]
 }
 
 type Service interface {
@@ -94,18 +94,18 @@ func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.P
 		return domain.Product{}, NewErrGeneric("could not fetch products")
 	}
 
-	if updates.Code.HasVal && !isUniqueProductCode(updates.Code.Val, ps) {
-		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
-	}
-
 	p, err := s.repo.Get(c, id)
 	if err != nil {
 		return domain.Product{}, NewErrNotFound(id)
 	}
 
+	if code, hasVal := updates.Code.Value(); hasVal && p.ProductCode != code && !isUniqueProductCode(code, ps) {
+		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
+	}
+
 	updated := applyUpdates(p, updates)
 	if err := s.repo.Update(c, updated); err != nil {
-		return domain.Product{}, NewErrGeneric("coult not save changes")
+		return domain.Product{}, NewErrGeneric("could not save changes")
 	}
 
 	return updated, nil
@@ -150,38 +150,16 @@ func mapCreateToDomain(product *CreateDTO) *domain.Product {
 }
 
 func applyUpdates(p domain.Product, updates UpdateDTO) domain.Product {
-	if val, hasVal := updates.Desc.Value(); hasVal {
-		p.Description = val
-	}
-	if val, hasVal := updates.ExpR.Value(); hasVal {
-		p.ExpirationRate = val
-	}
-	if val, hasVal := updates.FreezeR.Value(); hasVal {
-		p.FreezingRate = val
-	}
-	if val, hasVal := updates.Height.Value(); hasVal {
-		p.Height = val
-	}
-	if val, hasVal := updates.Length.Value(); hasVal {
-		p.Length = val
-	}
-	if val, hasVal := updates.NetW.Value(); hasVal {
-		p.Netweight = val
-	}
-	if val, hasVal := updates.Code.Value(); hasVal {
-		p.ProductCode = val
-	}
-	if val, hasVal := updates.FreezeTemp.Value(); hasVal {
-		p.RecomFreezTemp = val
-	}
-	if val, hasVal := updates.Width.Value(); hasVal {
-		p.Width = val
-	}
-	if val, hasVal := updates.TypeID.Value(); hasVal {
-		p.ProductTypeID = val
-	}
-	if val, hasVal := updates.SellerID.Value(); hasVal {
-		p.SellerID = val
-	}
+	p.Description = updates.Desc.Or(p.Description)
+	p.ExpirationRate = updates.ExpR.Or(p.ExpirationRate)
+	p.FreezingRate = updates.FreezeR.Or(p.FreezingRate)
+	p.Height = updates.Height.Or(p.Height)
+	p.Length = updates.Length.Or(p.Length)
+	p.Netweight = updates.NetW.Or(p.Netweight)
+	p.ProductCode = updates.Code.Or(p.ProductCode)
+	p.RecomFreezTemp = updates.FreezeTemp.Or(p.RecomFreezTemp)
+	p.Width = updates.Width.Or(p.Width)
+	p.ProductTypeID = updates.TypeID.Or(p.ProductTypeID)
+	p.SellerID = updates.SellerID.Or(p.SellerID)
 	return p
 }
