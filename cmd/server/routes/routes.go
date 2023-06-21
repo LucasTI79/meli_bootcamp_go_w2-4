@@ -12,7 +12,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/middleware"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -74,11 +74,11 @@ func (r *router) buildProductRoutes() {
 
 	productRG := r.rg.Group("/products")
 	{
-		productRG.POST("/", middleware.JSONMapper[handler.CreateRequest](), h.Create())
+		productRG.POST("/", middleware.Body[handler.CreateRequest](), h.Create())
 		productRG.GET("/", h.GetAll())
-		productRG.GET("/:id", h.Get())
-		productRG.PATCH("/:id", middleware.JSONMapper[handler.UpdateRequest](), h.Update())
-		productRG.DELETE("/:id", h.Delete())
+		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[handler.UpdateRequest](), h.Update())
+		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
 }
 
