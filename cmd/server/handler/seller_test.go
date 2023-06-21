@@ -17,7 +17,7 @@ import (
 var BASE_URL = "/api/v1/sellers"
 
 func TestCreate(t *testing.T) {
-	t.Run("Returns 201 when successful", func(t *testing.T) {
+	t.Run("Returns 201 if successful", func(t *testing.T) {
 		svcMock := ServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
@@ -43,7 +43,7 @@ func TestCreate(t *testing.T) {
 		fmt.Println(received)
 	})
 
-	t.Run("Returns 400 when receives invalid field type", func(t *testing.T) {
+	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
 		svcMock := ServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
@@ -60,6 +60,22 @@ func TestCreate(t *testing.T) {
 
 		fmt.Println(response.Code)
 		assert.Equal(t, http.StatusBadRequest, response.Code)
+	})
+
+	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
+		svcMock := ServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(BASE_URL, sellerHandler.Create())
+
+		body := map[string]any{
+			"telephone": "9999999",
+		}
+		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, body)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
 	})
 }
 
