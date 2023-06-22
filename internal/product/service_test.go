@@ -154,7 +154,19 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, expected, received)
 	})
 	t.Run("Update fails if product code is not unique", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		toUpdate := getTestProducts()[1]
+		updates := product.UpdateDTO{Code: *optional.FromVal("SWP-1")}
+		var expectedErr *product.ErrInvalidProductCode
+
+		mockRepo.On("Get", mock.Anything, toUpdate.ID).Return(toUpdate, nil)
+		mockRepo.On("Exists", mock.Anything, updates.Code.Val).Return(true)
+
+		_, err := svc.Update(context.TODO(), toUpdate.ID, updates)
+
+		assert.ErrorAs(t, err, &expectedErr)
 	})
 	t.Run("Update succeds if product code doesn't change", func(t *testing.T) {
 		t.Skip()
