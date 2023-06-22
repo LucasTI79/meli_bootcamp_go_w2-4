@@ -229,6 +229,48 @@ func TestUpdateEmployee(t *testing.T) {
 	})
 }
 
+func TestDeleteEmployee(t *testing.T) {
+	t.Run("should return status 204 when sucessfull", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.DELETE(EMPLOYEE_URL_ID_PATH, controller.Delete())
+
+		idToDelete := 1
+
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, idToDelete)
+
+		mockedService.On("Delete", mock.Anything, idToDelete).Return(nil)
+
+		req, res := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Employee]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusNoContent, res.Code)
+
+	})
+	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.DELETE(EMPLOYEE_URL_ID_PATH, controller.Delete())
+
+		idToDelete := 1
+
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, idToDelete)
+
+		mockedService.On("Delete", mock.Anything, idToDelete).Return(employee.ErrNotFound)
+
+		req, res := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.ErrorResponse
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+}
+
 type EmployeeServiceMock struct {
 	mock.Mock
 }
