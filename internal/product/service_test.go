@@ -169,7 +169,19 @@ func TestUpdate(t *testing.T) {
 		assert.ErrorAs(t, err, &expectedErr)
 	})
 	t.Run("Update succeds if product code doesn't change", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		toUpdate := getTestProducts()[1]
+		updates := product.UpdateDTO{Code: *optional.FromVal(toUpdate.ProductCode)}
+
+		mockRepo.On("Get", mock.Anything, toUpdate.ID).Return(toUpdate, nil)
+		mockRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
+
+		received, err := svc.Update(context.TODO(), toUpdate.ID, updates)
+
+		assert.NoError(t, err)
+		assert.Equal(t, toUpdate, received)
 	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
 		t.Skip()
