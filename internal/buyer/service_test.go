@@ -69,7 +69,7 @@ func TestGetbyIDBuyer(t *testing.T) {
 	t.Run("Find by existent Id", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
-		buyerMock := domain.BuyerCreate{
+		buyerMock := domain.Buyer{
 			ID:           1,
 			CardNumberID: "123",
 			FirstName:    "nome",
@@ -113,6 +113,51 @@ func TesGetBuyer(t *testing.T) {
 	})
 }
 
+func TesUpdateBuyer(t *testing.T) {
+	t.Run("Update existent buyer", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+		buyerMock := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
+		buyerUpdate := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "lucas",
+			LastName:     "ganda",
+		}
+
+		repositoryMock.On("Get", mock.Anything, 12).Return(buyerMock, nil)
+		repositoryMock.On("Update", mock.Anything, buyerMock).Return(buyerUpdate, nil)
+
+		returned, err := svc.Update(context.TODO(), buyerUpdate, 12)
+
+		assert.NoError(t, err)
+		assert.Equal(t, buyerUpdate, returned)
+	})
+
+	t.Run("Update non existent buyer", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+		buyerUpdate := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "lucas",
+			LastName:     "ganda",
+		}
+
+		repositoryMock.On("Get", mock.Anything, 12).Return(domain.Buyer{}, errors.New("buyer not found"))
+		returned, err := svc.Update(context.TODO(), buyerUpdate, 12)
+
+		repositoryMock.AssertNumberOfCalls(t, "Update", 0)
+		assert.Error(t, err)
+		assert.Equal(t, domain.Buyer{}, returned)
+	})
+}
+
 type RepositoryMock struct {
 	mock.Mock
 }
@@ -139,10 +184,10 @@ func (r *RepositoryMock) Save(ctx context.Context, s domain.BuyerCreate) (int, e
 
 func (r *RepositoryMock) Update(ctx context.Context, s domain.Buyer) error {
 	args := r.Called(ctx, s)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
-	return args.Error(1)
+	return args.Error(0)
 }
