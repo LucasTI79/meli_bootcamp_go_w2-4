@@ -34,6 +34,27 @@ func TestCreateWarehouse(t *testing.T) {
 
 	})
 
+	t.Run("create warehouse with conflict (warehousecode alread exixt)", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Exists", mock.Anything, "cod1").Return(true)
+
+		_, err := svc.Create(context.TODO(), expectedWarehouse)
+
+		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
+
+		assert.ErrorIs(t, err, warehouse.ErrInvalidWarehouseCode)
+	})
 }
 
 type RepositoryWarehouseMock struct {
