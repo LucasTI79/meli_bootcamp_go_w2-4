@@ -140,6 +140,27 @@ func TestWarehouseGetAll(t *testing.T) {
 		assert.Equal(t, response.Code, http.StatusOK)
 
 	})
+
+	t.Run("test if getall not return a error if a length was zero", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+
+		expectedWarehouse := []domain.Warehouse{}
+
+		request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
+
+		svcMock.On("GetAll", mock.Anything).Return(expectedWarehouse, nil)
+
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Warehouse]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusNoContent)
+
+	})
 }
 
 type ServiceWarehouseMock struct {
