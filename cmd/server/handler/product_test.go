@@ -300,7 +300,19 @@ func TestProductDelete(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		id := 42
+
+		mockSvc.On("Delete", mock.Anything, id).Return(product.NewErrNotFound(id))
+
+		url := fmt.Sprintf("/products/%d", id)
+		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
 
