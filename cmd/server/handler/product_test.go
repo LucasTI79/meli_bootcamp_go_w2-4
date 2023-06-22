@@ -224,7 +224,26 @@ func TestProductUpdate(t *testing.T) {
 		assert.Equal(t, updated, received.Data)
 	})
 	t.Run("Does not fail when updated value is zero", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		p := getTestProducts()[0]
+		body := handler.UpdateRequest{
+			Desc:       testutil.ToPtr(""),
+			FreezeTemp: testutil.ToPtr[float32](0),
+		}
+		updated := p
+		updated.Description = *body.Desc
+		updated.RecomFreezTemp = *body.FreezeTemp
+
+		mockSvc.On("Update", mock.Anything, p.ID, mock.Anything).Return(updated, nil)
+
+		url := fmt.Sprintf("/products/%d", p.ID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
 		t.Skip()
