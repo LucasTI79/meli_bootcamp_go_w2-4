@@ -95,7 +95,7 @@ func TestGetWarehouse(t *testing.T) {
 			MinimumTemperature: 2,
 		}
 
-		repositoryMock.On("get", mock.Anything, 1).Return(expectedWarehouse, nil)
+		repositoryMock.On("Get", mock.Anything, 1).Return(expectedWarehouse, nil)
 
 		received, err := svc.Get(context.TODO(), 1)
 
@@ -115,6 +115,33 @@ func TestGetWarehouse(t *testing.T) {
 
 		assert.ErrorIs(t, err, warehouse.ErrNotFound)
 	})
+
+}
+
+func TestUpdateWarehouse(t *testing.T) {
+	t.Run("test update warehouse", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Get", mock.Anything, expectedWarehouse.ID).Return(expectedWarehouse, nil)
+		repositoryMock.On("Update", mock.Anything, expectedWarehouse).Return(nil)
+		repositoryMock.On("Exists", mock.Anything, expectedWarehouse.WarehouseCode).Return(false)
+
+		received, err := svc.Update(context.TODO(), expectedWarehouse)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedWarehouse, received)
+	})
+
 }
 
 type RepositoryWarehouseMock struct {
@@ -143,10 +170,10 @@ func (r *RepositoryWarehouseMock) Save(ctx context.Context, s domain.Warehouse) 
 
 func (r *RepositoryWarehouseMock) Update(ctx context.Context, s domain.Warehouse) error {
 	args := r.Called(ctx, s)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryWarehouseMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
-	return args.Error(1)
+	return args.Error(0)
 }
