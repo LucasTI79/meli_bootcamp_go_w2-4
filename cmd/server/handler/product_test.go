@@ -264,7 +264,22 @@ func TestProductUpdate(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 	t.Run("Returns 409 when updated code exists", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		id := 42
+		body := handler.UpdateRequest{
+			Code: testutil.ToPtr("SWP-1"),
+		}
+
+		mockSvc.On("Update", mock.Anything, id, mock.Anything).Return(domain.Product{}, product.NewErrInvalidProductCode(*body.Code))
+
+		url := fmt.Sprintf("/products/%d", id)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusConflict, res.Code)
 	})
 }
 
