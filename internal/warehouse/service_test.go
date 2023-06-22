@@ -219,6 +219,29 @@ func TestUpdateWarehouse(t *testing.T) {
 	})
 }
 
+func TestDeleteWarehouse(t *testing.T) {
+	t.Run("test delete warehouse", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Delete", context.TODO(), expectedWarehouse.ID).Return(nil)
+
+		err := svc.Delete(context.TODO(), expectedWarehouse.ID)
+
+		assert.NoError(t, err)
+	})
+
+}
+
 type RepositoryWarehouseMock struct {
 	mock.Mock
 }
