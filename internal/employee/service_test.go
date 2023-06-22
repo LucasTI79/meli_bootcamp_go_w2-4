@@ -51,6 +51,57 @@ func TestCreateEmployee(t *testing.T) {
 
 	})
 }
+func TestGetAllEmployees(t *testing.T) {
+	t.Run("returns a list of employees", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		es := []domain.Employee{{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}, {
+			ID:           2,
+			CardNumberID: "128",
+			FirstName:    "Mario",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		},
+		}
+		mockedRepository.On("GetAll", mock.Anything).Return(es, nil)
+		employees, err := s.GetAll(context.TODO())
+		assert.NoError(t, err)
+		assert.Equal(t, es, employees)
+
+	})
+}
+func TestGetByIdEmployee(t *testing.T) {
+	t.Run("return correct employee for valid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Get", mock.Anything, e.ID).Return(e, nil)
+		employees, err := s.Get(context.TODO(), 1)
+		assert.NoError(t, err)
+		assert.Equal(t, e, employees)
+	})
+	t.Run("return error for invalid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		mockedRepository.On("Get", mock.Anything, 0).Return(domain.Employee{}, employee.ErrNotFound)
+		_, err := s.Get(context.TODO(), 0)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
