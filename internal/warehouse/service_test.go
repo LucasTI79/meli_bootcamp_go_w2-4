@@ -57,6 +57,30 @@ func TestCreateWarehouse(t *testing.T) {
 	})
 }
 
+func TestGetAllWarehouse(t *testing.T) {
+	t.Run("test Get All warehouses", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("GetAll", mock.Anything).Return([]domain.Warehouse{expectedWarehouse}, nil)
+
+		received, err := svc.GetAll(context.TODO())
+
+		// assert.Equal(t, []domain.Warehouse{expectedWarehouse}, received)
+		assert.True(t, len(received) == 1)
+		assert.NoError(t, err)
+	})
+}
+
 type RepositoryWarehouseMock struct {
 	mock.Mock
 }
