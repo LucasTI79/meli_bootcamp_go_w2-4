@@ -101,7 +101,30 @@ func TestProductCreate(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 	})
 	t.Run("Returns 409 when product code is not unique", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := map[string]any{
+			"description":                      "",
+			"expiration_rate":                  0,
+			"freezing_rate":                    0,
+			"height":                           200,
+			"length":                           40,
+			"netweight":                        10,
+			"product_code":                     "SWP-1",
+			"recommended_freezing_temperature": 0,
+			"width":                            100,
+			"product_type_id":                  1,
+			"seller_id":                        1,
+		}
+
+		mockSvc.On("Create", mock.Anything, mock.Anything).Return(domain.Product{}, product.NewErrInvalidProductCode("SWP-1"))
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/products/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusConflict, res.Code)
 	})
 }
 
