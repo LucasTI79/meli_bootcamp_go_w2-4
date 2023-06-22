@@ -141,7 +141,82 @@ func TestUpdateWarehouse(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedWarehouse, received)
 	})
+	t.Run("test update warehouse with duplicate code", func(t *testing.T) {
+		// repositoryMock := RepositoryWarehouseMock{}
+		// svc := warehouse.NewService(&repositoryMock)
 
+		// existingWarehouse := domain.Warehouse{
+		// 	ID:                 1,
+		// 	WarehouseCode:      "cod1",
+		// 	Address:            "Rua da Hora",
+		// 	Telephone:          "11111111",
+		// 	MinimumCapacity:    10,
+		// 	MinimumTemperature: 2,
+		// }
+
+		// updatedWarehouse := domain.Warehouse{
+		// 	ID:                 2,
+		// 	WarehouseCode:      "cod1",
+		// 	Address:            "Nova Rua",
+		// 	Telephone:          "2222222",
+		// 	MinimumCapacity:    5,
+		// 	MinimumTemperature: 0,
+		// }
+
+		// repositoryMock.On("Get", mock.Anything, updatedWarehouse.ID).Return(existingWarehouse, nil)
+		// repositoryMock.On("Exists", mock.Anything, updatedWarehouse.WarehouseCode).Return(true)
+		// repositoryMock.On("Update", mock.Anything, updatedWarehouse).Return(nil)
+
+		// _, err := svc.Update(context.TODO(), updatedWarehouse)
+
+		// assert.ErrorIs(t, err, warehouse.ErrInvalidWarehouseCode)
+	})
+
+	t.Run("test update warehouse ErrorProcessedData", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouseReceived := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "2222222",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Get", mock.Anything, expectedWarehouseReceived.ID).Return(expectedWarehouseReceived, nil)
+		repositoryMock.On("Exists", mock.Anything, expectedWarehouseReceived.WarehouseCode).Return(false)
+		repositoryMock.On("Update", mock.Anything, expectedWarehouseReceived).Return(warehouse.ErrorProcessedData)
+
+		received, err := svc.Update(context.TODO(), expectedWarehouseReceived)
+
+		assert.ErrorIs(t, err, warehouse.ErrorProcessedData)
+		assert.Equal(t, domain.Warehouse{}, received)
+	})
+
+	t.Run("test update warehouse not found", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouseReceived := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "2222222",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Get", mock.Anything, expectedWarehouseReceived.ID).Return(domain.Warehouse{}, warehouse.ErrNotFound)
+
+		received, err := svc.Update(context.TODO(), expectedWarehouseReceived)
+
+		assert.ErrorIs(t, err, warehouse.ErrNotFound)
+		assert.Equal(t, domain.Warehouse{}, received)
+
+		repositoryMock.AssertExpectations(t)
+	})
 }
 
 type RepositoryWarehouseMock struct {
