@@ -284,9 +284,20 @@ func TestProductUpdate(t *testing.T) {
 }
 
 func TestProductDelete(t *testing.T) {
-
 	t.Run("Returns 200 when delete succeds", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		id := 1
+
+		mockSvc.On("Delete", mock.Anything, id).Return(nil)
+
+		url := fmt.Sprintf("/products/%d", id)
+		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
 		t.Skip()
