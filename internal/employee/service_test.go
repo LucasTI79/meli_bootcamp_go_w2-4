@@ -103,6 +103,63 @@ func TestGetByIdEmployee(t *testing.T) {
 	})
 }
 
+func TestUpdateEmployee(t *testing.T) {
+	t.Run("updates an employee correctly", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Aragao",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Get", mock.Anything, e.ID).Return(e, nil)
+		mockedRepository.On("Exists", mock.Anything, e.CardNumberID).Return(false)
+		mockedRepository.On("Update", mock.Anything, e).Return(e, nil)
+
+		updatedEmployee, err := s.Update(context.TODO(), e)
+		assert.NoError(t, err)
+		assert.Equal(t, e, updatedEmployee)
+	})
+
+	t.Run("returns error when employee does not exist", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Aragao",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Get", mock.Anything, e.ID).Return(domain.Employee{}, employee.ErrNotFound)
+
+		_, err := s.Update(context.TODO(), e)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
+	})
+
+	t.Run("returns error when card number ID already exists", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Aragao",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Get", mock.Anything, e.ID).Return(e, nil)
+		mockedRepository.On("Exists", mock.Anything, e.CardNumberID).Return(true)
+
+		_, err := s.Update(context.TODO(), e)
+		assert.ErrorIs(t, err, employee.ErrAlreadyExists)
+	})
+}
+
 type RepositoryMock struct {
 	mock.Mock
 }
