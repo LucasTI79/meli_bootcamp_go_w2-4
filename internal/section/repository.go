@@ -11,7 +11,7 @@ import (
 type Repository interface {
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
-	Exists(ctx context.Context, cid int) bool
+	Exists(ctx context.Context, SectionNumber int) bool
 	Save(ctx context.Context, s domain.Section) (int, error)
 	Update(ctx context.Context, s domain.Section) (domain.Section, error)
 	Delete(ctx context.Context, id int) error
