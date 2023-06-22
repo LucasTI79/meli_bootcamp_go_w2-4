@@ -212,24 +212,25 @@ func TestWarehouseGet(t *testing.T) {
 	// 	assert.Equal(t, expectedWarehouse, received.Data)
 
 	// })
-	// t.Run("test get, when the id is inlalid - 400", func(t *testing.T) {
-	// 	svcMock := ServiceWarehouseMock{}
-	// 	warehouseHandler := handler.NewWarehouse(&svcMock)
-	// 	server := testutil.CreateServer()
-	// 	server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
+	t.Run("test get, when the id is inlalid - 400", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(WAREHOUSE_URL, warehouseHandler.Get())
 
-	// 	request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
+		request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
 
-	// 	svcMock.On("Get", mock.Anything, 1).Return(nil, nil)
+		svcMock.On("Get", mock.Anything, 1).Return(nil, nil)
 
-	// 	server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-	// 	var received testutil.ErrorResponse
-	// 	json.Unmarshal(response.Body.Bytes(), &received)
-	// 	assert.Equal(t, response.Code, http.StatusBadRequest)
-	// 	assert.Equal(t, received.Message, "invalid id")
+		var received testutil.ErrorResponse
+		json.Unmarshal(response.Body.Bytes(), &received)
 
-	// })
+		assert.Equal(t, response.Code, http.StatusBadRequest)
+		assert.Equal(t, received.Message, "invalid id")
+
+	})
 
 	t.Run("test get, when the warehouse not exist return 404", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
