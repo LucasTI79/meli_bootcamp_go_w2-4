@@ -161,6 +161,25 @@ func TestWarehouseGetAll(t *testing.T) {
 		assert.Equal(t, response.Code, http.StatusNoContent)
 
 	})
+
+	t.Run("test if getall return a error 500", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+
+		request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
+
+		svcMock.On("GetAll", mock.Anything).Return(nil, nil)
+
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Warehouse]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusInternalServerError)
+
+	})
 }
 
 type ServiceWarehouseMock struct {
