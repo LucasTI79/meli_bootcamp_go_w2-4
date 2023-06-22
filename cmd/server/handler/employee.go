@@ -87,11 +87,19 @@ func (e *Employee) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var employee domain.Employee
 		if err := c.ShouldBindJSON(&employee); err != nil {
-			web.Error(c, http.StatusConflict, "employee not created")
+			web.Error(c, http.StatusUnprocessableEntity, "employee not created")
 			return
 		}
 		if employee.CardNumberID == "" {
 			web.Error(c, http.StatusBadRequest, "employee card ID need to be only")
+			return
+		}
+		if employee.FirstName == "" {
+			web.Error(c, http.StatusBadRequest, "employee must have a first name")
+			return
+		}
+		if employee.LastName == "" {
+			web.Error(c, http.StatusBadRequest, "employee must have a last name")
 			return
 		}
 
