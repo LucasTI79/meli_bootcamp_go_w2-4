@@ -85,6 +85,33 @@ func TestGetbyIDBuyer(t *testing.T) {
 	})
 
 }
+func TesGetBuyer(t *testing.T) {
+	t.Run("Find all buyer", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+
+		buyerMock := []domain.BuyerCreate{
+			domain.BuyerCreate{
+				ID:           1,
+				CardNumberID: "123",
+				FirstName:    "nome",
+				LastName:     "sobrenome"},
+			domain.BuyerCreate{
+				ID:           1,
+				CardNumberID: "123",
+				FirstName:    "nome",
+				LastName:     "sobrenome",
+			},
+		}
+
+		repositoryMock.On("GetAll", mock.Anything).Return(buyerMock, nil)
+
+		received, err := svc.GetAll(context.TODO())
+
+		assert.NoError(t, err)
+		assert.Equal(t, buyerMock, received)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
