@@ -9,8 +9,9 @@ import (
 
 // Error definitions
 var (
-	ErrNotFound = errors.New("buyer not found")
-	ErrGeneric  = errors.New("")
+	ErrNotFound      = errors.New("buyer not found")
+	ErrGeneric       = errors.New("")
+	ErrAlreadyExists = errors.New("buyer already exists")
 )
 
 // Service is the buyer service interface
