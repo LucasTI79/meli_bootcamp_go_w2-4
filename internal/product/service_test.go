@@ -109,6 +109,12 @@ func TestUpdate(t *testing.T) {
 	t.Run("Updates given fields for existing product", func(t *testing.T) {
 		t.Skip()
 	})
+	t.Run("Update fails if product code is not unique", func(t *testing.T) {
+		t.Skip()
+	})
+	t.Run("Update succeds if product code doesn't change", func(t *testing.T) {
+		t.Skip()
+	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
 		t.Skip()
 	})
