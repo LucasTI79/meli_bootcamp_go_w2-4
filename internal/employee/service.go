@@ -99,7 +99,7 @@ func (s *service) Update(ctx context.Context, e domain.Employee) (domain.Employe
 
 		ecode := s.repository.Exists(ctx, e.CardNumberID)
 		if ecode {
-			return domain.Employee{}, errors.New("employee card id must be unique")
+			return domain.Employee{}, ErrAlreadyExists
 		}
 		currentEmployee.CardNumberID = e.CardNumberID
 	}
