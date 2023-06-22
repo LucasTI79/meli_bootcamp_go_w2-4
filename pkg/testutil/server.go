@@ -31,3 +31,7 @@ func MakeRequest(method, url string, body any) (*http.Request, *httptest.Respons
 	req.Header.Add("Content-Type", "application/json")
 	return req, httptest.NewRecorder()
 }
+
+func ToPtr[T any](val T) *T {
+	return &val
+}

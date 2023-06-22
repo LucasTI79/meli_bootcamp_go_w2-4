@@ -23,18 +23,18 @@ func TestProductCreate(t *testing.T) {
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
 
-		body := map[string]any{
-			"description":                      "Sweet potato",
-			"expiration_rate":                  3,
-			"freezing_rate":                    1,
-			"height":                           200,
-			"length":                           40,
-			"netweight":                        10,
-			"product_code":                     "SWP-1",
-			"recommended_freezing_temperature": 20,
-			"width":                            100,
-			"product_type_id":                  1,
-			"seller_id":                        1,
+		body := handler.CreateRequest{
+			Desc:       testutil.ToPtr("Sweet potato"),
+			ExpR:       testutil.ToPtr(3),
+			FreezeR:    testutil.ToPtr(1),
+			Height:     testutil.ToPtr[float32](200),
+			Length:     testutil.ToPtr[float32](40),
+			NetW:       testutil.ToPtr[float32](10),
+			Code:       testutil.ToPtr("SWP-1"),
+			FreezeTemp: testutil.ToPtr[float32](20),
+			Width:      testutil.ToPtr[float32](100),
+			TypeID:     testutil.ToPtr(1),
+			SellerID:   testutil.ToPtr(1),
 		}
 		created := domain.Product{
 			ID:             0,
@@ -63,18 +63,18 @@ func TestProductCreate(t *testing.T) {
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
 
-		body := map[string]any{
-			"description":                      "",
-			"expiration_rate":                  0,
-			"freezing_rate":                    0,
-			"height":                           200,
-			"length":                           40,
-			"netweight":                        10,
-			"product_code":                     "SWP-1",
-			"recommended_freezing_temperature": 0,
-			"width":                            100,
-			"product_type_id":                  1,
-			"seller_id":                        1,
+		body := handler.CreateRequest{
+			Desc:       testutil.ToPtr(""),
+			ExpR:       testutil.ToPtr(0),
+			FreezeR:    testutil.ToPtr(0),
+			Height:     testutil.ToPtr[float32](200),
+			Length:     testutil.ToPtr[float32](40),
+			NetW:       testutil.ToPtr[float32](10),
+			Code:       testutil.ToPtr("SWP-1"),
+			FreezeTemp: testutil.ToPtr[float32](0),
+			Width:      testutil.ToPtr[float32](100),
+			TypeID:     testutil.ToPtr(1),
+			SellerID:   testutil.ToPtr(1),
 		}
 
 		mockSvc.On("Create", mock.Anything, mock.Anything).Return(domain.Product{}, nil)
@@ -105,21 +105,21 @@ func TestProductCreate(t *testing.T) {
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
 
-		body := map[string]any{
-			"description":                      "",
-			"expiration_rate":                  0,
-			"freezing_rate":                    0,
-			"height":                           200,
-			"length":                           40,
-			"netweight":                        10,
-			"product_code":                     "SWP-1",
-			"recommended_freezing_temperature": 0,
-			"width":                            100,
-			"product_type_id":                  1,
-			"seller_id":                        1,
+		body := handler.CreateRequest{
+			Desc:       testutil.ToPtr(""),
+			ExpR:       testutil.ToPtr(0),
+			FreezeR:    testutil.ToPtr(0),
+			Height:     testutil.ToPtr[float32](200),
+			Length:     testutil.ToPtr[float32](40),
+			NetW:       testutil.ToPtr[float32](10),
+			Code:       testutil.ToPtr("SWP-1"),
+			FreezeTemp: testutil.ToPtr[float32](0),
+			Width:      testutil.ToPtr[float32](100),
+			TypeID:     testutil.ToPtr(1),
+			SellerID:   testutil.ToPtr(1),
 		}
 
-		mockSvc.On("Create", mock.Anything, mock.Anything).Return(domain.Product{}, product.NewErrInvalidProductCode("SWP-1"))
+		mockSvc.On("Create", mock.Anything, mock.Anything).Return(domain.Product{}, product.NewErrInvalidProductCode(*body.Code))
 
 		req, res := testutil.MakeRequest(http.MethodPost, "/products/", body)
 		server.ServeHTTP(res, req)
