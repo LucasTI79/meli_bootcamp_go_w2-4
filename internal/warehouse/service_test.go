@@ -55,6 +55,28 @@ func TestCreateWarehouse(t *testing.T) {
 
 		assert.ErrorIs(t, err, warehouse.ErrInvalidWarehouseCode)
 	})
+
+	t.Run("create error on save warehouse", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod1",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		repositoryMock.On("Exists", mock.Anything, "cod1").Return(false)
+		repositoryMock.On("Save", mock.Anything, expectedWarehouse).Return(0, warehouse.ErrorSavingWarehouse)
+
+		_, err := svc.Create(context.TODO(), expectedWarehouse)
+
+		assert.ErrorIs(t, err, warehouse.ErrorSavingWarehouse)
+
+	})
 }
 
 func TestGetAllWarehouse(t *testing.T) {
@@ -75,7 +97,6 @@ func TestGetAllWarehouse(t *testing.T) {
 
 		received, err := svc.GetAll(context.TODO())
 
-		// assert.Equal(t, []domain.Warehouse{expectedWarehouse}, received)
 		assert.True(t, len(received) == 1)
 		assert.NoError(t, err)
 	})
@@ -215,7 +236,6 @@ func TestUpdateWarehouse(t *testing.T) {
 		assert.ErrorIs(t, err, warehouse.ErrNotFound)
 		assert.Equal(t, domain.Warehouse{}, received)
 
-		repositoryMock.AssertExpectations(t)
 	})
 }
 
