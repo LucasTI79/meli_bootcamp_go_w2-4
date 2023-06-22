@@ -3,6 +3,7 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -161,11 +162,27 @@ func TestProductRead(t *testing.T) {
 		json.Unmarshal(res.Body.Bytes(), &received)
 
 		assert.Equal(t, http.StatusNoContent, res.Code)
+		assert.Len(t, received.Data, 0)
 	})
 	t.Run("Returns existing product on Get by ID", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		product := getTestProducts()[0]
+		mockSvc.On("Get", mock.Anything, mock.Anything).Return(product, nil)
+
+		url := fmt.Sprintf("/products/%d", product.ID)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Product]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, product, received.Data)
 	})
-	t.Run("Returns 400 when ID is not an int", func(t *testing.T) {
+	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
 		t.Skip()
 	})
 }
