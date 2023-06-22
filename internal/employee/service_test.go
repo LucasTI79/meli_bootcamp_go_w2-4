@@ -117,7 +117,7 @@ func TestUpdateEmployee(t *testing.T) {
 
 		mockedRepository.On("Get", mock.Anything, e.ID).Return(e, nil)
 		mockedRepository.On("Exists", mock.Anything, e.CardNumberID).Return(false)
-		mockedRepository.On("Update", mock.Anything, e).Return(e, nil)
+		mockedRepository.On("Update", mock.Anything, e).Return(nil)
 
 		updatedEmployee, err := s.Update(context.TODO(), e)
 		assert.NoError(t, err)
@@ -159,6 +159,24 @@ func TestUpdateEmployee(t *testing.T) {
 		assert.ErrorIs(t, err, employee.ErrAlreadyExists)
 	})
 }
+func TestDeleteEmployee(t *testing.T) {
+	t.Run("sucessfuly deletes a employee", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		mockedRepository.On("Delete", mock.Anything, 1).Return(nil)
+		err := s.Delete(context.TODO(), 1)
+		assert.NoError(t, err)
+	})
+	t.Run("return error for invalid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		mockedRepository.On("Delete", mock.Anything, 0).Return(employee.ErrNotFound)
+		err := s.Delete(context.TODO(), 0)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
@@ -186,10 +204,10 @@ func (r *RepositoryMock) Save(ctx context.Context, s domain.Employee) (int, erro
 
 func (r *RepositoryMock) Update(ctx context.Context, s domain.Employee) error {
 	args := r.Called(ctx, s)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
-	return args.Error(1)
+	return args.Error(0)
 }
