@@ -170,7 +170,7 @@ func TestProductRead(t *testing.T) {
 		server := getProductServer(h)
 
 		p := getTestProducts()[0]
-		mockSvc.On("Get", mock.Anything, mock.Anything).Return(p, nil)
+		mockSvc.On("Get", mock.Anything, p.ID).Return(p, nil)
 
 		url := fmt.Sprintf("/products/%d", p.ID)
 		req, res := testutil.MakeRequest(http.MethodGet, url, "")
@@ -188,7 +188,7 @@ func TestProductRead(t *testing.T) {
 		server := getProductServer(h)
 
 		p := getTestProducts()[0]
-		mockSvc.On("Get", mock.Anything, mock.Anything).Return(domain.Product{}, product.NewErrNotFound(p.ID))
+		mockSvc.On("Get", mock.Anything, p.ID).Return(domain.Product{}, product.NewErrNotFound(p.ID))
 
 		url := fmt.Sprintf("/products/%d", p.ID)
 		req, res := testutil.MakeRequest(http.MethodGet, url, "")
@@ -200,7 +200,28 @@ func TestProductRead(t *testing.T) {
 
 func TestProductUpdate(t *testing.T) {
 	t.Run("Returns 200 when update succeds", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		p := getTestProducts()[0]
+		body := handler.UpdateRequest{
+			Desc: testutil.ToPtr("updated description"),
+		}
+		updated := p
+		updated.Description = *body.Desc
+
+		mockSvc.On("Update", mock.Anything, p.ID, mock.Anything).Return(updated, nil)
+
+		url := fmt.Sprintf("/products/%d", p.ID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Product]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, updated, received.Data)
 	})
 	t.Run("Does not fail when updated value is zero", func(t *testing.T) {
 		t.Skip()
