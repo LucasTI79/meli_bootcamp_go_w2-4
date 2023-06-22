@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -130,7 +131,21 @@ func TestProductCreate(t *testing.T) {
 
 func TestProductRead(t *testing.T) {
 	t.Run("Returns all products on GetAll", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		expected := getTestProducts()
+		mockSvc.On("GetAll", mock.Anything).Return(expected, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, "/products/", "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, expected, received.Data)
 	})
 	t.Run("Returns 204 when GetAll returns no products", func(t *testing.T) {
 		t.Skip()
@@ -181,6 +196,38 @@ func getProductServer(h *handler.Product) *gin.Engine {
 	}
 
 	return server
+}
+func getTestProducts() []domain.Product {
+	return []domain.Product{
+		{
+			ID:             1,
+			Description:    "abc",
+			ExpirationRate: 1,
+			FreezingRate:   2,
+			Height:         3,
+			Length:         4,
+			Netweight:      5,
+			ProductCode:    "PRODUCT-1",
+			RecomFreezTemp: 6,
+			Width:          7,
+			ProductTypeID:  8,
+			SellerID:       9,
+		},
+		{
+			ID:             2,
+			Description:    "cde",
+			ExpirationRate: 1,
+			FreezingRate:   2,
+			Height:         3,
+			Length:         4,
+			Netweight:      5,
+			ProductCode:    "PRODUCT-2",
+			RecomFreezTemp: 6,
+			Width:          7,
+			ProductTypeID:  8,
+			SellerID:       9,
+		},
+	}
 }
 
 type ProductServiceMock struct {
