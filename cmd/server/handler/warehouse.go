@@ -82,7 +82,7 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 //	@Produce		json
 //	@Param			warehouse	body		domain.Warehouse	true	"Warehouse object"
 //	@Success		201			{object}	domain.Warehouse
-//	@Failure		400			{string}	string	"Invalid request"
+//	@Failure		422			{string}	string	"warehousecode need to be passed, it can't be empty"
 //	@Failure		500			{string}	string	err.Error()
 //	@Failure		409			{string}	string	"warehouse can be alreary exist"
 //	@Router			/api/v1/warehouses [post]
@@ -94,7 +94,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 			return
 		}
 		if warehouse.WarehouseCode == "" {
-			web.Error(c, http.StatusBadRequest, "warehousecode need to be passed, it can't be empty")
+			web.Error(c, http.StatusUnprocessableEntity, "warehousecode need to be passed, it can't be empty")
 			return
 		}
 

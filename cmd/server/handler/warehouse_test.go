@@ -44,6 +44,32 @@ func TestWarehouseCreate(t *testing.T) {
 
 	})
 
+	t.Run("test create, if warehouse is empty, return 422", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, expectedWarehouse)
+
+		server.ServeHTTP(response, request)
+
+		var received testutil.ErrorResponse
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusUnprocessableEntity)
+		assert.Equal(t, received.Message, "warehousecode need to be passed, it can't be empty")
+	})
+
 }
 
 type ServiceWarehouseMock struct {
