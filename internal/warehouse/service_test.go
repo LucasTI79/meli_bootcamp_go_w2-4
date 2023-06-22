@@ -240,6 +240,18 @@ func TestDeleteWarehouse(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("test delete warehouse, id not found", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{}
+
+		repositoryMock.On("Delete", context.TODO(), expectedWarehouse.ID).Return(warehouse.ErrNotFound)
+
+		err := svc.Delete(context.TODO(), expectedWarehouse.ID)
+
+		assert.ErrorIs(t, err, warehouse.ErrNotFound)
+	})
 }
 
 type RepositoryWarehouseMock struct {
