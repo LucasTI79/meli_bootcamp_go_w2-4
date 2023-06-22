@@ -68,7 +68,16 @@ func TestCreate(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	t.Run("Gets all products", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		expected := getTestProducts()
+
+		mockRepo.On("GetAll", mock.Anything).Return(expected, nil)
+		ps, err := svc.GetAll(context.TODO())
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, expected, ps)
 	})
 	t.Run("Gets correct product by ID", func(t *testing.T) {
 		t.Skip()
@@ -94,6 +103,39 @@ func TestDelete(t *testing.T) {
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
 		t.Skip()
 	})
+}
+
+func getTestProducts() []domain.Product {
+	return []domain.Product{
+		{
+			ID:             1,
+			Description:    "abc",
+			ExpirationRate: 1,
+			FreezingRate:   2,
+			Height:         3,
+			Length:         4,
+			Netweight:      5,
+			ProductCode:    "PRODUCT-1",
+			RecomFreezTemp: 6,
+			Width:          7,
+			ProductTypeID:  8,
+			SellerID:       9,
+		},
+		{
+			ID:             2,
+			Description:    "cde",
+			ExpirationRate: 1,
+			FreezingRate:   2,
+			Height:         3,
+			Length:         4,
+			Netweight:      5,
+			ProductCode:    "PRODUCT-2",
+			RecomFreezTemp: 6,
+			Width:          7,
+			ProductTypeID:  8,
+			SellerID:       9,
+		},
+	}
 }
 
 type RepositoryMock struct {
