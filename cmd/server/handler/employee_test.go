@@ -95,7 +95,7 @@ func TestCreateEmployee(t *testing.T) {
 
 		var received testutil.ErrorResponse
 		json.Unmarshal(res.Body.Bytes(), &received)
-		fmt.Println(received)
+
 		assert.Equal(t, http.StatusConflict, res.Code)
 	})
 }
@@ -171,7 +171,59 @@ func TestGetByIdEmployee(t *testing.T) {
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
+		var received testutil.ErrorResponse
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+}
+
+func TestUpdateEmployee(t *testing.T) {
+	t.Run("should return status 200 and updated object when id is valid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.PATCH(EMPLOYEE_URL_ID_PATH, controller.Update())
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "125",
+			FirstName:    "Mario",
+			LastName:     "Kart",
+			WarehouseID:  1,
+		}
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, e.ID)
+
+		mockedService.On("Update", mock.Anything, e).Return(e, nil)
+
+		req, res := testutil.MakeRequest(http.MethodPatch, url, e)
+		server.ServeHTTP(res, req)
+
 		var received testutil.SuccessResponse[domain.Employee]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, e, received.Data)
+	})
+	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.PATCH(EMPLOYEE_URL_ID_PATH, controller.Update())
+
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "125",
+			FirstName:    "Mario",
+			LastName:     "Kart",
+			WarehouseID:  1,
+		}
+
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, e.ID)
+
+		mockedService.On("Update", mock.Anything, e).Return(domain.Employee{}, employee.ErrNotFound)
+
+		req, res := testutil.MakeRequest(http.MethodPatch, url, e)
+		server.ServeHTTP(res, req)
+
+		var received testutil.ErrorResponse
 		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
