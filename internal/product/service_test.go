@@ -213,7 +213,17 @@ func TestDelete(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		deleteID := 1
+		var expectedErr *product.ErrNotFound
+
+		mockRepo.On("Delete", mock.Anything, deleteID).Return(product.NewErrNotFound(deleteID))
+
+		err := svc.Delete(context.TODO(), deleteID)
+
+		assert.ErrorAs(t, err, &expectedErr)
 	})
 }
 
