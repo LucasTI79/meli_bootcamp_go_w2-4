@@ -2,19 +2,87 @@ package handler_test
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
+var PRODUCTS_URL = "/products"
+
 func TestProductCreate(t *testing.T) {
 	t.Run("Returns 201 when creation succeds", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := map[string]any{
+			"description":                      "Sweet potato",
+			"expiration_rate":                  3,
+			"freezing_rate":                    1,
+			"height":                           200,
+			"length":                           40,
+			"netweight":                        10,
+			"product_code":                     "SWP-1",
+			"recommended_freezing_temperature": 20,
+			"width":                            100,
+			"product_type_id":                  1,
+			"seller_id":                        1,
+		}
+		created := domain.Product{
+			ID:             0,
+			Description:    "Sweet potato",
+			ExpirationRate: 3,
+			FreezingRate:   1,
+			Height:         200,
+			Length:         40,
+			Netweight:      10,
+			ProductCode:    "SWP-1",
+			RecomFreezTemp: 20,
+			Width:          100,
+			ProductTypeID:  1,
+			SellerID:       1,
+		}
+
+		mockSvc.On("Create", mock.Anything, mock.Anything).Return(created, nil)
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/products/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusCreated, res.Code)
 	})
 	t.Run("Does not fail when fields are zero", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := map[string]any{
+			"description":                      "",
+			"expiration_rate":                  0,
+			"freezing_rate":                    0,
+			"height":                           200,
+			"length":                           40,
+			"netweight":                        10,
+			"product_code":                     "SWP-1",
+			"recommended_freezing_temperature": 0,
+			"width":                            100,
+			"product_type_id":                  1,
+			"seller_id":                        1,
+		}
+
+		mockSvc.On("Create", mock.Anything, mock.Anything).Return(domain.Product{}, nil)
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/products/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusCreated, res.Code)
 	})
 	t.Run("Returns 422 when required fields are omitted", func(t *testing.T) {
 		t.Skip()
@@ -62,6 +130,21 @@ func TestProductDelete(t *testing.T) {
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
 		t.Skip()
 	})
+}
+
+func getProductServer(h *handler.Product) *gin.Engine {
+	server := testutil.CreateServer()
+
+	productRG := server.Group(PRODUCTS_URL)
+	{
+		productRG.POST("/", middleware.Body[handler.CreateRequest](), h.Create())
+		productRG.GET("/", h.GetAll())
+		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[handler.UpdateRequest](), h.Update())
+		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
+
+	return server
 }
 
 type ProductServiceMock struct {
