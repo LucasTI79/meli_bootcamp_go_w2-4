@@ -169,10 +169,10 @@ func TestProductRead(t *testing.T) {
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
 
-		product := getTestProducts()[0]
-		mockSvc.On("Get", mock.Anything, mock.Anything).Return(product, nil)
+		p := getTestProducts()[0]
+		mockSvc.On("Get", mock.Anything, mock.Anything).Return(p, nil)
 
-		url := fmt.Sprintf("/products/%d", product.ID)
+		url := fmt.Sprintf("/products/%d", p.ID)
 		req, res := testutil.MakeRequest(http.MethodGet, url, "")
 		server.ServeHTTP(res, req)
 
@@ -180,10 +180,21 @@ func TestProductRead(t *testing.T) {
 		json.Unmarshal(res.Body.Bytes(), &received)
 
 		assert.Equal(t, http.StatusOK, res.Code)
-		assert.Equal(t, product, received.Data)
+		assert.Equal(t, p, received.Data)
 	})
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		p := getTestProducts()[0]
+		mockSvc.On("Get", mock.Anything, mock.Anything).Return(domain.Product{}, product.NewErrNotFound(p.ID))
+
+		url := fmt.Sprintf("/products/%d", p.ID)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
 
