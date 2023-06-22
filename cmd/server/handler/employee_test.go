@@ -16,6 +16,7 @@ import (
 )
 
 var EMPLOYEE_URL = "/api/v1/employees"
+var EMPLOYEE_URL_ID_PATH = "/api/v1/employees/:id"
 
 func TestCreateEmployee(t *testing.T) {
 	t.Run("should return status 201 if sucessfull", func(t *testing.T) {
@@ -135,6 +136,7 @@ func TestGetByIdEmployee(t *testing.T) {
 		mockedService := EmployeeServiceMock{}
 		controller := handler.NewEmployee(&mockedService)
 		server := testutil.CreateServer()
+		server.GET(EMPLOYEE_URL_ID_PATH, controller.Get())
 		e := domain.Employee{
 			ID:           1,
 			CardNumberID: "125",
@@ -143,9 +145,8 @@ func TestGetByIdEmployee(t *testing.T) {
 			WarehouseID:  1,
 		}
 		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, e.ID)
-		server.GET(url, controller.Get())
 
-		mockedService.On("Get", mock.Anything).Return(e, nil)
+		mockedService.On("Get", mock.Anything, 1).Return(e, nil)
 
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
@@ -154,6 +155,25 @@ func TestGetByIdEmployee(t *testing.T) {
 		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, e, received.Data)
+	})
+	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.GET(EMPLOYEE_URL_ID_PATH, controller.Get())
+
+		nonExistentId := 120
+
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, nonExistentId)
+
+		mockedService.On("Get", mock.Anything, nonExistentId).Return(domain.Employee{}, employee.ErrNotFound)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Employee]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
 
