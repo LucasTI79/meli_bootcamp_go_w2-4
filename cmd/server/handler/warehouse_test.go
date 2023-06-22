@@ -70,6 +70,76 @@ func TestWarehouseCreate(t *testing.T) {
 		assert.Equal(t, received.Message, "warehousecode need to be passed, it can't be empty")
 	})
 
+	// t.Run("test create, if warehouse is exist, return 409", func(t *testing.T) {
+	// 	svcMock := ServiceWarehouseMock{}
+	// 	warehouseHandler := handler.NewWarehouse(&svcMock)
+	// 	server := testutil.CreateServer()
+	// 	server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+
+	// 	expectedWarehouse := domain.Warehouse{
+	// 		ID:                 1,
+	// 		WarehouseCode:      "cod",
+	// 		Address:            "Rua da Hora",
+	// 		Telephone:          "11111111",
+	// 		MinimumCapacity:    10,
+	// 		MinimumTemperature: 2,
+	// 	}
+
+	// 	request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, expectedWarehouse)
+
+	// 	svcMock.On("Create", mock.Anything, expectedWarehouse).Return(expectedWarehouse, nil)
+	// 	svcMock.On("Exists", mock.Anything, expectedWarehouse.WarehouseCode).Return(true)
+
+	// 	server.ServeHTTP(response, request)
+
+	// 	var received testutil.ErrorResponse
+	// 	json.Unmarshal(response.Body.Bytes(), &received)
+
+	// 	assert.Equal(t, response.Code, http.StatusConflict)
+	// 	assert.Equal(t, received.Message, "warehouse already exists")
+
+	// })
+
+}
+
+func TestWarehouseGetAll(t *testing.T) {
+	t.Run("test if getall return a list that warehouse", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+
+		expectedWarehouse := []domain.Warehouse{
+			{
+				ID:                 1,
+				WarehouseCode:      "cod",
+				Address:            "Rua da Hora",
+				Telephone:          "11111111",
+				MinimumCapacity:    10,
+				MinimumTemperature: 2,
+			},
+			{
+				ID:                 2,
+				WarehouseCode:      "cod2",
+				Address:            "Rua da Hora",
+				Telephone:          "11111111",
+				MinimumCapacity:    10,
+				MinimumTemperature: 2,
+			},
+		}
+
+		request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
+
+		svcMock.On("GetAll", mock.Anything).Return(expectedWarehouse, nil)
+
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Warehouse]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusOK)
+
+	})
 }
 
 type ServiceWarehouseMock struct {
