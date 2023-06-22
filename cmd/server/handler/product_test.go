@@ -20,7 +20,7 @@ import (
 var PRODUCTS_URL = "/products"
 
 func TestProductCreate(t *testing.T) {
-	t.Run("Returns 201 when creation succeds", func(t *testing.T) {
+	t.Run("Returns 201 when creation succeeds", func(t *testing.T) {
 		mockSvc := ProductServiceMock{}
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
@@ -199,7 +199,7 @@ func TestProductRead(t *testing.T) {
 }
 
 func TestProductUpdate(t *testing.T) {
-	t.Run("Returns 200 when update succeds", func(t *testing.T) {
+	t.Run("Returns 200 when update succeeds", func(t *testing.T) {
 		mockSvc := ProductServiceMock{}
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
@@ -284,7 +284,7 @@ func TestProductUpdate(t *testing.T) {
 }
 
 func TestProductDelete(t *testing.T) {
-	t.Run("Returns 200 when delete succeds", func(t *testing.T) {
+	t.Run("Returns 200 when delete succeeds", func(t *testing.T) {
 		mockSvc := ProductServiceMock{}
 		h := handler.NewProduct(&mockSvc)
 		server := getProductServer(h)
