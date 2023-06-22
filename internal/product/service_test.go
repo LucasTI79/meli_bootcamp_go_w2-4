@@ -92,7 +92,16 @@ func TestRead(t *testing.T) {
 		assert.Equal(t, expected, p)
 	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		p := getTestProducts()[0]
+		var expectedErr *product.ErrNotFound
+
+		mockRepo.On("Get", mock.Anything, p.ID).Return(domain.Product{}, product.NewErrNotFound(p.ID))
+		_, err := svc.Get(context.TODO(), p.ID)
+
+		assert.ErrorAs(t, err, &expectedErr)
 	})
 }
 
