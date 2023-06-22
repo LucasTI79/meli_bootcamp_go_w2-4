@@ -148,7 +148,19 @@ func TestProductRead(t *testing.T) {
 		assert.ElementsMatch(t, expected, received.Data)
 	})
 	t.Run("Returns 204 when GetAll returns no products", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		mockSvc.On("GetAll", mock.Anything).Return(make([]domain.Product, 0), nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, "/products/", "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNoContent, res.Code)
 	})
 	t.Run("Returns existing product on Get by ID", func(t *testing.T) {
 		t.Skip()
