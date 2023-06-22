@@ -158,6 +158,31 @@ func TesUpdateBuyer(t *testing.T) {
 	})
 }
 
+func TestDeleteBuyer(t *testing.T) {
+	t.Run("Delete existent buyer", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+
+		repositoryMock.On("Delete", mock.Anything, 12).Return(nil)
+
+		err := svc.Delete(context.TODO(), 12)
+
+		assert.NoError(t, err)
+	})
+
+	t.Run("Delete non existent buyer", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+
+		repositoryMock.On("Delete", mock.Anything, 12).Return(errors.New("buyer not found"))
+
+		err := svc.Delete(context.TODO(), 12)
+
+		assert.Error(t, err)
+		assert.Equal(t, errors.New("buyer not found"), err)
+	})
+}
+
 type RepositoryMock struct {
 	mock.Mock
 }
