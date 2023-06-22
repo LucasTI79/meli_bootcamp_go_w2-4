@@ -5,12 +5,39 @@ import (
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestCreate(t *testing.T) {
 	t.Run("Creates valid product", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		productDTO := product.CreateDTO{
+			Desc:       "Sweet potato",
+			ExpR:       3,
+			FreezeR:    1,
+			Height:     200,
+			Length:     40,
+			NetW:       10,
+			Code:       "SWP-1",
+			FreezeTemp: 20,
+			Width:      100,
+			TypeID:     1,
+			SellerID:   1,
+		}
+		expected := *product.MapCreateToDomain(&productDTO)
+		expected.ID = 1
+
+		mockRepo.On("Exists", mock.Anything, mock.Anything).Return(false)
+		mockRepo.On("Save", mock.Anything, mock.Anything).Return(expected.ID, nil)
+
+		p, err := svc.Create(context.TODO(), productDTO)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, p)
 	})
 	t.Run("Doesn't create product if product code exists", func(t *testing.T) {
 		t.Skip()
