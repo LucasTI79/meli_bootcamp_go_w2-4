@@ -246,7 +246,22 @@ func TestProductUpdate(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		id := 42
+		body := handler.UpdateRequest{
+			Desc: testutil.ToPtr("New description"),
+		}
+
+		mockSvc.On("Update", mock.Anything, id, mock.Anything).Return(domain.Product{}, product.NewErrNotFound(id))
+
+		url := fmt.Sprintf("/products/%d", id)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 	t.Run("Returns 409 when updated code exists", func(t *testing.T) {
 		t.Skip()
