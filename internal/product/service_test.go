@@ -80,7 +80,16 @@ func TestRead(t *testing.T) {
 		assert.ElementsMatch(t, expected, ps)
 	})
 	t.Run("Gets correct product by ID", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		expected := getTestProducts()[0]
+
+		mockRepo.On("Get", mock.Anything, expected.ID).Return(expected, nil)
+		p, err := svc.Get(context.TODO(), expected.ID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, p)
 	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
 		t.Skip()
