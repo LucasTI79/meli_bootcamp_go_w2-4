@@ -201,7 +201,16 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Run("Deletes existing product", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		deleteID := 1
+
+		mockRepo.On("Delete", mock.Anything, deleteID).Return(nil)
+
+		err := svc.Delete(context.TODO(), deleteID)
+
+		assert.NoError(t, err)
 	})
 	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
 		t.Skip()
