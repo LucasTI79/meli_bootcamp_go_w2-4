@@ -85,7 +85,20 @@ func TestProductCreate(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, res.Code)
 	})
 	t.Run("Returns 422 when required fields are omitted", func(t *testing.T) {
-		t.Skip()
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := map[string]any{
+			"description":  "",
+			"product_code": "SWP-1",
+			"seller_id":    1,
+		}
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/products/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 	})
 	t.Run("Returns 409 when product code is not unique", func(t *testing.T) {
 		t.Skip()
