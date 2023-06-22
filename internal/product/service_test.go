@@ -15,7 +15,7 @@ func TestCreate(t *testing.T) {
 		mockRepo := RepositoryMock{}
 		svc := product.NewService(&mockRepo)
 
-		productDTO := product.CreateDTO{
+		dto := product.CreateDTO{
 			Desc:       "Sweet potato",
 			ExpR:       3,
 			FreezeR:    1,
@@ -28,19 +28,41 @@ func TestCreate(t *testing.T) {
 			TypeID:     1,
 			SellerID:   1,
 		}
-		expected := *product.MapCreateToDomain(&productDTO)
+		expected := *product.MapCreateToDomain(&dto)
 		expected.ID = 1
 
 		mockRepo.On("Exists", mock.Anything, mock.Anything).Return(false)
 		mockRepo.On("Save", mock.Anything, mock.Anything).Return(expected.ID, nil)
 
-		p, err := svc.Create(context.TODO(), productDTO)
+		p, err := svc.Create(context.TODO(), dto)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, p)
 	})
 	t.Run("Doesn't create product if product code exists", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		dto := product.CreateDTO{
+			Desc:       "Sweet potato",
+			ExpR:       3,
+			FreezeR:    1,
+			Height:     200,
+			Length:     40,
+			NetW:       10,
+			Code:       "SWP-1",
+			FreezeTemp: 20,
+			Width:      100,
+			TypeID:     1,
+			SellerID:   1,
+		}
+		var expectedErr *product.ErrInvalidProductCode
+
+		mockRepo.On("Exists", mock.Anything, mock.Anything).Return(true)
+
+		_, err := svc.Create(context.TODO(), dto)
+
+		assert.ErrorAs(t, err, &expectedErr)
 	})
 }
 
