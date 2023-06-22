@@ -1,7 +1,12 @@
 package handler_test
 
 import (
+	"context"
 	"testing"
+
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestProductCreate(t *testing.T) {
@@ -57,4 +62,33 @@ func TestProductDelete(t *testing.T) {
 	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
 		t.Skip()
 	})
+}
+
+type ProductServiceMock struct {
+	mock.Mock
+}
+
+func (s *ProductServiceMock) Create(c context.Context, product product.CreateDTO) (domain.Product, error) {
+	args := s.Called(c, product)
+	return args.Get(0).(domain.Product), args.Error(1)
+}
+
+func (s *ProductServiceMock) GetAll(c context.Context) ([]domain.Product, error) {
+	args := s.Called(c)
+	return args.Get(0).([]domain.Product), args.Error(1)
+}
+
+func (s *ProductServiceMock) Get(c context.Context, id int) (domain.Product, error) {
+	args := s.Called(c, id)
+	return args.Get(0).(domain.Product), args.Error(1)
+}
+
+func (s *ProductServiceMock) Update(c context.Context, id int, updates product.UpdateDTO) (domain.Product, error) {
+	args := s.Called(c, id)
+	return args.Get(0).(domain.Product), args.Error(1)
+}
+
+func (s *ProductServiceMock) Delete(c context.Context, id int) error {
+	args := s.Called(c, id)
+	return args.Error(0)
 }
