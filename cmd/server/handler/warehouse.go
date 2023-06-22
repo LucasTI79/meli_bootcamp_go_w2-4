@@ -41,7 +41,7 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 
 		warehouse, err := w.warehouseService.Get(c, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "invalid id")
+			web.Error(c, http.StatusNotFound, "Warehouse not found")
 			return
 		}
 		web.Success(c, http.StatusOK, warehouse)
