@@ -58,7 +58,7 @@ func TestCreateWarehouse(t *testing.T) {
 }
 
 func TestGetAllWarehouse(t *testing.T) {
-	t.Run("test Get All warehouses", func(t *testing.T) {
+	t.Run("test get all warehouses", func(t *testing.T) {
 		repositoryMock := RepositoryWarehouseMock{}
 		svc := warehouse.NewService(&repositoryMock)
 
@@ -82,7 +82,7 @@ func TestGetAllWarehouse(t *testing.T) {
 }
 
 func TestGetWarehouse(t *testing.T) {
-	t.Run("test Get warehouse by ID", func(t *testing.T) {
+	t.Run("test get warehouse by id", func(t *testing.T) {
 		repositoryMock := RepositoryWarehouseMock{}
 		svc := warehouse.NewService(&repositoryMock)
 
@@ -95,7 +95,7 @@ func TestGetWarehouse(t *testing.T) {
 			MinimumTemperature: 2,
 		}
 
-		repositoryMock.On("Get", mock.Anything, 1).Return(expectedWarehouse, nil)
+		repositoryMock.On("get", mock.Anything, 1).Return(expectedWarehouse, nil)
 
 		received, err := svc.Get(context.TODO(), 1)
 
@@ -103,6 +103,18 @@ func TestGetWarehouse(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("test det warehouse by id not found", func(t *testing.T) {
+		repositoryMock := RepositoryWarehouseMock{}
+		svc := warehouse.NewService(&repositoryMock)
+
+		expectedWarehouse := domain.Warehouse{}
+
+		repositoryMock.On("Get", mock.Anything, 1).Return(expectedWarehouse, warehouse.ErrNotFound)
+
+		_, err := svc.Get(context.TODO(), 1)
+
+		assert.ErrorIs(t, err, warehouse.ErrNotFound)
+	})
 }
 
 type RepositoryWarehouseMock struct {
