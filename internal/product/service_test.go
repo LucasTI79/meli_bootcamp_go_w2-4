@@ -6,6 +6,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -107,7 +108,50 @@ func TestRead(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	t.Run("Updates given fields for existing product", func(t *testing.T) {
-		t.Skip()
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		toUpdate := domain.Product{
+			ID:             1,
+			Description:    "Sweet potato",
+			ExpirationRate: 3,
+			FreezingRate:   1,
+			Height:         200,
+			Length:         40,
+			Netweight:      10,
+			ProductCode:    "SWP-1",
+			RecomFreezTemp: 20,
+			Width:          100,
+			ProductTypeID:  1,
+			SellerID:       1,
+		}
+		updates := product.UpdateDTO{
+			Desc:     *optional.FromVal("Garlic"),
+			Height:   *optional.FromVal[float32](42),
+			SellerID: *optional.FromVal(10),
+		}
+		expected := domain.Product{
+			ID:             1,
+			Description:    "Garlic",
+			ExpirationRate: 3,
+			FreezingRate:   1,
+			Height:         42,
+			Length:         40,
+			Netweight:      10,
+			ProductCode:    "SWP-1",
+			RecomFreezTemp: 20,
+			Width:          100,
+			ProductTypeID:  1,
+			SellerID:       10,
+		}
+
+		mockRepo.On("Get", mock.Anything, toUpdate.ID).Return(toUpdate, nil)
+		mockRepo.On("Update", mock.Anything, mock.Anything).Return(nil)
+
+		received, err := svc.Update(context.TODO(), toUpdate.ID, updates)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, received)
 	})
 	t.Run("Update fails if product code is not unique", func(t *testing.T) {
 		t.Skip()
