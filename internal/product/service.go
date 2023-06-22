@@ -52,16 +52,11 @@ func NewService(repo Repository) Service {
 }
 
 func (s *service) Create(c context.Context, product CreateDTO) (domain.Product, error) {
-	ps, err := s.repo.GetAll(c)
-	if err != nil {
-		return domain.Product{}, NewErrGeneric("error fetching products")
-	}
-
-	if !isUniqueProductCode(product.Code, ps) {
+	if s.repo.Exists(c, product.Code) {
 		return domain.Product{}, NewErrInvalidProductCode(product.Code)
 	}
 
-	p := mapCreateToDomain(&product)
+	p := MapCreateToDomain(&product)
 	id, err := s.repo.Save(c, *p)
 	if err != nil {
 		return domain.Product{}, NewErrGeneric("error saving product")
@@ -89,17 +84,12 @@ func (s *service) Get(c context.Context, id int) (domain.Product, error) {
 }
 
 func (s *service) Update(c context.Context, id int, updates UpdateDTO) (domain.Product, error) {
-	ps, err := s.repo.GetAll(c)
-	if err != nil {
-		return domain.Product{}, NewErrGeneric("could not fetch products")
-	}
-
 	p, err := s.repo.Get(c, id)
 	if err != nil {
 		return domain.Product{}, NewErrNotFound(id)
 	}
 
-	if code, hasVal := updates.Code.Value(); hasVal && p.ProductCode != code && !isUniqueProductCode(code, ps) {
+	if code, hasVal := updates.Code.Value(); hasVal && p.ProductCode != code && s.repo.Exists(c, code) {
 		return domain.Product{}, NewErrInvalidProductCode(updates.Code.Val)
 	}
 
@@ -124,16 +114,7 @@ func (s *service) Delete(c context.Context, id int) error {
 	return nil
 }
 
-func isUniqueProductCode(code string, ps []domain.Product) bool {
-	for _, p := range ps {
-		if p.ProductCode == code {
-			return false
-		}
-	}
-	return true
-}
-
-func mapCreateToDomain(product *CreateDTO) *domain.Product {
+func MapCreateToDomain(product *CreateDTO) *domain.Product {
 	return &domain.Product{
 		Description:    product.Desc,
 		ExpirationRate: product.ExpR,
