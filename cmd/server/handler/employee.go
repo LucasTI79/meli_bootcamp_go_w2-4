@@ -141,7 +141,7 @@ func (e *Employee) Update() gin.HandlerFunc {
 		employee.ID = id
 		employee, err = e.employeeService.Update(c, employee)
 		if err != nil {
-			web.Error(c, http.StatusConflict, "employee code id must be unique")
+			web.Error(c, http.StatusNotFound, "employee does not exist")
 			return
 		}
 		web.Success(c, http.StatusOK, employee)
