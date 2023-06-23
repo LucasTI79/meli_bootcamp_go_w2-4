@@ -3,6 +3,7 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -165,7 +166,71 @@ func TestUpdateSeller(t *testing.T) {
 	})
 }
 
-func TestGetByIdSeller(t *testing.T) {
+func TestReadSeller(t *testing.T) {
+	t.Run("returns 200 if getAll is successful", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(SELLER_URL, sellerHandler.GetAll())
+
+		expected := []domain.Seller{
+			{
+				ID:          1,
+				CID:         123,
+				CompanyName: "TEST",
+				Address:     "test street",
+				Telephone:   "9999999",
+			},
+			{
+				ID:          1,
+				CID:         1234,
+				CompanyName: "TESTE",
+				Address:     "test street",
+				Telephone:   "8888888",
+			},
+		}
+
+		svcMock.On("GetAll", mock.Anything).Return(expected, nil)
+
+		request, response := testutil.MakeRequest(http.MethodGet, SELLER_URL, "")
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[[]domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+		assert.ElementsMatch(t, expected, received.Data)
+	})
+	t.Run("returns error when the api is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(SELLER_URL, sellerHandler.GetAll())
+
+		svcMock.On("GetAll", mock.Anything).Return([]domain.Seller{}, errors.New(""))
+
+		request, response := testutil.MakeRequest(http.MethodGet, SELLER_URL, "")
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusInternalServerError, response.Code)
+	})
+	t.Run("returns 204 when there's no sellers", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(SELLER_URL, sellerHandler.GetAll())
+
+		svcMock.On("GetAll", mock.Anything).Return([]domain.Seller{}, nil)
+
+		request, response := testutil.MakeRequest(http.MethodGet, SELLER_URL, "")
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[[]domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNoContent, response.Code)
+		assert.Len(t, received.Data, 0)
+	})
 	t.Run("returns 200 if get is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)

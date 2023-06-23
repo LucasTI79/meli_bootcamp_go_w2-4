@@ -130,6 +130,43 @@ func TestUpdateSeller(t *testing.T) {
 }
 
 func TestGetSeller(t *testing.T) {
+	t.Run("get valids sellers", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		sellerMock := []domain.Seller{
+			{
+				ID:          1,
+				CID:         123,
+				CompanyName: "TEST",
+				Address:     "test street",
+				Telephone:   "9999999",
+			},
+			{
+				ID:          1,
+				CID:         1234,
+				CompanyName: "TESTE",
+				Address:     "test street",
+				Telephone:   "8888888",
+			},
+		}
+
+		repositoryMock.On("GetAll", mock.Anything).Return(sellerMock, nil)
+
+		received, err := svc.GetAll(context.TODO())
+
+		assert.ElementsMatch(t, sellerMock, received)
+		assert.NoError(t, err)
+	})
+	t.Run("get invalids sellers", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		repositoryMock.On("GetAll", mock.Anything).Return([]domain.Seller{}, seller.ErrFindSellers)
+		_, err := svc.GetAll(context.TODO())
+
+		assert.ErrorIs(t, err, seller.ErrFindSellers)
+	})
 	t.Run("get valid seller", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := seller.NewService(&repositoryMock)

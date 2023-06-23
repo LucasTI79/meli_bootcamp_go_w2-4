@@ -40,6 +40,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 		}
 		if len(sellers) == 0 {
 			web.Success(c, http.StatusNoContent, sellers)
+			return
 		}
 		web.Success(c, http.StatusOK, sellers)
 	}
