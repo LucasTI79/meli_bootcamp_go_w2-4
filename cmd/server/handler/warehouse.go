@@ -174,7 +174,7 @@ func (w *Warehouse) Delete() gin.HandlerFunc {
 		}
 		err = w.warehouseService.Delete(c, id)
 		if err != nil {
-			web.Error(c, http.StatusMethodNotAllowed, ErrWarehouseNotDeleted)
+			web.Error(c, http.StatusInternalServerError, ErrWarehouseNotDeleted)
 			return
 		}
 		web.Success(c, http.StatusNoContent, nil)
