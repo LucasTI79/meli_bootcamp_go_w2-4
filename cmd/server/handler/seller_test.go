@@ -72,7 +72,57 @@ func TestCreateSeller(t *testing.T) {
 		server.POST(SELLER_URL, sellerHandler.Create())
 
 		body := map[string]any{
-			"telephone": "9999999",
+			"cid": 123,
+		}
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
+	})
+	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(SELLER_URL, sellerHandler.Create())
+
+		body := map[string]any{
+			"cid":          123,
+			"company_name": "company",
+		}
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
+	})
+	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(SELLER_URL, sellerHandler.Create())
+
+		body := map[string]any{
+			"cid":          123,
+			"company_name": "company",
+			"address":      "address",
+		}
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
+		server.ServeHTTP(response, request)
+
+		fmt.Println(response.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
+	})
+	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(SELLER_URL, sellerHandler.Create())
+
+		body := map[string]any{
+			"company_name": "company",
+			"address":      "address",
+			"telephone":    "9999999",
 		}
 		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
 		server.ServeHTTP(response, request)
@@ -101,6 +151,26 @@ func TestCreateSeller(t *testing.T) {
 
 		assert.Equal(t, http.StatusConflict, response.Code)
 	})
+	t.Run("Returns 500 if api is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(SELLER_URL, sellerHandler.Create())
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		svcMock.On("Save", mock.Anything, expected).Return(domain.Seller{}, errors.New(""))
+
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusInternalServerError, response.Code)
+	})
 }
 func TestDeleteSeller(t *testing.T) {
 	t.Run("returns 404 when id does not exist", func(t *testing.T) {
@@ -118,6 +188,35 @@ func TestDeleteSeller(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assert.Equal(t, http.StatusNotFound, response.Code)
+
+	})
+	t.Run("returns 400 if receives invalid field type", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(SELLER_URL, sellerHandler.Delete())
+
+		request, response := testutil.MakeRequest(http.MethodDelete, SELLER_URL, nil)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusBadRequest, response.Code)
+
+	})
+	t.Run("returns if api is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+
+		idToDelete := 1
+		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
+
+		svcMock.On("Delete", mock.Anything, idToDelete).Return(errors.New(""))
+
+		request, response := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusInternalServerError, response.Code)
 
 	})
 	t.Run("returns 204 when sucessfull", func(t *testing.T) {
@@ -164,8 +263,59 @@ func TestUpdateSeller(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Equal(t, expected, received.Data)
 	})
-}
+	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
 
+		url := fmt.Sprintf("%s/%s", SELLER_URL, "a")
+		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusBadRequest, response.Code)
+	})
+	t.Run("Returns 422 if receives invalid body", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
+		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
+	})
+	t.Run("Returns 404 when id does not exist", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
+		svcMock.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Seller{}, seller.ErrNotFound)
+
+		request, response := testutil.MakeRequest(http.MethodPatch, url, domain.Seller{})
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
+	})
+	t.Run("Returns 500 api is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
+		svcMock.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Seller{}, errors.New(""))
+
+		request, response := testutil.MakeRequest(http.MethodPatch, url, domain.Seller{})
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusInternalServerError, response.Code)
+	})
+}
 func TestReadSeller(t *testing.T) {
 	t.Run("returns 200 if getAll is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}

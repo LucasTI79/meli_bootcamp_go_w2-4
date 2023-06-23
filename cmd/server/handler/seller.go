@@ -114,8 +114,10 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())
+				return
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
+				return
 			}
 		}
 		web.Success(c, http.StatusCreated, sellerSaved)
@@ -145,7 +147,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 		}
 		var sellerBody domain.Seller
 		if err := c.ShouldBindJSON(&sellerBody); err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+			web.Error(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 		sellerUpdated, err := s.sellerService.Update(c, id, sellerBody)
