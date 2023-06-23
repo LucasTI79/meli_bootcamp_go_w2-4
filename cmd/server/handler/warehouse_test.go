@@ -352,6 +352,36 @@ func TestWarehouseUpdate(t *testing.T) {
 	})
 }
 
+func TestWarehouseDelete(t *testing.T) {
+	t.Run("test delete, when the id is valid", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(WAREHOUSE_URL_ID, warehouseHandler.Delete())
+
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
+
+		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, expectedWarehouse.ID)
+
+		svcMock.On("Delete", mock.Anything, expectedWarehouse.ID).Return(nil)
+		request, response := testutil.MakeRequest(http.MethodDelete, url, expectedWarehouse)
+
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Warehouse]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusNoContent)
+	})
+}
+
 type ServiceWarehouseMock struct {
 	mock.Mock
 }
