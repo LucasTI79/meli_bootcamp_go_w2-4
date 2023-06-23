@@ -87,12 +87,12 @@ func TestBuyerGet(t *testing.T) {
 		server := testutil.CreateServer()
 		server.GET(BASE_URL_BUYER, buyerHandler.GetAll())
 		expected := []domain.Buyer{
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
 				LastName:     "sobrenome"},
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
