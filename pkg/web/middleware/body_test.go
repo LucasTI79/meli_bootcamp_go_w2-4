@@ -29,7 +29,7 @@ func TestBodyMapper(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
-	t.Run("Should return 422 if body has invalid type", func(t *testing.T) {
+	t.Run("Should return 422 if body has invalid field type", func(t *testing.T) {
 		server := testutil.CreateServer() // TODO: Remove testutil dependency
 
 		bodyMapper := middleware.Body[PrimitiveTypesBody]()
@@ -38,6 +38,22 @@ func TestBodyMapper(t *testing.T) {
 
 		body := map[string]any{
 			"id":     "23",
+			"name":   "John Doe",
+			"height": 1.91,
+		}
+		req, res := testutil.MakeRequest(http.MethodPost, "/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+	})
+	t.Run("Should return 422 if body has missing required field", func(t *testing.T) {
+		server := testutil.CreateServer() // TODO: Remove testutil dependency
+
+		bodyMapper := middleware.Body[PrimitiveTypesBody]()
+		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
+		server.POST("/", bodyMapper, handler)
+
+		body := map[string]any{
 			"name":   "John Doe",
 			"height": 1.91,
 		}
