@@ -89,8 +89,7 @@ func TestWarehouseCreate(t *testing.T) {
 
 	// 	request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, expectedWarehouse)
 
-	// 	svcMock.On("Create", mock.Anything, expectedWarehouse).Return(expectedWarehouse, nil)
-	// 	svcMock.On("Exists", mock.Anything, expectedWarehouse.WarehouseCode).Return(true)
+	// 	svcMock.On("Create", mock.Anything, expectedWarehouse).Return(domain.Warehouse{}, handler.ErrAlrearyExist)
 
 	// 	server.ServeHTTP(response, request)
 

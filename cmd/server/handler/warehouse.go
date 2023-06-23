@@ -10,6 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	ErrAlrearyExist        = "warehouse can be alreary exist"
+	ErrWarehouseCodeUnique = "warehouse code must be unique"
+	ErrUnprocessableEntity = "action could not be processed correctly due to invalid data provided"
+	ErrServerInternalError = "something went wrong with the request"
+	ErrWarehouseEmpty      = "warehousecode need to be passed, it can't be empty"
+	ErrWarehouseNotFound   = "Warehouse not found"
+	ErrInvalidID           = "Invalid ID"
+	ErrWarehouseNotDeleted = "Warehouse not deleted"
+)
+
 type Warehouse struct {
 	warehouseService warehouse.Service
 }
@@ -35,13 +46,13 @@ func (w *Warehouse) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid id")
+			web.Error(c, http.StatusBadRequest, ErrInvalidID)
 			return
 		}
 
 		warehouse, err := w.warehouseService.Get(c, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "Warehouse not found")
+			web.Error(c, http.StatusNotFound, ErrWarehouseNotFound)
 			return
 		}
 		web.Success(c, http.StatusOK, warehouse)
@@ -62,7 +73,7 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		warehouses, err := w.warehouseService.GetAll(c)
 		if err != nil {
-			web.Error(c, http.StatusInternalServerError, "something went wrong with the request")
+			web.Error(c, http.StatusInternalServerError, ErrServerInternalError)
 			return
 		}
 		if len(warehouses) == 0 {
@@ -94,13 +105,13 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 			return
 		}
 		if warehouse.WarehouseCode == "" {
-			web.Error(c, http.StatusUnprocessableEntity, "warehousecode need to be passed, it can't be empty")
+			web.Error(c, http.StatusUnprocessableEntity, ErrWarehouseEmpty)
 			return
 		}
 
 		warehouse, err := w.warehouseService.Create(c, warehouse)
 		if err != nil {
-			web.Error(c, http.StatusConflict, "warehouse can be alreary exist")
+			web.Error(c, http.StatusConflict, ErrAlrearyExist)
 			return
 		}
 		web.Success(c, http.StatusCreated, warehouse)
@@ -126,18 +137,18 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "action could not be processed correctly due to invalid data provided")
+			web.Error(c, http.StatusUnprocessableEntity, ErrUnprocessableEntity)
 			return
 		}
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "invalid id")
+			web.Error(c, http.StatusNotFound, ErrInvalidID)
 			return
 		}
 		warehouse.ID = id
 		warehouse, err = w.warehouseService.Update(c, warehouse)
 		if err != nil {
-			web.Error(c, http.StatusConflict, "warehouse code must be unique")
+			web.Error(c, http.StatusConflict, ErrWarehouseCodeUnique)
 			return
 		}
 		web.Success(c, http.StatusOK, warehouse)
@@ -158,12 +169,12 @@ func (w *Warehouse) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, "invalid id")
+			web.Error(c, http.StatusNotFound, ErrInvalidID)
 			return
 		}
 		err = w.warehouseService.Delete(c, id)
 		if err != nil {
-			web.Error(c, http.StatusMethodNotAllowed, "warehouse not deleted")
+			web.Error(c, http.StatusMethodNotAllowed, ErrWarehouseNotDeleted)
 			return
 		}
 		web.Success(c, http.StatusNoContent, nil)
