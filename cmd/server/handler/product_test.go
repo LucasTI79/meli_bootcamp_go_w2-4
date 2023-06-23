@@ -148,6 +148,18 @@ func TestProductRead(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.ElementsMatch(t, expected, received.Data)
 	})
+	t.Run("Returns 500 if service throws generic error", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		mockSvc.On("GetAll", mock.Anything).Return([]domain.Product{}, product.NewErrGeneric(""))
+
+		req, res := testutil.MakeRequest(http.MethodGet, "/products/", "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
 	t.Run("Returns 204 when GetAll returns no products", func(t *testing.T) {
 		mockSvc := ProductServiceMock{}
 		h := handler.NewProduct(&mockSvc)
