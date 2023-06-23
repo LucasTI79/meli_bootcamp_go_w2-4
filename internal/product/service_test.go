@@ -2,6 +2,7 @@ package product_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
@@ -10,6 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+var ErrRepository = errors.New("error in the repository layer")
 
 func TestCreate(t *testing.T) {
 	t.Run("Creates valid product", func(t *testing.T) {
@@ -65,6 +68,32 @@ func TestCreate(t *testing.T) {
 
 		assert.ErrorAs(t, err, &expectedErr)
 	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		dto := product.CreateDTO{
+			Desc:       "Sweet potato",
+			ExpR:       3,
+			FreezeR:    1,
+			Height:     200,
+			Length:     40,
+			NetW:       10,
+			Code:       "SWP-1",
+			FreezeTemp: 20,
+			Width:      100,
+			TypeID:     1,
+			SellerID:   1,
+		}
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("Exists", mock.Anything, mock.Anything).Return(false)
+		mockRepo.On("Save", mock.Anything, mock.Anything).Return(0, ErrRepository)
+
+		_, err := svc.Create(context.TODO(), dto)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
 }
 
 func TestRead(t *testing.T) {
@@ -101,6 +130,17 @@ func TestRead(t *testing.T) {
 
 		mockRepo.On("Get", mock.Anything, p.ID).Return(domain.Product{}, product.NewErrNotFound(p.ID))
 		_, err := svc.Get(context.TODO(), p.ID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("GetAll", mock.Anything).Return([]domain.Product{}, ErrRepository)
+		_, err := svc.GetAll(context.TODO())
 
 		assert.ErrorAs(t, err, &expectedErr)
 	})
@@ -197,6 +237,22 @@ func TestUpdate(t *testing.T) {
 
 		assert.ErrorAs(t, err, &expectedErr)
 	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		toUpdate := getTestProducts()[1]
+		updates := product.UpdateDTO{Desc: *optional.FromVal("Garlic")}
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("Get", mock.Anything, mock.Anything).Return(toUpdate, nil)
+		mockRepo.On("Exists", mock.Anything, mock.Anything).Return(false)
+		mockRepo.On("Update", mock.Anything, mock.Anything).Return(ErrRepository)
+
+		_, err := svc.Update(context.TODO(), toUpdate.ID, updates)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
 }
 
 func TestDelete(t *testing.T) {
@@ -220,6 +276,19 @@ func TestDelete(t *testing.T) {
 		var expectedErr *product.ErrNotFound
 
 		mockRepo.On("Delete", mock.Anything, deleteID).Return(product.NewErrNotFound(deleteID))
+
+		err := svc.Delete(context.TODO(), deleteID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		deleteID := 1
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("Delete", mock.Anything, deleteID).Return(ErrRepository)
 
 		err := svc.Delete(context.TODO(), deleteID)
 
