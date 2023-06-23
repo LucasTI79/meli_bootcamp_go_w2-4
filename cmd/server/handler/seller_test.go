@@ -16,6 +16,7 @@ import (
 )
 
 var SELLER_URL = "/api/v1/sellers"
+var SELLER_URL_ID_PATH = "/api/v1/sellers/:id"
 
 func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 201 if successful", func(t *testing.T) {
@@ -97,8 +98,43 @@ func TestCreateSeller(t *testing.T) {
 		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
 
-		fmt.Println(response.Code)
 		assert.Equal(t, http.StatusConflict, response.Code)
+	})
+}
+func TestDeleteSeller(t *testing.T) {
+	t.Run("returns 404 when id does not exist", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+
+		idToDelete := 1
+		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
+
+		svcMock.On("Delete", mock.Anything, idToDelete).Return(seller.ErrNotFound)
+
+		request, response := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
+
+	})
+	t.Run("returns 204 when sucessfull", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+
+		idToDelete := 1
+		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
+
+		svcMock.On("Delete", mock.Anything, idToDelete).Return(nil)
+
+		request, response := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusNoContent, response.Code)
+
 	})
 }
 
