@@ -150,6 +150,15 @@ func TestGetSeller(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("get invalid seller", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		repositoryMock.On("Get", mock.Anything, 1).Return(domain.Seller{}, seller.ErrNotFound)
+		_, err := svc.Get(context.TODO(), 1)
+
+		assert.ErrorIs(t, err, seller.ErrNotFound)
+	})
 }
 
 type RepositoryMock struct {
