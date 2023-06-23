@@ -9,7 +9,8 @@ import (
 
 // Errors
 var (
-	ErrNotFound = errors.New("employee not found")
+	ErrNotFound      = errors.New("employee not found")
+	ErrAlreadyExists = errors.New("employee id already exists")
 )
 
 // Service define a interface para o serviço de funcionários.
@@ -37,7 +38,7 @@ func (s *service) Create(ctx context.Context, e domain.Employee) (domain.Employe
 	eid := s.repository.Exists(ctx, e.CardNumberID)
 
 	if eid {
-		return domain.Employee{}, errors.New("employee id already exists")
+		return domain.Employee{}, ErrAlreadyExists
 	}
 
 	id, err := s.repository.Save(ctx, e)
@@ -98,7 +99,7 @@ func (s *service) Update(ctx context.Context, e domain.Employee) (domain.Employe
 
 		ecode := s.repository.Exists(ctx, e.CardNumberID)
 		if ecode {
-			return domain.Employee{}, errors.New("employee card id must be unique")
+			return domain.Employee{}, ErrAlreadyExists
 		}
 		currentEmployee.CardNumberID = e.CardNumberID
 	}
