@@ -194,6 +194,104 @@ func TestSectionDelete(t *testing.T) {
 	})
 }
 
+func TestSectionUpdate(t *testing.T) {
+	t.Run("Update a section with succees", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		body := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(123),
+			CurrentTemperature: testutil.ToPtr(11),
+		}
+
+		expected := getTestSections()[0]
+		expected.CurrentTemperature = 11
+
+		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(expected, nil)
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Section]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+	t.Run("Update no section and return error: bad request", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		body := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(123),
+			CurrentTemperature: testutil.ToPtr(11),
+		}
+
+		url := fmt.Sprintf("%s%s", SECTIONS_URL, "a")
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
+	t.Run("Update no section and return error: not found", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		body := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(123),
+			CurrentTemperature: testutil.ToPtr(11),
+		}
+
+		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrNotFound)
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("Update no section and return error: conflict", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		body := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(123),
+			CurrentTemperature: testutil.ToPtr(11),
+		}
+
+		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusConflict, res.Code)
+	})
+	t.Run("Update no section and return error: internal server error", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		body := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(123),
+			CurrentTemperature: testutil.ToPtr(11),
+		}
+
+		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
+}
+
 func getSectionServer(h *handler.Section) *gin.Engine {
 	server := testutil.CreateServer()
 
@@ -237,19 +335,6 @@ func getTestCreateSections() section.CreateSection {
 		ProductTypeID:      2,
 	}
 }
-
-// func getTestCreateSectionsJSON() section.CreateSection {
-// 	return section.CreateSection{
-// 		"section_number":      123,
-// 		"current_temperature": 10,
-// 		"minimum_temperature": 5,
-// 		"current_capacity":    15,
-// 		"minimum_capacity":    10,
-// 		"maximum_capacity":    20,
-// 		"warehouse_id":        321,
-// 		"product_type_id":     2,
-// 	}
-// }
 
 type SectionServiceMock struct {
 	mock.Mock
