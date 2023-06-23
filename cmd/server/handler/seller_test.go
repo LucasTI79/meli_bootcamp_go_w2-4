@@ -163,11 +163,14 @@ func TestUpdateSeller(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Equal(t, expected, received.Data)
 	})
-	/*t.Run("Returns 404 if update is not existent", func(t *testing.T) {
+}
+
+func TestGetByIdSeller(t *testing.T) {
+	t.Run("returns 200 if get is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
 
 		expected := domain.Seller{
 			ID:          1,
@@ -176,17 +179,62 @@ func TestUpdateSeller(t *testing.T) {
 			Address:     "test street",
 			Telephone:   "9999999",
 		}
-		url := fmt.Sprintf("%s/%d", SELLER_URL, expected.ID)
-		svcMock.On("Update", mock.Anything, expected.ID, expected).Return(domain.Seller{}, seller.ErrNotFound)
 
-		request, response := testutil.MakeRequest(http.MethodPatch, url, expected)
+		url := fmt.Sprintf("%s/%d", SELLER_URL, expected.ID)
+		svcMock.On("Get", mock.Anything, expected.ID).Return(expected, nil)
+
+		request, response := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+
+	t.Run("returns error when the id is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
+
+		url := fmt.Sprintf("%s/%s", SELLER_URL, "aa")
+
+		request, response := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusBadRequest, response.Code)
+	})
+
+	t.Run("returns error when the api is not valid", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
+
+		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+
+		svcMock.On("Get", mock.Anything, expected.ID).Return(domain.Seller{}, seller.ErrNotFound)
+		request, response := testutil.MakeRequest(http.MethodGet, url, "")
 		server.ServeHTTP(response, request)
 
 		var received testutil.SuccessResponse[domain.Seller]
 		json.Unmarshal(response.Body.Bytes(), &received)
 
 		assert.Equal(t, http.StatusNotFound, response.Code)
-	})*/
+	})
 }
 
 type SellerServiceMock struct {
