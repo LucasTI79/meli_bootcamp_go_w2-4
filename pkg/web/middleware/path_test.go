@@ -59,4 +59,19 @@ func TestIntPathParamValidator(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
+	t.Run("Should panic if endpoint has more than one path param", func(t *testing.T) {
+		server := testutil.CreateServer()
+
+		intParam := middleware.IntPathParam()
+		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
+		server.GET("/:code/:id", intParam, handler)
+
+		code := 39
+		id := 42
+		url := fmt.Sprintf("/%d/%d", code, id)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
 }
