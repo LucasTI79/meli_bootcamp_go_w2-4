@@ -48,7 +48,7 @@ func TestCreateBuyer(t *testing.T) {
 		_, err := svc.Create(context.TODO(), buyerMock)
 
 		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
-		assert.Equal(t, err.Error(), "buyer already exists")
+		assert.ErrorIs(t, err, buyer.ErrAlreadyExists)
 	})
 }
 
@@ -57,7 +57,7 @@ func TestGetbyIDBuyer(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 
-		repositoryMock.On("Get", mock.Anything, 12).Return(domain.Buyer{}, errors.New("buyer not found"))
+		repositoryMock.On("Get", mock.Anything, 12).Return(domain.Buyer{}, buyer.ErrNotFound)
 
 		returned, err := svc.Get(context.TODO(), 12)
 
@@ -70,7 +70,7 @@ func TestGetbyIDBuyer(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 		buyerMock := domain.Buyer{
-			ID:           1,
+			ID:           12,
 			CardNumberID: "123",
 			FirstName:    "nome",
 			LastName:     "sobrenome",
@@ -85,18 +85,18 @@ func TestGetbyIDBuyer(t *testing.T) {
 	})
 
 }
-func TesGetBuyer(t *testing.T) {
+func TestGetBuyer(t *testing.T) {
 	t.Run("Find all buyer", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 
-		buyerMock := []domain.BuyerCreate{
-			domain.BuyerCreate{
+		buyerMock := []domain.Buyer{
+			domain.Buyer{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
 				LastName:     "sobrenome"},
-			domain.BuyerCreate{
+			domain.Buyer{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
@@ -109,11 +109,11 @@ func TesGetBuyer(t *testing.T) {
 		received, err := svc.GetAll(context.TODO())
 
 		assert.NoError(t, err)
-		assert.Equal(t, buyerMock, received)
+		assert.ElementsMatch(t, buyerMock, received)
 	})
 }
 
-func TesUpdateBuyer(t *testing.T) {
+func TestUpdateBuyer(t *testing.T) {
 	t.Run("Update existent buyer", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
@@ -131,7 +131,7 @@ func TesUpdateBuyer(t *testing.T) {
 		}
 
 		repositoryMock.On("Get", mock.Anything, 12).Return(buyerMock, nil)
-		repositoryMock.On("Update", mock.Anything, buyerMock).Return(buyerUpdate, nil)
+		repositoryMock.On("Update", mock.Anything, buyerUpdate).Return(nil)
 
 		returned, err := svc.Update(context.TODO(), buyerUpdate, 12)
 
@@ -149,7 +149,7 @@ func TesUpdateBuyer(t *testing.T) {
 			LastName:     "ganda",
 		}
 
-		repositoryMock.On("Get", mock.Anything, 12).Return(domain.Buyer{}, errors.New("buyer not found"))
+		repositoryMock.On("Get", mock.Anything, 12).Return(domain.Buyer{}, buyer.ErrNotFound)
 		returned, err := svc.Update(context.TODO(), buyerUpdate, 12)
 
 		repositoryMock.AssertNumberOfCalls(t, "Update", 0)
@@ -174,7 +174,7 @@ func TestDeleteBuyer(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 
-		repositoryMock.On("Delete", mock.Anything, 12).Return(errors.New("buyer not found"))
+		repositoryMock.On("Delete", mock.Anything, 12).Return(buyer.ErrNotFound)
 
 		err := svc.Delete(context.TODO(), 12)
 
