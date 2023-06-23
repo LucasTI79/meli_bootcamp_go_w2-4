@@ -52,6 +52,36 @@ func TestCreateSeller(t *testing.T) {
 		assert.ErrorIs(t, err, seller.ErrCidAlreadyExists)
 	})
 }
+func TestDelete(t *testing.T) {
+	t.Run("returns error not found when seller does not exist ", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+		idToDelete := 1
+
+		repositoryMock.On("Get", mock.Anything, idToDelete).Return(domain.Seller{}, seller.ErrNotFound)
+		err := svc.Delete(context.TODO(), idToDelete)
+
+		assert.ErrorIs(t, err, seller.ErrNotFound)
+	})
+	t.Run("returns no error when sucessfull", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		repositoryMock.On("Get", mock.Anything, expected.ID).Return(expected, nil)
+		repositoryMock.On("Delete", mock.Anything, expected.ID).Return(nil)
+
+		err := svc.Delete(context.TODO(), expected.ID)
+
+		assert.NoError(t, err)
+
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
@@ -79,10 +109,10 @@ func (r *RepositoryMock) Save(ctx context.Context, s domain.Seller) (int, error)
 
 func (r *RepositoryMock) Update(ctx context.Context, s domain.Seller) error {
 	args := r.Called(ctx, s)
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
-	return args.Error(1)
+	return args.Error(0)
 }
