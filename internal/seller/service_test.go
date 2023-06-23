@@ -82,6 +82,52 @@ func TestDelete(t *testing.T) {
 
 	})
 }
+func TestUpdateSeller(t *testing.T) {
+	t.Run("Update valid seller", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		seller := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		sellerUpdate := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "Meli",
+			Address:     "Osasco",
+			Telephone:   "1134489093",
+		}
+		repositoryMock.On("Get", mock.Anything, 1).Return(seller, nil)
+		repositoryMock.On("Update", mock.Anything, sellerUpdate).Return(nil)
+
+		received, err := svc.Update(context.TODO(), 1, sellerUpdate)
+
+		assert.NoError(t, err)
+		assert.Equal(t, sellerUpdate, received)
+	})
+
+	t.Run("Update non existent seller", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		sellerMock := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		repositoryMock.On("Get", mock.Anything, 1).Return(domain.Seller{}, seller.ErrNotFound)
+
+		_, err := svc.Update(context.TODO(), 1, sellerMock)
+
+		assert.ErrorIs(t, err, seller.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock

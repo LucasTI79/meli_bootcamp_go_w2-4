@@ -137,6 +137,57 @@ func TestDeleteSeller(t *testing.T) {
 
 	})
 }
+func TestUpdateSeller(t *testing.T) {
+	t.Run("Returns 200 if update is successful", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		url := fmt.Sprintf("%s/%d", SELLER_URL, expected.ID)
+		svcMock.On("Update", mock.Anything, expected.ID, expected).Return(expected, nil)
+
+		request, response := testutil.MakeRequest(http.MethodPatch, url, expected)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+	/*t.Run("Returns 404 if update is not existent", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		url := fmt.Sprintf("%s/%d", SELLER_URL, expected.ID)
+		svcMock.On("Update", mock.Anything, expected.ID, expected).Return(domain.Seller{}, seller.ErrNotFound)
+
+		request, response := testutil.MakeRequest(http.MethodPatch, url, expected)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Seller]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
+	})*/
+}
 
 type SellerServiceMock struct {
 	mock.Mock
@@ -158,7 +209,7 @@ func (svc *SellerServiceMock) Save(c context.Context, s domain.Seller) (domain.S
 }
 
 func (svc *SellerServiceMock) Update(ctx context.Context, id int, s domain.Seller) (domain.Seller, error) {
-	args := svc.Called(ctx, s)
+	args := svc.Called(ctx, id, s)
 	return args.Get(0).(domain.Seller), args.Error(1)
 }
 

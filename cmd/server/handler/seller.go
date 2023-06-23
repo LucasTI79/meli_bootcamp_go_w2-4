@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -141,13 +142,17 @@ func (s *Seller) Update() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		var seller domain.Seller
-		if err := c.ShouldBindJSON(&seller); err != nil {
+		var sellerBody domain.Seller
+		if err := c.ShouldBindJSON(&sellerBody); err != nil {
 			web.Error(c, http.StatusNotFound, err.Error())
 			return
 		}
-		sellerUpdated, err := s.sellerService.Update(c, id, seller)
+		sellerUpdated, err := s.sellerService.Update(c, id, sellerBody)
 		if err != nil {
+			if errors.Is(err, seller.ErrNotFound) {
+				web.Error(c, http.StatusNotFound, err.Error())
+				return
+			}
 			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}
