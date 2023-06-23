@@ -16,6 +16,7 @@ import (
 )
 
 var BASE_URL_BUYER = "/api/v1/buyers"
+var BASE_URL_BUYER_ID = "/api/v1/buyers/:id"
 
 func TestBuyerCreate(t *testing.T) {
 	t.Run("Returns 201 if successful", func(t *testing.T) {
@@ -76,6 +77,173 @@ func TestBuyerCreate(t *testing.T) {
 
 		fmt.Println(response.Code)
 		assert.Equal(t, http.StatusConflict, response.Code)
+	})
+}
+
+func TestBuyerGet(t *testing.T) {
+	t.Run("Returns 200 if successful", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(BASE_URL_BUYER, buyerHandler.GetAll())
+		expected := []domain.Buyer{
+			domain.Buyer{
+				ID:           1,
+				CardNumberID: "123",
+				FirstName:    "nome",
+				LastName:     "sobrenome"},
+			domain.Buyer{
+				ID:           1,
+				CardNumberID: "123",
+				FirstName:    "nome",
+				LastName:     "sobrenome",
+			},
+		}
+		svcMock.On("GetAll", mock.Anything).Return(expected, nil)
+
+		request, response := testutil.MakeRequest(http.MethodGet, BASE_URL_BUYER, mock.Anything)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[[]domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+	})
+
+	t.Run("Returns 404 if id is not existing", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(BASE_URL_BUYER, buyerHandler.Get())
+		id := 12
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, id)
+		svcMock.On("Get", mock.Anything, 1).Return(domain.Buyer{}, errors.New("buyer not found"))
+		request, response := testutil.MakeRequest(http.MethodGet, urlId, mock.Anything)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
+	})
+
+	t.Run("Returns 200 if id exists", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(BASE_URL_BUYER_ID, buyerHandler.Get())
+		expected := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, expected.ID)
+		svcMock.On("Get", mock.Anything, expected.ID).Return(expected, nil)
+		request, response := testutil.MakeRequest(http.MethodGet, urlId, mock.Anything)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+}
+
+func TestBuyerDelete(t *testing.T) {
+	t.Run("Returns 204 if successful", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(BASE_URL_BUYER_ID, buyerHandler.Delete())
+		expected := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, expected.ID)
+		svcMock.On("Delete", mock.Anything, expected.ID).Return(nil)
+		request, response := testutil.MakeRequest(http.MethodDelete, urlId, mock.Anything)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+	})
+
+	t.Run("Returns 404 if not existent", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(BASE_URL_BUYER_ID, buyerHandler.Delete())
+		expected := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, expected.ID)
+		svcMock.On("Delete", mock.Anything, expected.ID).Return(errors.New("buyer not found"))
+		request, response := testutil.MakeRequest(http.MethodDelete, urlId, mock.Anything)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
+	})
+
+}
+
+func TestBuyerUpdate(t *testing.T) {
+	t.Run("Returns 200 if update is successful", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(BASE_URL_BUYER_ID, buyerHandler.Update())
+		expected := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "crash",
+			LastName:     "bandicoot",
+		}
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, expected.ID)
+		svcMock.On("Update", mock.Anything, expected).Return(expected, nil)
+
+		request, response := testutil.MakeRequest(http.MethodPatch, urlId, expected)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, response.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+
+	t.Run("Returns 404 if update is unsuccessful", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(BASE_URL_BUYER_ID, buyerHandler.Update())
+		expected := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "crash",
+			LastName:     "bandicoot",
+		}
+		urlId := fmt.Sprintf("%s/%d", BASE_URL_BUYER, expected.ID)
+		svcMock.On("Update", mock.Anything, expected).Return(domain.Buyer{}, errors.New("buyer not updated"))
+
+		request, response := testutil.MakeRequest(http.MethodPatch, urlId, expected)
+		server.ServeHTTP(response, request)
+
+		var received testutil.SuccessResponse[domain.Buyer]
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusNotFound, response.Code)
 	})
 }
 
