@@ -3,6 +3,7 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -14,7 +15,7 @@ import (
 )
 
 var WAREHOUSE_URL = "/api/v1/warehouses"
-var WAREHOUSE_URL_ID = "/api/v1/warehouses/1"
+var WAREHOUSE_URL_ID = "/api/v1/warehouses/:id"
 
 func TestWarehouseCreate(t *testing.T) {
 	t.Run("test create, if successful, return 201", func(t *testing.T) {
@@ -185,33 +186,35 @@ func TestWarehouseGetAll(t *testing.T) {
 
 func TestWarehouseGet(t *testing.T) {
 
-	// t.Run("test get, when the id is valid", func(t *testing.T) {
-	// 	svcMock := ServiceWarehouseMock{}
-	// 	warehouseHandler := handler.NewWarehouse(&svcMock)
-	// 	server := testutil.CreateServer()
-	// 	server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
+	t.Run("test get, when the id is valid", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
 
-	// 	expectedWarehouse := domain.Warehouse{
-	// 		ID:                 1,
-	// 		WarehouseCode:      "cod",
-	// 		Address:            "Rua da Hora",
-	// 		Telephone:          "11111111",
-	// 		MinimumCapacity:    10,
-	// 		MinimumTemperature: 2,
-	// 	}
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
 
-	// 	svcMock.On("Get", mock.Anything, 1).Return(expectedWarehouse, nil)
-	// 	request, response := testutil.MakeRequest(http.MethodGet, WAREHOUSE_URL, "")
+		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, expectedWarehouse.ID)
 
-	// 	server.ServeHTTP(response, request)
+		svcMock.On("Get", mock.Anything, 1).Return(expectedWarehouse, nil)
+		request, response := testutil.MakeRequest(http.MethodGet, url, nil)
 
-	// 	var received testutil.SuccessResponse[domain.Warehouse]
-	// 	json.Unmarshal(response.Body.Bytes(), &received)
+		server.ServeHTTP(response, request)
 
-	// 	assert.Equal(t, response.Code, http.StatusOK)
-	// 	assert.Equal(t, expectedWarehouse, received.Data)
+		var received testutil.SuccessResponse[domain.Warehouse]
+		json.Unmarshal(response.Body.Bytes(), &received)
+		fmt.Println(request.Body)
+		assert.Equal(t, response.Code, http.StatusOK)
+		assert.Equal(t, expectedWarehouse, received.Data)
 
-	// })
+	})
 	t.Run("test get, when the id is inlalid - 400", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
