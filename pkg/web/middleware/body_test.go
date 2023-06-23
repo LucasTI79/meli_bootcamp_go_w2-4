@@ -30,7 +30,7 @@ func TestBodyMapper(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
 	t.Run("Should return 422 if body has invalid field type", func(t *testing.T) {
-		server := testutil.CreateServer() // TODO: Remove testutil dependency
+		server := testutil.CreateServer()
 
 		bodyMapper := middleware.Body[PrimitiveTypesBody]()
 		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
@@ -47,7 +47,7 @@ func TestBodyMapper(t *testing.T) {
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 	})
 	t.Run("Should return 422 if body has missing required field", func(t *testing.T) {
-		server := testutil.CreateServer() // TODO: Remove testutil dependency
+		server := testutil.CreateServer()
 
 		bodyMapper := middleware.Body[PrimitiveTypesBody]()
 		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
@@ -61,6 +61,28 @@ func TestBodyMapper(t *testing.T) {
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+	})
+	t.Run("Handler can get parsed body", func(t *testing.T) {
+		server := testutil.CreateServer()
+
+		bodyMapper := middleware.Body[PrimitiveTypesBody]()
+
+		body := PrimitiveTypesBody{
+			ID:     1,
+			Name:   "John Doe",
+			Height: 1.91,
+		}
+		handler := func(ctx *gin.Context) {
+			req := middleware.GetBody[PrimitiveTypesBody](ctx)
+			assert.Equal(t, body, req)
+			web.Success(ctx, 200, nil)
+		}
+		server.POST("/", bodyMapper, handler)
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 }
 
