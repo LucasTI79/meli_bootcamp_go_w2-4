@@ -44,10 +44,28 @@ func TestCreateEmployee(t *testing.T) {
 		}
 
 		mockedRepository.On("Exists", mock.Anything, "126").Return(true)
-		mockedRepository.On("Save", mock.Anything, e).Return(nil, employee.ErrAlreadyExists)
 
 		_, err := s.Create(context.TODO(), e)
 		assert.ErrorIs(t, err, employee.ErrAlreadyExists)
+
+	})
+	t.Run("if there is an error creating the employee should return internal server error", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Exists", mock.Anything, "126").Return(false)
+		mockedRepository.On("Save", mock.Anything, e).Return(0, employee.ErrInternalServerError)
+
+		_, err := s.Create(context.TODO(), e)
+		assert.ErrorIs(t, err, employee.ErrInternalServerError)
 
 	})
 }
@@ -73,6 +91,15 @@ func TestGetAllEmployees(t *testing.T) {
 		employees, err := s.GetAll(context.TODO())
 		assert.NoError(t, err)
 		assert.Equal(t, es, employees)
+
+	})
+	t.Run("returns not found when there is a error", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		mockedRepository.On("GetAll", mock.Anything).Return([]domain.Employee{}, employee.ErrNotFound)
+		_, err := s.GetAll(context.TODO())
+		assert.ErrorIs(t, err, employee.ErrNotFound)
 
 	})
 }
@@ -172,6 +199,31 @@ func TestUpdateEmployee(t *testing.T) {
 
 		_, err := s.Update(context.TODO(), newE)
 		assert.ErrorIs(t, err, employee.ErrAlreadyExists)
+	})
+	t.Run("return a error when the updates fails ", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+		currentE := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}
+		newE := domain.Employee{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Aragao",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("Get", mock.Anything, currentE.ID).Return(currentE, nil)
+		mockedRepository.On("Exists", mock.Anything, newE.CardNumberID).Return(false)
+		mockedRepository.On("Update", mock.Anything, newE).Return(employee.ErrNotFound)
+
+		_, err := s.Update(context.TODO(), newE)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
 	})
 }
 func TestDeleteEmployee(t *testing.T) {

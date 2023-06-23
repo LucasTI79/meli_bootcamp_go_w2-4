@@ -9,8 +9,9 @@ import (
 
 // Errors
 var (
-	ErrNotFound      = errors.New("employee not found")
-	ErrAlreadyExists = errors.New("employee id already exists")
+	ErrNotFound            = errors.New("employee not found")
+	ErrAlreadyExists       = errors.New("employee id already exists")
+	ErrInternalServerError = errors.New("internal server error")
 )
 
 // Service define a interface para o serviço de funcionários.
@@ -43,7 +44,7 @@ func (s *service) Create(ctx context.Context, e domain.Employee) (domain.Employe
 
 	id, err := s.repository.Save(ctx, e)
 	if err != nil {
-		return domain.Employee{}, errors.New("error saving employee")
+		return domain.Employee{}, ErrInternalServerError
 	}
 
 	e.ID = id
