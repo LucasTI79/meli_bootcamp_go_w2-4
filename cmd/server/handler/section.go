@@ -139,6 +139,8 @@ func (s *Section) Update() gin.HandlerFunc {
 		if err != nil {
 			if err == section.ErrInvalidSectionNumber {
 				web.Error(c, http.StatusConflict, err.Error())
+			} else if err == section.ErrNotFound {
+				web.Error(c, http.StatusNotFound, err.Error())
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}

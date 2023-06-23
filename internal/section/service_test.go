@@ -13,7 +13,6 @@ import (
 
 var sectionID = 1
 var sectionNumber = 123
-var sectionTemp = 11
 
 func TestCreate(t *testing.T) {
 	t.Run("Create valid section", func(t *testing.T) {
@@ -90,7 +89,7 @@ func TestRead(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		expected := getTestSections()
+		expected := getTestSections()[0]
 
 		repositoryMock.On("Get", mock.Anything, sectionID).Return(expected, nil)
 		result, err := svc.Get(context.TODO(), sectionID)
@@ -115,12 +114,11 @@ func TestDelete(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		repositoryMock.On("Get", mock.Anything, sectionID).Return(domain.Section{}, section.ErrNotFound)
+		repositoryMock.On("Get", mock.Anything, sectionID).Return(domain.Section{}, nil)
 		repositoryMock.On("Delete", mock.Anything, sectionID).Return(nil)
 		err := svc.Delete(context.TODO(), sectionID)
 
-		assert.Error(t, err)
-		assert.ErrorIs(t, err, section.ErrNotFound)
+		assert.NoError(t, err)
 	})
 	t.Run("Doesn't delete a section and return error: not found", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
@@ -144,11 +142,23 @@ func TestUpdate(t *testing.T) {
 
 		updatePayload := section.UpdateSection{
 			SectionNumber:      testutil.ToPtr(sectionNumber),
-			CurrentTemperature: testutil.ToPtr(sectionTemp),
+			CurrentTemperature: testutil.ToPtr(11),
+			MinimumTemperature: testutil.ToPtr(6),
+			CurrentCapacity:    testutil.ToPtr(16),
+			MinimumCapacity:    testutil.ToPtr(11),
+			MaximumCapacity:    testutil.ToPtr(21),
+			WarehouseID:        testutil.ToPtr(3210),
+			ProductTypeID:      testutil.ToPtr(3),
 		}
 
 		expected := getTestSections()[0]
-		expected.CurrentTemperature = sectionTemp
+		expected.CurrentTemperature = 11
+		expected.MinimumTemperature = 6
+		expected.CurrentCapacity = 16
+		expected.MinimumCapacity = 11
+		expected.MaximumCapacity = 21
+		expected.WarehouseID = 3210
+		expected.ProductTypeID = 3
 
 		repositoryMock.On("Get", mock.Anything, mock.Anything).Return(actualSection, nil)
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
@@ -158,7 +168,6 @@ func TestUpdate(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
-		assert.Equal(t, actualSection.ProductTypeID, result.ProductTypeID)
 		assert.NotEqual(t, actualSection, result)
 	})
 	t.Run("Doesn't update a section by id and return error: not found", func(t *testing.T) {
@@ -167,7 +176,7 @@ func TestUpdate(t *testing.T) {
 
 		updatePayload := section.UpdateSection{
 			SectionNumber:      testutil.ToPtr(sectionNumber),
-			CurrentTemperature: testutil.ToPtr(sectionTemp),
+			CurrentTemperature: testutil.ToPtr(11),
 		}
 
 		repositoryMock.On("Get", mock.Anything, sectionID).Return(domain.Section{}, section.ErrNotFound)

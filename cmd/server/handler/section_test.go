@@ -88,6 +88,18 @@ func TestSectionRead(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, expected, received.Data)
 	})
+	t.Run("Return no section and error: bad request", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		url := fmt.Sprintf("%s%s", SECTIONS_URL, "a")
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+		sectionService.AssertNumberOfCalls(t, "Get", 0)
+	})
 	t.Run("Return no section and error: not found", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
 		h := handler.NewSection(&sectionService)
@@ -131,6 +143,7 @@ func TestSectionCreate(t *testing.T) {
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+		sectionService.AssertNumberOfCalls(t, "Save", 0)
 	})
 	t.Run("Doesn't create a section and return error: conflict", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
@@ -146,51 +159,19 @@ func TestSectionCreate(t *testing.T) {
 
 		assert.Equal(t, http.StatusConflict, res.Code)
 	})
-}
-
-func TestSectionDelete(t *testing.T) {
-	t.Run("Delete a section with success", func(t *testing.T) {
+	t.Run("Doesn't create a section and return error: internal server error", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
 		h := handler.NewSection(&sectionService)
 		server := getSectionServer(h)
 
-		sectionService.On("Delete", mock.Anything, sectionID).Return(nil)
+		body := getTestCreateSections()
 
-		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
-		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		sectionService.On("Save", mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
+
+		req, res := testutil.MakeRequest(http.MethodPost, SECTIONS_URL, body)
 		server.ServeHTTP(res, req)
 
-		var received testutil.SuccessResponse[domain.Section]
-		json.Unmarshal(res.Body.Bytes(), &received)
-
-		assert.Empty(t, received.Data)
-		assert.Equal(t, http.StatusNoContent, res.Code)
-	})
-	t.Run("Delete no section and return error: not found", func(t *testing.T) {
-		sectionService := SectionServiceMock{}
-		h := handler.NewSection(&sectionService)
-		server := getSectionServer(h)
-
-		sectionService.On("Delete", mock.Anything, mock.Anything).Return(errors.New(""))
-
-		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
-		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusNotFound, res.Code)
-	})
-	t.Run("Delete no section and return error: internal server error", func(t *testing.T) {
-		sectionService := SectionServiceMock{}
-		h := handler.NewSection(&sectionService)
-		server := getSectionServer(h)
-
-		sectionService.On("Delete", mock.Anything, mock.Anything).Return(errors.New(""))
-
-		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
-		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusNotFound, res.Code)
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
 }
 
@@ -235,6 +216,7 @@ func TestSectionUpdate(t *testing.T) {
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusBadRequest, res.Code)
+		sectionService.AssertNumberOfCalls(t, "Update", 0)
 	})
 	t.Run("Update no section and return error: not found", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
@@ -253,6 +235,18 @@ func TestSectionUpdate(t *testing.T) {
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("Update no section and return error: unprocessable content", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodPatch, url, []section.UpdateSection{})
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+		sectionService.AssertNumberOfCalls(t, "Update", 0)
 	})
 	t.Run("Update no section and return error: conflict", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
@@ -289,6 +283,51 @@ func TestSectionUpdate(t *testing.T) {
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
+}
+
+func TestSectionDelete(t *testing.T) {
+	t.Run("Delete a section with success", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		sectionService.On("Delete", mock.Anything, sectionID).Return(nil)
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[domain.Section]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Empty(t, received.Data)
+		assert.Equal(t, http.StatusNoContent, res.Code)
+	})
+	t.Run("Delete no section and return error: not found", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		sectionService.On("Delete", mock.Anything, mock.Anything).Return(errors.New(""))
+
+		url := fmt.Sprintf("%s%d", SECTIONS_URL, sectionID)
+		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("Delete no section and return error: internal server error", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		url := fmt.Sprintf("%s%s", SECTIONS_URL, "a")
+		req, res := testutil.MakeRequest(http.MethodDelete, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+		sectionService.AssertNumberOfCalls(t, "Delete", 0)
 	})
 }
 
