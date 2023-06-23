@@ -27,4 +27,18 @@ func TestIntPathParamValidator(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, res.Code)
 	})
+	t.Run("Should raise status 400 if path param is not an int", func(t *testing.T) {
+		server := testutil.CreateServer()
+
+		intParam := middleware.IntPathParam()
+		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
+		server.GET("/:code", intParam, handler)
+
+		code := "code"
+		url := fmt.Sprintf("/%s", code)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
 }
