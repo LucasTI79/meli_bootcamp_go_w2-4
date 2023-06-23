@@ -68,15 +68,14 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		sectionPayload := getTestCreateSections()
+		body := getTestCreateSections()
 
-		expected := *section.MapCreateToDomain(&sectionPayload)
-		expected.ID = sectionID
+		expected := getTestSections()[0]
 
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(sectionID, nil)
 
-		result, err := svc.Save(context.TODO(), sectionPayload)
+		result, err := svc.Save(context.TODO(), body)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -86,10 +85,10 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		sectionPayload := getTestCreateSections()
+		body := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(true)
-		_, err := svc.Save(context.TODO(), sectionPayload)
+		_, err := svc.Save(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrInvalidSectionNumber)
@@ -99,12 +98,12 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		sectionPayload := getTestCreateSections()
+		body := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, section.ErrSavingSection)
 
-		_, err := svc.Save(context.TODO(), sectionPayload)
+		_, err := svc.Save(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrSavingSection)
@@ -118,7 +117,7 @@ func TestUpdate(t *testing.T) {
 
 		actualSection := getTestSections()[0]
 
-		updatePayload := getUpdateSection()
+		body := getUpdateSection()
 
 		expected := getTestSections()[1]
 
@@ -126,7 +125,7 @@ func TestUpdate(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Update", mock.Anything, mock.Anything).Return(expected, nil)
 
-		result, err := svc.Update(context.TODO(), updatePayload, sectionID)
+		result, err := svc.Update(context.TODO(), body, sectionID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -136,11 +135,11 @@ func TestUpdate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		updatePayload := getUpdateSection()
+		body := getUpdateSection()
 
 		repositoryMock.On("Get", mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrNotFound)
 
-		_, err := svc.Update(context.TODO(), updatePayload, sectionID)
+		_, err := svc.Update(context.TODO(), body, sectionID)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrNotFound)
@@ -151,12 +150,12 @@ func TestUpdate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		updatePayload := getUpdateSection()
+		body := getUpdateSection()
 
 		repositoryMock.On("Get", mock.Anything, mock.Anything).Return(domain.Section{}, nil)
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(true)
 
-		_, err := svc.Update(context.TODO(), updatePayload, sectionID)
+		_, err := svc.Update(context.TODO(), body, sectionID)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrInvalidSectionNumber)

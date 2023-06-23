@@ -60,7 +60,7 @@ func (s *service) Save(ctx context.Context, createSection CreateSection) (domain
 	if existsSectionNumber {
 		return domain.Section{}, ErrInvalidSectionNumber
 	}
-	section := MapCreateToDomain(&createSection)
+	section := mapCreateToDomain(&createSection)
 	i, err := s.repository.Save(ctx, *section)
 	if err != nil {
 		return domain.Section{}, ErrSavingSection
@@ -157,7 +157,7 @@ func applyValues(sec *domain.Section, dto UpdateSection) {
 	}
 }
 
-func MapCreateToDomain(section *CreateSection) *domain.Section {
+func mapCreateToDomain(section *CreateSection) *domain.Section {
 	return &domain.Section{
 		SectionNumber:      section.SectionNumber,
 		CurrentTemperature: section.CurrentTemperature,
