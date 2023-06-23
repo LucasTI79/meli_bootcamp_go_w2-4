@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,7 +16,7 @@ var (
 	ErrUnprocessableEntity = "action could not be processed correctly due to invalid data provided"
 	ErrServerInternalError = "something went wrong with the request"
 	ErrWarehouseEmpty      = "warehousecode need to be passed, it can't be empty"
-	ErrWarehouseNotFound   = "Warehouse not found"
+	ErrWarehouseNotFound   = "warehouse not found"
 	ErrInvalidID           = "Invalid ID"
 	ErrWarehouseNotDeleted = "Warehouse not deleted"
 )
@@ -95,15 +94,14 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 //	@Param			warehouse	body		domain.Warehouse	true	"Warehouse object"
 //	@Success		201			{object}	domain.Warehouse
 //	@Failure		422			{string}	string	"warehousecode need to be passed, it can't be empty"
-//	@Failure		500			{string}	string	err.Error()
+//	@Failure		500			{string}	string	 "something went wrong with the request"
 //	@Failure		409			{string}	string	"warehouse can be alreary exist"
 //	@Router			/api/v1/warehouses [post]
 func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
-			fmt.Println(err.Error())
+			web.Error(c, http.StatusInternalServerError, ErrServerInternalError)
 			return
 		}
 		if warehouse.WarehouseCode == "" {
@@ -137,23 +135,27 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 func (w *Warehouse) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var warehouse domain.Warehouse
-		if err := c.ShouldBindJSON(&warehouse); err != nil {
+		var ware domain.Warehouse
+		if err := c.ShouldBindJSON(&ware); err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, ErrUnprocessableEntity)
 			return
 		}
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			web.Error(c, http.StatusNotFound, ErrInvalidID)
+			web.Error(c, http.StatusBadRequest, ErrInvalidID)
 			return
 		}
-		warehouse.ID = id
-		warehouse, err = w.warehouseService.Update(c, warehouse)
+		ware.ID = id
+		ware, err = w.warehouseService.Update(c, ware)
 		if err != nil {
-			web.Error(c, http.StatusConflict, ErrWarehouseCodeUnique)
+			if err == warehouse.ErrNotFound {
+				web.Error(c, http.StatusNotFound, ErrWarehouseNotFound)
+			} else {
+				web.Error(c, http.StatusConflict, ErrWarehouseCodeUnique)
+			}
 			return
 		}
-		web.Success(c, http.StatusOK, warehouse)
+		web.Success(c, http.StatusOK, ware)
 	}
 }
 
