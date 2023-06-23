@@ -15,14 +15,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var BASE_URL = "/api/v1/sellers"
+var SELLER_URL = "/api/v1/sellers"
 
-func TestCreate(t *testing.T) {
+func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 201 if successful", func(t *testing.T) {
-		svcMock := ServiceMock{}
+		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
-		server.POST(BASE_URL, sellerHandler.Create())
+		server.POST(SELLER_URL, sellerHandler.Create())
 
 		expected := domain.Seller{
 			ID:          1,
@@ -33,7 +33,7 @@ func TestCreate(t *testing.T) {
 		}
 		svcMock.On("Save", mock.Anything, expected).Return(expected, nil)
 
-		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, expected)
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
 
 		var received testutil.SuccessResponse[domain.Seller]
@@ -45,10 +45,10 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
-		svcMock := ServiceMock{}
+		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
-		server.POST(BASE_URL, sellerHandler.Create())
+		server.POST(SELLER_URL, sellerHandler.Create())
 
 		body := map[string]any{
 			"cid":          "123", // passing CID as string instead of int
@@ -56,7 +56,7 @@ func TestCreate(t *testing.T) {
 			"address":      "test street",
 			"telephone":    "9999999",
 		}
-		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, body)
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
 		server.ServeHTTP(response, request)
 
 		fmt.Println(response.Code)
@@ -64,15 +64,15 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
-		svcMock := ServiceMock{}
+		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
-		server.POST(BASE_URL, sellerHandler.Create())
+		server.POST(SELLER_URL, sellerHandler.Create())
 
 		body := map[string]any{
 			"telephone": "9999999",
 		}
-		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, body)
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, body)
 		server.ServeHTTP(response, request)
 
 		fmt.Println(response.Code)
@@ -80,10 +80,10 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Returns 409 if CID already exists", func(t *testing.T) {
-		svcMock := ServiceMock{}
+		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
 		server := testutil.CreateServer()
-		server.POST(BASE_URL, sellerHandler.Create())
+		server.POST(SELLER_URL, sellerHandler.Create())
 
 		expected := domain.Seller{
 			ID:          1,
@@ -94,7 +94,7 @@ func TestCreate(t *testing.T) {
 		}
 		svcMock.On("Save", mock.Anything, expected).Return(domain.Seller{}, seller.ErrCidAlreadyExists)
 
-		request, response := testutil.MakeRequest(http.MethodPost, BASE_URL, expected)
+		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
 
 		fmt.Println(response.Code)
@@ -102,31 +102,31 @@ func TestCreate(t *testing.T) {
 	})
 }
 
-type ServiceMock struct {
+type SellerServiceMock struct {
 	mock.Mock
 }
 
-func (svc *ServiceMock) GetAll(c context.Context) ([]domain.Seller, error) {
+func (svc *SellerServiceMock) GetAll(c context.Context) ([]domain.Seller, error) {
 	args := svc.Called(c)
 	return args.Get(0).([]domain.Seller), args.Error(1)
 }
 
-func (svc *ServiceMock) Get(ctx context.Context, id int) (domain.Seller, error) {
+func (svc *SellerServiceMock) Get(ctx context.Context, id int) (domain.Seller, error) {
 	args := svc.Called(ctx, id)
 	return args.Get(0).(domain.Seller), args.Error(1)
 }
 
-func (svc *ServiceMock) Save(c context.Context, s domain.Seller) (domain.Seller, error) {
+func (svc *SellerServiceMock) Save(c context.Context, s domain.Seller) (domain.Seller, error) {
 	args := svc.Called(c, s)
 	return args.Get(0).(domain.Seller), args.Error(1)
 }
 
-func (svc *ServiceMock) Update(ctx context.Context, id int, s domain.Seller) (domain.Seller, error) {
+func (svc *SellerServiceMock) Update(ctx context.Context, id int, s domain.Seller) (domain.Seller, error) {
 	args := svc.Called(ctx, s)
 	return args.Get(0).(domain.Seller), args.Error(1)
 }
 
-func (svc *ServiceMock) Delete(ctx context.Context, id int) error {
+func (svc *SellerServiceMock) Delete(ctx context.Context, id int) error {
 	args := svc.Called(ctx, id)
 	return args.Error(0)
 }
