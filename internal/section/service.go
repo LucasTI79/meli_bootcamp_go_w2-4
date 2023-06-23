@@ -34,7 +34,7 @@ var (
 	ErrNotFound             = errors.New("section not found")
 	ErrInvalidSectionNumber = errors.New("section number alredy exists")
 	ErrSavingSection        = errors.New("error saving section")
-	ErrGetSections          = errors.New("error gettiung sections")
+	ErrGetSections          = errors.New("error getting sections")
 )
 
 type Service interface {

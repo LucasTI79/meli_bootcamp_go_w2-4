@@ -20,24 +20,15 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		dto := section.CreateSection{
-			SectionNumber:      123,
-			CurrentTemperature: 10,
-			MinimumTemperature: 5,
-			CurrentCapacity:    15,
-			MinimumCapacity:    10,
-			MaximumCapacity:    20,
-			WarehouseID:        321,
-			ProductTypeID:      2,
-		}
+		sectionPayload := getTestCreateSections()
 
-		expected := *section.MapCreateToDomain(&dto)
+		expected := *section.MapCreateToDomain(&sectionPayload)
 		expected.ID = sectionID
 
 		repositoryMock.On("Exists", mock.Anything, sectionNumber).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(sectionID, nil)
 
-		result, err := svc.Save(context.TODO(), dto)
+		result, err := svc.Save(context.TODO(), sectionPayload)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -47,19 +38,10 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		dto := section.CreateSection{
-			SectionNumber:      123,
-			CurrentTemperature: 10,
-			MinimumTemperature: 5,
-			CurrentCapacity:    15,
-			MinimumCapacity:    10,
-			MaximumCapacity:    20,
-			WarehouseID:        321,
-			ProductTypeID:      2,
-		}
+		sectionPayload := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, sectionNumber).Return(true)
-		_, err := svc.Save(context.TODO(), dto)
+		_, err := svc.Save(context.TODO(), sectionPayload)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrInvalidSectionNumber)
@@ -69,21 +51,12 @@ func TestCreate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		dto := section.CreateSection{
-			SectionNumber:      123,
-			CurrentTemperature: 10,
-			MinimumTemperature: 5,
-			CurrentCapacity:    15,
-			MinimumCapacity:    10,
-			MaximumCapacity:    20,
-			WarehouseID:        321,
-			ProductTypeID:      2,
-		}
+		sectionPayload := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, sectionNumber).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, section.ErrSavingSection)
 
-		_, err := svc.Save(context.TODO(), dto)
+		_, err := svc.Save(context.TODO(), sectionPayload)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrSavingSection)
@@ -117,7 +90,7 @@ func TestRead(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		expected := getTestSections()[0]
+		expected := getTestSections()
 
 		repositoryMock.On("Get", mock.Anything, sectionID).Return(expected, nil)
 		result, err := svc.Get(context.TODO(), sectionID)
@@ -238,17 +211,19 @@ func getTestSections() []domain.Section {
 			WarehouseID:        321,
 			ProductTypeID:      2,
 		},
-		{
-			ID:                 2,
-			SectionNumber:      456,
-			CurrentTemperature: 15,
-			MinimumTemperature: 10,
-			CurrentCapacity:    20,
-			MinimumCapacity:    15,
-			MaximumCapacity:    25,
-			WarehouseID:        654,
-			ProductTypeID:      3,
-		},
+	}
+}
+
+func getTestCreateSections() section.CreateSection {
+	return section.CreateSection{
+		SectionNumber:      123,
+		CurrentTemperature: 10,
+		MinimumTemperature: 5,
+		CurrentCapacity:    15,
+		MinimumCapacity:    10,
+		MaximumCapacity:    20,
+		WarehouseID:        321,
+		ProductTypeID:      2,
 	}
 }
 
