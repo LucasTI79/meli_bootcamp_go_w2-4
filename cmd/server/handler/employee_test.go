@@ -3,6 +3,7 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -41,13 +42,54 @@ func TestCreateEmployee(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, res.Code)
 		assert.Equal(t, e, received.Data)
 	})
-	t.Run("should return status 400 when receives missing fields", func(t *testing.T) {
+	t.Run("should return status 400 when missing first name", func(t *testing.T) {
 		mockedService := EmployeeServiceMock{}
 		controller := handler.NewEmployee(&mockedService)
 		server := testutil.CreateServer()
 		server.POST(EMPLOYEE_URL, controller.Create())
 		e := domain.Employee{
-			LastName: "Kart",
+			ID:           1,
+			CardNumberID: "24",
+			LastName:     "Kell",
+			WarehouseID:  1,
+		}
+		req, res := testutil.MakeRequest(http.MethodPost, EMPLOYEE_URL, e)
+		server.ServeHTTP(res, req)
+
+		var received testutil.ErrorResponse
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
+	t.Run("should return status 400 when missing card number id", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.POST(EMPLOYEE_URL, controller.Create())
+		e := domain.Employee{
+			ID:          1,
+			FirstName:   "24",
+			LastName:    "Kell",
+			WarehouseID: 1,
+		}
+		req, res := testutil.MakeRequest(http.MethodPost, EMPLOYEE_URL, e)
+		server.ServeHTTP(res, req)
+
+		var received testutil.ErrorResponse
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
+	t.Run("should return status 400 when missing last name", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.POST(EMPLOYEE_URL, controller.Create())
+		e := domain.Employee{
+			ID:           1,
+			CardNumberID: "24",
+			FirstName:    "Joel",
+			WarehouseID:  1,
 		}
 		req, res := testutil.MakeRequest(http.MethodPost, EMPLOYEE_URL, e)
 		server.ServeHTTP(res, req)
@@ -130,6 +172,19 @@ func TestGetAllEmployees(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, es, received.Data)
 	})
+	t.Run("should return status 400 when  not sucessfull", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.GET(EMPLOYEE_URL, controller.GetAll())
+
+		mockedService.On("GetAll", mock.Anything).Return([]domain.Employee{}, errors.New("employees not found"))
+
+		req, res := testutil.MakeRequest(http.MethodGet, EMPLOYEE_URL, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
 }
 func TestGetByIdEmployee(t *testing.T) {
 	t.Run("should return status 200 when id is valid", func(t *testing.T) {
@@ -200,6 +255,40 @@ func TestUpdateEmployee(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, e, received.Data)
 	})
+	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.PATCH(EMPLOYEE_URL_ID_PATH, controller.Update())
+
+		invalidId := "oi"
+		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, invalidId)
+
+		req, res := testutil.MakeRequest(http.MethodPatch, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
+	t.Run("should return status 422 when body is invalid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.PATCH(EMPLOYEE_URL_ID_PATH, controller.Update())
+
+		e := map[string]any{
+			"id":             1,
+			"card_number_id": 125,
+			"first_name":     "Mario",
+			"last_name":      "Kart",
+			"warehouse_id":   1,
+		}
+		url := fmt.Sprintf("%s/%d", EMPLOYEE_URL, e["id"])
+
+		req, res := testutil.MakeRequest(http.MethodPatch, url, e)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+	})
 	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {
 		mockedService := EmployeeServiceMock{}
 		controller := handler.NewEmployee(&mockedService)
@@ -223,6 +312,21 @@ func TestUpdateEmployee(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
+	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.GET(EMPLOYEE_URL_ID_PATH, controller.Get())
+
+		invalidId := "oi"
+
+		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, invalidId)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
 }
 
 func TestDeleteEmployee(t *testing.T) {
@@ -244,6 +348,22 @@ func TestDeleteEmployee(t *testing.T) {
 		var received testutil.SuccessResponse[domain.Employee]
 		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusNoContent, res.Code)
+
+	})
+	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := testutil.CreateServer()
+		server.DELETE(EMPLOYEE_URL_ID_PATH, controller.Delete())
+
+		idToDelete := "oi"
+
+		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, idToDelete)
+
+		req, res := testutil.MakeRequest(http.MethodDelete, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
 
 	})
 	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {
