@@ -171,8 +171,6 @@ func TestGetByIdEmployee(t *testing.T) {
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var received testutil.ErrorResponse
-		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
@@ -223,8 +221,6 @@ func TestUpdateEmployee(t *testing.T) {
 		req, res := testutil.MakeRequest(http.MethodPatch, url, e)
 		server.ServeHTTP(res, req)
 
-		var received testutil.ErrorResponse
-		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
