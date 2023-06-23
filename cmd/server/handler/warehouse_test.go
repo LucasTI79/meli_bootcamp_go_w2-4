@@ -380,6 +380,24 @@ func TestWarehouseDelete(t *testing.T) {
 
 		assert.Equal(t, response.Code, http.StatusNoContent)
 	})
+
+	t.Run("test delete, when the id is not found- 404", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.DELETE(WAREHOUSE_URL_ID, warehouseHandler.Delete())
+
+		expectedWarehouse2 := domain.Warehouse{}
+
+		svcMock.On("Get", mock.Anything, 2).Return(expectedWarehouse2, handler.ErrWarehouseNotFound)
+		request, response := testutil.MakeRequest(http.MethodDelete, WAREHOUSE_URL, "")
+
+		server.ServeHTTP(response, request)
+		var received testutil.ErrorResponse
+		json.Unmarshal(response.Body.Bytes(), &received)
+
+		assert.Equal(t, response.Code, http.StatusNotFound)
+	})
 }
 
 type ServiceWarehouseMock struct {
