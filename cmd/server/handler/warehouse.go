@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -102,6 +103,7 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 		var warehouse domain.Warehouse
 		if err := c.ShouldBindJSON(&warehouse); err != nil {
 			web.Error(c, http.StatusInternalServerError, err.Error())
+			fmt.Println(err.Error())
 			return
 		}
 		if warehouse.WarehouseCode == "" {

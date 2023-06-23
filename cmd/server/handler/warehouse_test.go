@@ -72,34 +72,34 @@ func TestWarehouseCreate(t *testing.T) {
 		assert.Equal(t, received.Message, handler.ErrWarehouseEmpty)
 	})
 
-	// t.Run("test create, if warehouse is exist, return 409", func(t *testing.T) {
-	// 	svcMock := ServiceWarehouseMock{}
-	// 	warehouseHandler := handler.NewWarehouse(&svcMock)
-	// 	server := testutil.CreateServer()
-	// 	server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+	t.Run("test create, if warehouse is exist, return 409", func(t *testing.T) {
+		svcMock := ServiceWarehouseMock{}
+		warehouseHandler := handler.NewWarehouse(&svcMock)
+		server := testutil.CreateServer()
+		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
 
-	// 	expectedWarehouse := domain.Warehouse{
-	// 		ID:                 1,
-	// 		WarehouseCode:      "cod",
-	// 		Address:            "Rua da Hora",
-	// 		Telephone:          "11111111",
-	// 		MinimumCapacity:    10,
-	// 		MinimumTemperature: 2,
-	// 	}
+		expectedWarehouse := domain.Warehouse{
+			ID:                 1,
+			WarehouseCode:      "cod",
+			Address:            "Rua da Hora",
+			Telephone:          "11111111",
+			MinimumCapacity:    10,
+			MinimumTemperature: 2,
+		}
 
-	// 	request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, expectedWarehouse)
+		request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, expectedWarehouse)
 
-	// 	svcMock.On("Create", mock.Anything, expectedWarehouse).Return(domain.Warehouse{}, handler.ErrAlrearyExist)
+		svcMock.On("Create", mock.Anything, mock.Anything).Return(domain.Warehouse{}, handler.ErrAlrearyExist)
 
-	// 	server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-	// 	var received testutil.ErrorResponse
-	// 	json.Unmarshal(response.Body.Bytes(), &received)
+		var received testutil.ErrorResponse
+		json.Unmarshal(response.Body.Bytes(), &received)
 
-	// 	assert.Equal(t, response.Code, http.StatusConflict)
-	// 	assert.Equal(t, received.Message, "warehouse already exists")
+		assert.Equal(t, response.Code, http.StatusConflict)
+		assert.Equal(t, received.Message, "warehouse already exists")
 
-	// })
+	})
 
 }
 
@@ -389,7 +389,7 @@ func TestWarehouseDelete(t *testing.T) {
 
 		expectedWarehouse2 := domain.Warehouse{}
 
-		svcMock.On("Get", mock.Anything, 2).Return(expectedWarehouse2, handler.ErrWarehouseNotFound)
+		svcMock.On("Get", mock.Anything, "2").Return(expectedWarehouse2, handler.ErrWarehouseNotFound)
 		request, response := testutil.MakeRequest(http.MethodDelete, WAREHOUSE_URL, "")
 
 		server.ServeHTTP(response, request)
@@ -397,6 +397,7 @@ func TestWarehouseDelete(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &received)
 
 		assert.Equal(t, response.Code, http.StatusNotFound)
+
 	})
 
 	t.Run("test delete, when the return an error in the server 405 StatusMethodNotAllowed", func(t *testing.T) {
