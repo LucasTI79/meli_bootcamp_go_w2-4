@@ -129,6 +129,29 @@ func TestUpdateSeller(t *testing.T) {
 	})
 }
 
+func TestGetSeller(t *testing.T) {
+	t.Run("get valid seller", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		sellerMock := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+
+		repositoryMock.On("Get", mock.Anything, 1).Return(sellerMock, nil)
+
+		received, err := svc.Get(context.TODO(), 1)
+
+		assert.Equal(t, sellerMock, received)
+		assert.NoError(t, err)
+	})
+
+}
+
 type RepositoryMock struct {
 	mock.Mock
 }
