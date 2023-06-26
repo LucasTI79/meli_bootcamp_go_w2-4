@@ -102,6 +102,24 @@ func TestDelete(t *testing.T) {
 		assert.NoError(t, err)
 
 	})
+	t.Run("returns domain error when error occurs on repository", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		repositoryMock.On("Get", mock.Anything, expected.ID).Return(expected, nil)
+		repositoryMock.On("Delete", mock.Anything, expected.ID).Return(ErrRepository)
+
+		err := svc.Delete(context.TODO(), expected.ID)
+
+		assert.ErrorIs(t, err, seller.ErrRepository)
+
+	})
 }
 func TestUpdateSeller(t *testing.T) {
 	t.Run("Update valid seller", func(t *testing.T) {
