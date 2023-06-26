@@ -113,10 +113,6 @@ func (b *Buyer) Create() gin.HandlerFunc {
 			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
 			return
 		}
-		if buyer.CardNumberID == "" {
-			web.Error(c, http.StatusBadRequest, "cardID must be passed")
-			return
-		}
 		buyerF, err := b.buyerService.Create(c.Request.Context(), buyer)
 		if err != nil {
 			web.Error(c, http.StatusConflict, "buyer not created")
