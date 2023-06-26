@@ -61,6 +61,7 @@ func (s *Section) Get() gin.HandlerFunc {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, err.Error())
+			return
 		}
 		sec, err := s.sectionService.Get(c.Request.Context(), id)
 
@@ -126,6 +127,7 @@ func (s *Section) Update() gin.HandlerFunc {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, "id should be a number")
+			return
 		}
 
 		var dto section.UpdateSection
@@ -139,6 +141,8 @@ func (s *Section) Update() gin.HandlerFunc {
 		if err != nil {
 			if err == section.ErrInvalidSectionNumber {
 				web.Error(c, http.StatusConflict, err.Error())
+			} else if err == section.ErrNotFound {
+				web.Error(c, http.StatusNotFound, err.Error())
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
 			}

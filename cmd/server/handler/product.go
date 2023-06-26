@@ -16,17 +16,17 @@ type Product struct {
 }
 
 type CreateRequest struct {
-	Desc       string  `binding:"required" json:"description"`
-	ExpR       int     `binding:"required" json:"expiration_rate"`
-	FreezeR    int     `binding:"required" json:"freezing_rate"`
-	Height     float32 `binding:"required" json:"height"`
-	Length     float32 `binding:"required" json:"length"`
-	NetW       float32 `binding:"required" json:"netweight"`
-	Code       string  `binding:"required" json:"product_code"`
-	FreezeTemp float32 `binding:"required" json:"recommended_freezing_temperature"`
-	Width      float32 `binding:"required" json:"width"`
-	TypeID     int     `binding:"required" json:"product_type_id"`
-	SellerID   int     `json:"seller_id"`
+	Desc       *string  `binding:"required" json:"description"`
+	ExpR       *int     `binding:"required" json:"expiration_rate"`
+	FreezeR    *int     `binding:"required" json:"freezing_rate"`
+	Height     *float32 `binding:"required" json:"height"`
+	Length     *float32 `binding:"required" json:"length"`
+	NetW       *float32 `binding:"required" json:"netweight"`
+	Code       *string  `binding:"required" json:"product_code"`
+	FreezeTemp *float32 `binding:"required" json:"recommended_freezing_temperature"`
+	Width      *float32 `binding:"required" json:"width"`
+	TypeID     *int     `binding:"required" json:"product_type_id"`
+	SellerID   *int     `json:"seller_id"`
 }
 
 // UpdateRequest contains pointers so that the Handler is able to
@@ -225,16 +225,16 @@ func mapUpdateRequestToDTO(req *UpdateRequest) *product.UpdateDTO {
 
 func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 	return &product.CreateDTO{
-		Desc:       req.Desc,
-		ExpR:       req.ExpR,
-		FreezeR:    req.FreezeR,
-		Height:     req.Height,
-		Length:     req.Length,
-		NetW:       req.NetW,
-		Code:       req.Code,
-		FreezeTemp: req.FreezeTemp,
-		Width:      req.Width,
-		TypeID:     req.TypeID,
-		SellerID:   req.SellerID,
+		Desc:       *req.Desc,
+		ExpR:       *req.ExpR,
+		FreezeR:    *req.FreezeR,
+		Height:     *req.Height,
+		Length:     *req.Length,
+		NetW:       *req.NetW,
+		Code:       *req.Code,
+		FreezeTemp: *req.FreezeTemp,
+		Width:      *req.Width,
+		TypeID:     *req.TypeID,
+		SellerID:   *req.SellerID,
 	}
 }

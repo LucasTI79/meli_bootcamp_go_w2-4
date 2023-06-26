@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -39,6 +40,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 		}
 		if len(sellers) == 0 {
 			web.Success(c, http.StatusNoContent, sellers)
+			return
 		}
 		web.Success(c, http.StatusOK, sellers)
 	}
@@ -87,8 +89,8 @@ func (s *Seller) GetById() gin.HandlerFunc {
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req domain.Seller
-		if err := c.Bind(&req); err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+		if err := c.ShouldBind(&req); err != nil {
+			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		if req.CID == 0 {
@@ -112,8 +114,10 @@ func (s *Seller) Create() gin.HandlerFunc {
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())
+				return
 			} else {
 				web.Error(c, http.StatusInternalServerError, err.Error())
+				return
 			}
 		}
 		web.Success(c, http.StatusCreated, sellerSaved)
@@ -141,13 +145,20 @@ func (s *Seller) Update() gin.HandlerFunc {
 			web.Error(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		var seller domain.Seller
-		if err := c.ShouldBindJSON(&seller); err != nil {
-			web.Error(c, http.StatusNotFound, err.Error())
+		var sellerBody domain.Seller
+		if err := c.ShouldBindJSON(&sellerBody); err != nil {
+			web.Error(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
-		sellerUpdated, err := s.sellerService.Update(c, id, seller)
+		sellerUpdated, err := s.sellerService.Update(c, id, sellerBody)
 		if err != nil {
+			if errors.Is(err, seller.ErrNotFound) {
+				web.Error(c, http.StatusNotFound, err.Error())
+				return
+			} else if errors.Is(err, seller.ErrCidAlreadyExists) {
+				web.Error(c, http.StatusConflict, err.Error())
+				return
+			}
 			web.Error(c, http.StatusInternalServerError, err.Error())
 			return
 		}

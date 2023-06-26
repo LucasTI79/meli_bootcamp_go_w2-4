@@ -34,7 +34,7 @@ var (
 	ErrNotFound             = errors.New("section not found")
 	ErrInvalidSectionNumber = errors.New("section number alredy exists")
 	ErrSavingSection        = errors.New("error saving section")
-	ErrGetSections          = errors.New("error gettiung sections")
+	ErrGetSections          = errors.New("error getting sections")
 )
 
 type Service interface {
@@ -79,7 +79,6 @@ func (s *service) Save(ctx context.Context, createSection CreateSection) (domain
 	}
 
 	return sec, nil
-
 }
 
 func (s *service) GetAll(ctx context.Context) ([]domain.Section, error) {
@@ -113,11 +112,13 @@ func (s *service) Update(ctx context.Context, dto UpdateSection, id int) (domain
 	if err != nil {
 		return domain.Section{}, ErrNotFound
 	}
-	applyValues(&sec, dto)
-	existsSectionNumber := s.repository.Exists(ctx, sec.SectionNumber)
-	if existsSectionNumber && sec.SectionNumber != *dto.SectionNumber {
-		return domain.Section{}, ErrInvalidSectionNumber
+	if dto.SectionNumber != nil {
+		existsSectionNumber := s.repository.Exists(ctx, *dto.SectionNumber)
+		if existsSectionNumber && sec.SectionNumber != *dto.SectionNumber {
+			return domain.Section{}, ErrInvalidSectionNumber
+		}
 	}
+	applyValues(&sec, dto)
 	sec, err = s.repository.Update(ctx, sec)
 	return sec, err
 }
