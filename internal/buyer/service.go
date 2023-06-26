@@ -12,6 +12,7 @@ var (
 	ErrNotFound      = errors.New("buyer not found")
 	ErrGeneric       = errors.New("")
 	ErrAlreadyExists = errors.New("buyer already exists")
+	ErrSavingBuyer   = errors.New("error saving buyer")
 )
 
 // Service is the buyer service interface
@@ -34,7 +35,7 @@ func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.Buye
 	}
 	id, err := s.repository.Save(ctx, b)
 	if err != nil {
-		return domain.BuyerCreate{}, errors.New("error saving buyer")
+		return domain.BuyerCreate{}, ErrSavingBuyer
 	}
 	b.ID = id
 	return b, nil
