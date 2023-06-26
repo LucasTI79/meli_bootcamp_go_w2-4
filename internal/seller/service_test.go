@@ -148,6 +148,31 @@ func TestUpdateSeller(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, sellerUpdate, received)
 	})
+	t.Run("returns an error when an error occurs on the repository", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		s := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		sellerUpdate := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "Meli",
+			Address:     "Osasco",
+			Telephone:   "1134489093",
+		}
+		repositoryMock.On("Get", mock.Anything, s.ID).Return(s, nil)
+		repositoryMock.On("Update", mock.Anything, sellerUpdate).Return(ErrRepository)
+
+		_, err := svc.Update(context.TODO(), sellerUpdate.ID, sellerUpdate)
+
+		assert.ErrorIs(t, err, seller.ErrRepository)
+	})
 
 	t.Run("Update non existent seller", func(t *testing.T) {
 		repositoryMock := RepositoryMock{}
@@ -165,6 +190,31 @@ func TestUpdateSeller(t *testing.T) {
 		_, err := svc.Update(context.TODO(), 1, sellerMock)
 
 		assert.ErrorIs(t, err, seller.ErrNotFound)
+	})
+	t.Run("returns an error when the cid already exist", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		sellerMock := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		sellerUpdate := domain.Seller{
+			ID:          1,
+			CID:         1234,
+			CompanyName: "Meli",
+			Address:     "Osasco",
+			Telephone:   "1134489093",
+		}
+		repositoryMock.On("Get", mock.Anything, sellerMock.ID).Return(sellerMock, nil)
+		repositoryMock.On("Exists", mock.Anything, sellerUpdate.CID).Return(true)
+
+		_, err := svc.Update(context.TODO(), sellerUpdate.ID, sellerUpdate)
+
+		assert.ErrorIs(t, err, seller.ErrCidAlreadyExists)
 	})
 }
 
