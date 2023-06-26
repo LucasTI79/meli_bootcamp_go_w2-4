@@ -111,19 +111,19 @@ func TestBuyerGet(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, response.Code)
 	})
-	/*t.Run("Returns 500 if buyers not found", func(t *testing.T) {
+	t.Run("Returns 500 if buyers not found", func(t *testing.T) {
 		svcMock := ServiceMockBuyer{}
 		buyerHandler := handler.NewBuyer(&svcMock)
 		server := testutil.CreateServer()
 		server.GET(BASE_URL_BUYER, buyerHandler.GetAll())
 
-		svcMock.On("GetAll", mock.Anything).Return(domain.Buyer{}, "buyer not found")
+		svcMock.On("GetAll", mock.Anything).Return([]domain.Buyer{}, buyer.ErrNotFound)
 
 		request, response := testutil.MakeRequest(http.MethodGet, BASE_URL_BUYER, mock.Anything)
 		server.ServeHTTP(response, request)
 
 		assert.Equal(t, http.StatusInternalServerError, response.Code)
-	})*/
+	})
 	t.Run("Returns 204 if buyers length is zero", func(t *testing.T) {
 		svcMock := ServiceMockBuyer{}
 		buyerHandler := handler.NewBuyer(&svcMock)
