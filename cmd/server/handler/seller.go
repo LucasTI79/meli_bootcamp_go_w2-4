@@ -155,6 +155,9 @@ func (s *Seller) Update() gin.HandlerFunc {
 			if errors.Is(err, seller.ErrNotFound) {
 				web.Error(c, http.StatusNotFound, err.Error())
 				return
+			} else if errors.Is(err, seller.ErrCidAlreadyExists) {
+				web.Error(c, http.StatusConflict, err.Error())
+				return
 			}
 			web.Error(c, http.StatusInternalServerError, err.Error())
 			return

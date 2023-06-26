@@ -263,6 +263,28 @@ func TestUpdateSeller(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Equal(t, expected, received.Data)
 	})
+	t.Run("Returns 409  if cid already exist", func(t *testing.T) {
+		svcMock := SellerServiceMock{}
+		sellerHandler := handler.NewSeller(&svcMock)
+		server := testutil.CreateServer()
+		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+		url := fmt.Sprintf("%s/%d", SELLER_URL, expected.ID)
+
+		svcMock.On("Update", mock.Anything, expected.ID, expected).Return(domain.Seller{}, seller.ErrCidAlreadyExists)
+
+		request, response := testutil.MakeRequest(http.MethodPatch, url, expected)
+		server.ServeHTTP(response, request)
+
+		assert.Equal(t, http.StatusConflict, response.Code)
+	})
 	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
