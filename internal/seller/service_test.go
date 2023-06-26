@@ -2,6 +2,7 @@ package seller_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
@@ -9,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+var ErrRepository = errors.New("error in the repository layer")
 
 func TestCreateSeller(t *testing.T) {
 	t.Run("Create valid seller", func(t *testing.T) {
@@ -50,6 +53,24 @@ func TestCreateSeller(t *testing.T) {
 
 		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
 		assert.ErrorIs(t, err, seller.ErrCidAlreadyExists)
+	})
+	t.Run("return domain error when repository fails ", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := seller.NewService(&repositoryMock)
+
+		expected := domain.Seller{
+			ID:          1,
+			CID:         123,
+			CompanyName: "TEST",
+			Address:     "test street",
+			Telephone:   "9999999",
+		}
+
+		repositoryMock.On("Exists", mock.Anything, 123).Return(false)
+		repositoryMock.On("Save", mock.Anything, expected).Return(0, ErrRepository)
+
+		_, err := svc.Save(context.TODO(), expected)
+		assert.ErrorIs(t, err, seller.ErrRepository)
 	})
 }
 func TestDelete(t *testing.T) {
