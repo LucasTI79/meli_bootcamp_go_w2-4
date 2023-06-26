@@ -259,8 +259,8 @@ func (r *RepositoryMock) Get(ctx context.Context, id int) (domain.Employee, erro
 	return args.Get(0).(domain.Employee), args.Error(1)
 }
 
-func (r *RepositoryMock) Exists(ctx context.Context, cid string) bool {
-	args := r.Called(ctx, cid)
+func (r *RepositoryMock) Exists(ctx context.Context, CardNumberID string) bool {
+	args := r.Called(ctx, CardNumberID)
 	return args.Get(0).(bool)
 }
 
