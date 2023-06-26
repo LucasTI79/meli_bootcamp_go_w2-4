@@ -50,6 +50,25 @@ func TestCreateBuyer(t *testing.T) {
 		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
 		assert.ErrorIs(t, err, buyer.ErrAlreadyExists)
 	})
+
+	t.Run("Create Buyer with error", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+
+		buyerMock := domain.BuyerCreate{
+			ID:           1,
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
+
+		repositoryMock.On("Exists", mock.Anything, "123").Return(false)
+		repositoryMock.On("Save", mock.Anything, buyerMock).Return(1, buyer.ErrSavingBuyer)
+
+		_, err := svc.Create(context.TODO(), buyerMock)
+
+		assert.ErrorIs(t, err, buyer.ErrSavingBuyer)
+	})
 }
 
 func TestGetbyIDBuyer(t *testing.T) {
@@ -111,6 +130,17 @@ func TestGetBuyer(t *testing.T) {
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, buyerMock, received)
 	})
+
+	t.Run("Find all buyer with error", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+
+		repositoryMock.On("GetAll", mock.Anything).Return([]domain.Buyer{}, buyer.ErrNotFound)
+
+		_, err := svc.GetAll(context.TODO())
+
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
+	})
 }
 
 func TestUpdateBuyer(t *testing.T) {
@@ -155,6 +185,29 @@ func TestUpdateBuyer(t *testing.T) {
 		repositoryMock.AssertNumberOfCalls(t, "Update", 0)
 		assert.Error(t, err)
 		assert.Equal(t, domain.Buyer{}, returned)
+	})
+
+	t.Run("Update buyer with error", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := buyer.NewService(&repositoryMock)
+		buyerPreUpdate := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "usuario",
+			LastName:     "de teste",
+		}
+		buyerUpdate := domain.Buyer{
+			ID:           12,
+			CardNumberID: "123",
+			FirstName:    "lucas",
+			LastName:     "ganda",
+		}
+
+		repositoryMock.On("Get", mock.Anything, 12).Return(buyerPreUpdate, nil)
+		repositoryMock.On("Update", mock.Anything, buyerUpdate).Return(buyer.ErrNotFound)
+		_, err := svc.Update(context.TODO(), buyerUpdate, 12)
+
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
 	})
 }
 
