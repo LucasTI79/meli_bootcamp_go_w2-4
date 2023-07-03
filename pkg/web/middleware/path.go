@@ -23,6 +23,7 @@ func IntPathParam() gin.HandlerFunc {
 		val64, err := strconv.ParseInt(p.Value, 10, 0)
 		if err != nil {
 			web.Error(c, http.StatusBadRequest, "path parameter %s should be an int", p.Key)
+			c.Abort()
 			return
 		}
 
