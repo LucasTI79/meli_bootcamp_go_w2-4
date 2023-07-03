@@ -127,10 +127,14 @@ func (r *router) buildEmployeeRoutes() {
 func (r *router) buildBuyerRoutes() {
 	repo := buyer.NewRepository(r.db)
 	service := buyer.NewService(repo)
-	handler := handler.NewBuyer(service)
-	r.rg.GET("/buyers", handler.GetAll())
-	r.rg.POST("/buyers", handler.Create())
-	r.rg.GET("/buyers/:id", handler.Get())
-	r.rg.DELETE("/buyers/:id", handler.Delete())
-	r.rg.PATCH("/buyers/:id", handler.Update())
+	h := handler.NewBuyer(service)
+
+	buyerRG := r.rg.Group("/buyers")
+	{
+		buyerRG.GET("", h.GetAll())
+		buyerRG.POST("", middleware.Body[domain.BuyerCreate](), h.Create())
+		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
+	}
 }
