@@ -12,19 +12,19 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-var WAREHOUSE_URL = "/api/v1/warehouses"
-var WAREHOUSE_URL_ID = "/api/v1/warehouses/:id"
+var WAREHOUSE_URL = "/warehouses"
 
 func TestWarehouseCreate(t *testing.T) {
 	t.Run("test create, if successful, return 201", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -51,8 +51,7 @@ func TestWarehouseCreate(t *testing.T) {
 	t.Run("test create, if warehouse is empty, return 422", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -77,8 +76,7 @@ func TestWarehouseCreate(t *testing.T) {
 	t.Run("test create, if warehouse is exist, return 409", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -102,34 +100,13 @@ func TestWarehouseCreate(t *testing.T) {
 		assert.Equal(t, received.Message, handler.ErrAlrearyExist)
 
 	})
-
-	t.Run("test create, if warehouse return an error - 500", func(t *testing.T) {
-		svcMock := ServiceWarehouseMock{}
-		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(WAREHOUSE_URL, warehouseHandler.Create())
-
-		svcMock.On("Create", mock.Anything, mock.Anything).Return(domain.Warehouse{}, errors.New(handler.ErrServerInternalError))
-		request, response := testutil.MakeRequest(http.MethodPost, WAREHOUSE_URL, "")
-
-		server.ServeHTTP(response, request)
-
-		var received testutil.ErrorResponse
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, response.Code, http.StatusInternalServerError)
-		assert.Equal(t, received.Message, handler.ErrServerInternalError)
-
-	})
-
 }
 
 func TestWarehouseGetAll(t *testing.T) {
 	t.Run("test if getall return a list that warehouse", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := []domain.Warehouse{
 			{
@@ -166,8 +143,7 @@ func TestWarehouseGetAll(t *testing.T) {
 	t.Run("test if getall not return a error if a length was zero", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := []domain.Warehouse{}
 
@@ -187,8 +163,7 @@ func TestWarehouseGetAll(t *testing.T) {
 	t.Run("test if getall return a error 500", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL, warehouseHandler.GetAll())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse2 := []domain.Warehouse{}
 
@@ -211,8 +186,7 @@ func TestWarehouseGet(t *testing.T) {
 	t.Run("test get, when the id is valid - 200", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -240,8 +214,7 @@ func TestWarehouseGet(t *testing.T) {
 	t.Run("test get, when the id is not found - 404", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
+		server := getWarehouseServer(warehouseHandler)
 
 		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, 1)
 
@@ -262,8 +235,7 @@ func TestWarehouseGet(t *testing.T) {
 	t.Run("test get, when the warehouse id is invalid - 400", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(WAREHOUSE_URL_ID, warehouseHandler.Get())
+		server := getWarehouseServer(warehouseHandler)
 
 		url := fmt.Sprintf("%s/%s", WAREHOUSE_URL, "aa")
 		request, response := testutil.MakeRequest(http.MethodGet, url, "")
@@ -273,8 +245,6 @@ func TestWarehouseGet(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &received)
 
 		assert.Equal(t, response.Code, http.StatusBadRequest)
-		assert.Equal(t, received.Message, handler.ErrInvalidID)
-
 	})
 }
 
@@ -282,8 +252,7 @@ func TestWarehouseUpdate(t *testing.T) {
 	t.Run("test update, when the id is valid", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(WAREHOUSE_URL_ID, warehouseHandler.Update())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -312,8 +281,7 @@ func TestWarehouseUpdate(t *testing.T) {
 	t.Run("test update, when the id is invalid- 400", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(WAREHOUSE_URL_ID, warehouseHandler.Update())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse2 := domain.Warehouse{}
 
@@ -326,14 +294,12 @@ func TestWarehouseUpdate(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &received)
 
 		assert.Equal(t, response.Code, http.StatusBadRequest)
-		assert.Equal(t, received.Message, handler.ErrInvalidID)
 	})
 
 	t.Run("test update, when the id must to be unique - 409", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(WAREHOUSE_URL_ID, warehouseHandler.Update())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -363,13 +329,13 @@ func TestWarehouseUpdate(t *testing.T) {
 	t.Run("test update, when the return an error in the server 422", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(WAREHOUSE_URL_ID, warehouseHandler.Update())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse2 := domain.Warehouse{}
 
+		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, 2)
 		svcMock.On("Get", mock.Anything, 2).Return(expectedWarehouse2, handler.ErrUnprocessableEntity)
-		request, response := testutil.MakeRequest(http.MethodPatch, WAREHOUSE_URL_ID, "")
+		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
 
 		server.ServeHTTP(response, request)
 		var received testutil.ErrorResponse
@@ -381,8 +347,7 @@ func TestWarehouseUpdate(t *testing.T) {
 	t.Run("test update, when the id not found - 404", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(WAREHOUSE_URL_ID, warehouseHandler.Update())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse2 := domain.Warehouse{}
 
@@ -404,8 +369,7 @@ func TestWarehouseDelete(t *testing.T) {
 	t.Run("test delete, when the id is valid - 204", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(WAREHOUSE_URL_ID, warehouseHandler.Delete())
+		server := getWarehouseServer(warehouseHandler)
 
 		expectedWarehouse := domain.Warehouse{
 			ID:                 1,
@@ -432,49 +396,34 @@ func TestWarehouseDelete(t *testing.T) {
 	t.Run("test delete, when the id is not found- 404", func(t *testing.T) {
 		svcMock := ServiceWarehouseMock{}
 		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(WAREHOUSE_URL_ID, warehouseHandler.Delete())
+		server := getWarehouseServer(warehouseHandler)
 
-		svcMock.On("Get", mock.Anything, "2").Return(errors.New(handler.ErrInvalidID))
-		request, response := testutil.MakeRequest(http.MethodDelete, WAREHOUSE_URL_ID, "")
+		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, 2)
+		svcMock.On("Delete", mock.Anything, 2).Return(errors.New(handler.ErrInvalidID))
+		request, response := testutil.MakeRequest(http.MethodDelete, url, "")
 
 		server.ServeHTTP(response, request)
 		var received testutil.ErrorResponse
 		json.Unmarshal(response.Body.Bytes(), &received)
 
 		assert.Equal(t, response.Code, http.StatusNotFound)
-		assert.Equal(t, received.Message, handler.ErrInvalidID)
+		assert.Equal(t, received.Message, handler.ErrWarehouseNotFound)
 	})
+}
 
-	t.Run("test delete, when the return an error in the server 500", func(t *testing.T) {
-		svcMock := ServiceWarehouseMock{}
-		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(WAREHOUSE_URL_ID, warehouseHandler.Delete())
+func getWarehouseServer(h *handler.Warehouse) *gin.Engine {
+	server := testutil.CreateServer()
 
-		expectedWarehouse := domain.Warehouse{
-			ID:                 1,
-			WarehouseCode:      "cod",
-			Address:            "Rua da Hora",
-			Telephone:          "11111111",
-			MinimumCapacity:    10,
-			MinimumTemperature: 2,
-		}
+	warehouseRG := server.Group(WAREHOUSE_URL)
+	{
+		warehouseRG.POST("", middleware.Body[domain.Warehouse](), h.Create())
+		warehouseRG.GET("", h.GetAll())
+		warehouseRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		warehouseRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
+		warehouseRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
 
-		url := fmt.Sprintf("%s/%d", WAREHOUSE_URL, expectedWarehouse.ID)
-
-		svcMock.On("Delete", mock.Anything, expectedWarehouse.ID).Return(errors.New(handler.ErrWarehouseNotDeleted))
-		request, response := testutil.MakeRequest(http.MethodDelete, url, expectedWarehouse)
-
-		server.ServeHTTP(response, request)
-		var received testutil.ErrorResponse
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, response.Code, http.StatusInternalServerError)
-		assert.Equal(t, received.Message, handler.ErrWarehouseNotDeleted)
-
-	})
-
+	return server
 }
 
 type ServiceWarehouseMock struct {

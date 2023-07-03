@@ -7,6 +7,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
@@ -99,12 +100,16 @@ func (r *router) buildSectionRoutes() {
 func (r *router) buildWarehouseRoutes() {
 	repo := warehouse.NewRepository(r.db)
 	service := warehouse.NewService(repo)
-	handler := handler.NewWarehouse(service)
-	r.rg.POST("/warehouses", handler.Create())
-	r.rg.GET("/warehouses", handler.GetAll())
-	r.rg.GET("/warehouses/:id", handler.Get())
-	r.rg.PATCH("/warehouses/:id", handler.Update())
-	r.rg.DELETE("/warehouses/:id", handler.Delete())
+	h := handler.NewWarehouse(service)
+
+	productRG := r.rg.Group("/warehouses")
+	{
+		productRG.POST("/", middleware.Body[domain.Warehouse](), h.Create())
+		productRG.GET("/", h.GetAll())
+		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
+		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
 }
 
 func (r *router) buildEmployeeRoutes() {
