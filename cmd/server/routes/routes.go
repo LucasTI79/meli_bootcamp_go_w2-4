@@ -61,10 +61,10 @@ func (r *router) buildSellerRoutes() {
 	sellerGroup := r.rg.Group("/sellers")
 	{
 		sellerGroup.GET("/", handler.GetAll())
-		sellerGroup.GET("/:id", handler.GetById())
-		sellerGroup.POST("/", handler.Create())
-		sellerGroup.PATCH("/:id", handler.Update())
-		sellerGroup.DELETE("/:id", handler.Delete())
+		sellerGroup.GET("/:id", middleware.IntPathParam(), handler.GetById())
+		sellerGroup.POST("/", middleware.Body[domain.Seller](), handler.Create())
+		sellerGroup.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Seller](), handler.Update())
+		sellerGroup.DELETE("/:id", middleware.IntPathParam(), handler.Delete())
 	}
 }
 
@@ -113,8 +113,6 @@ func (r *router) buildWarehouseRoutes() {
 }
 
 func (r *router) buildEmployeeRoutes() {
-	// Employee routes
-	// Example:
 	repo := employee.NewRepository(r.db)
 	service := employee.NewService(repo)
 	handler := handler.NewEmployee(service)

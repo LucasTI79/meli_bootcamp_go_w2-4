@@ -3,11 +3,11 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,11 +59,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 //	@Router			/api/v1/sellers/{id} [get]
 func (s *Seller) GetById() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 		seller, errGetSeller := s.sellerService.Get(c, id)
 		if errGetSeller != nil {
 			web.Error(c, http.StatusNotFound, errGetSeller.Error())
@@ -88,11 +84,8 @@ func (s *Seller) GetById() gin.HandlerFunc {
 //	@Router			/api/v1/sellers [post]
 func (s *Seller) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req domain.Seller
-		if err := c.ShouldBind(&req); err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
+		req := middleware.GetBody[domain.Seller](c)
+
 		if req.CID == 0 {
 			web.Error(c, http.StatusUnprocessableEntity, "cid is required")
 			return
@@ -140,16 +133,10 @@ func (s *Seller) Create() gin.HandlerFunc {
 //	@Router			/api/v1/sellers/{id} [put]
 func (s *Seller) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		var sellerBody domain.Seller
-		if err := c.ShouldBindJSON(&sellerBody); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+		id := c.GetInt("id")
+
+		sellerBody := middleware.GetBody[domain.Seller](c)
+
 		sellerUpdated, err := s.sellerService.Update(c, id, sellerBody)
 		if err != nil {
 			if errors.Is(err, seller.ErrNotFound) {
@@ -179,11 +166,7 @@ func (s *Seller) Update() gin.HandlerFunc {
 //	@Router			/api/v1/sellers/{id} [delete]
 func (s *Seller) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 		errDelete := s.sellerService.Delete(c, id)
 		if errDelete != nil {
 			if errDelete == seller.ErrNotFound {
