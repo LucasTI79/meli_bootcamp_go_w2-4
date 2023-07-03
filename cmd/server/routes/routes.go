@@ -86,14 +86,14 @@ func (r *router) buildProductRoutes() {
 func (r *router) buildSectionRoutes() {
 	repository := section.NewRepository(r.db)
 	service := section.NewService(repository)
-	handler := handler.NewSection(service)
-	sec := r.rg.Group("sections")
+	h := handler.NewSection(service)
+	sec := r.rg.Group("/sections")
 	{
-		sec.POST("/", handler.Create())
-		sec.GET("/", handler.GetAll())
-		sec.GET("/:id", handler.Get())
-		sec.DELETE("/:id", handler.Delete())
-		sec.PATCH(":id", handler.Update())
+		sec.POST("", middleware.Body[section.CreateSection](), h.Create())
+		sec.GET("", h.GetAll())
+		sec.GET("/:id", middleware.IntPathParam(), h.Get())
+		sec.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		sec.PATCH("/:id", middleware.IntPathParam(), middleware.Body[section.UpdateSection](), h.Update())
 	}
 }
 
@@ -104,8 +104,8 @@ func (r *router) buildWarehouseRoutes() {
 
 	productRG := r.rg.Group("/warehouses")
 	{
-		productRG.POST("/", middleware.Body[domain.Warehouse](), h.Create())
-		productRG.GET("/", h.GetAll())
+		productRG.POST("", middleware.Body[domain.Warehouse](), h.Create())
+		productRG.GET("", h.GetAll())
 		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
 		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())

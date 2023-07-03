@@ -2,11 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,11 +58,7 @@ func (s *Section) GetAll() gin.HandlerFunc {
 //	@Router		/api/v1/sections/{id} [get]
 func (s *Section) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 		sec, err := s.sectionService.Get(c.Request.Context(), id)
 
 		if err != nil {
@@ -87,11 +83,7 @@ func (s *Section) Get() gin.HandlerFunc {
 //	@Router		/api/v1/sections [post]
 func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var dto section.CreateSection
-		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+		dto := middleware.GetBody[section.CreateSection](c)
 
 		sec, err := s.sectionService.Save(c, dto)
 		if err != nil {
@@ -124,17 +116,8 @@ func (s *Section) Create() gin.HandlerFunc {
 //	@Router		/api/v1/sections/{id} [patch]
 func (s *Section) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id should be a number")
-			return
-		}
-
-		var dto section.UpdateSection
-		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+		id := c.GetInt("id")
+		dto := middleware.GetBody[section.UpdateSection](c)
 
 		sec, err := s.sectionService.Update(c.Request.Context(), dto, id)
 
@@ -167,13 +150,9 @@ func (s *Section) Update() gin.HandlerFunc {
 //	@Router		/api/v1/sections/{id} [delete]
 func (s *Section) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 
-		err = s.sectionService.Delete(c, id)
+		err := s.sectionService.Delete(c, id)
 
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "id %d not found", id)
