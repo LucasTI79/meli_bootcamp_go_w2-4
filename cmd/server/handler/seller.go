@@ -46,7 +46,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 	}
 }
 
-// GetById retrieves a seller by ID.
+// Get retrieves a seller by ID.
 //
 //	@Summary		Get a seller by ID
 //	@Description	Retrieves a seller based on the provided ID
@@ -57,7 +57,7 @@ func (s *Seller) GetAll() gin.HandlerFunc {
 //	@Failure		400	{object}	web.errorResponse	"Bad Request"
 //	@Failure		404	{object}	web.errorResponse	"Not Found"
 //	@Router			/api/v1/sellers/{id} [get]
-func (s *Seller) GetById() gin.HandlerFunc {
+func (s *Seller) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetInt("id")
 		seller, errGetSeller := s.sellerService.Get(c, id)

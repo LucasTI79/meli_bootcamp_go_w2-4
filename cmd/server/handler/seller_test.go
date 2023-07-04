@@ -418,7 +418,7 @@ func getSellerServer(h *handler.Seller) *gin.Engine {
 	sellerRG := s.Group(SELLER_URL)
 	{
 		sellerRG.GET("", h.GetAll())
-		sellerRG.GET("/:id", middleware.IntPathParam(), h.GetById())
+		sellerRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		sellerRG.POST("", middleware.Body[domain.Seller](), h.Create())
 		sellerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Seller](), h.Update())
 		sellerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
