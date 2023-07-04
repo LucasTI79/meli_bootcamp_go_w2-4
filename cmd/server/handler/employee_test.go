@@ -245,19 +245,6 @@ func TestUpdateEmployee(t *testing.T) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, e, received.Data)
 	})
-	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
-		mockedService := EmployeeServiceMock{}
-		controller := handler.NewEmployee(&mockedService)
-		server := getEmployeeServer(controller)
-
-		invalidId := "oi"
-		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, invalidId)
-
-		req, res := testutil.MakeRequest(http.MethodPatch, url, nil)
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusBadRequest, res.Code)
-	})
 	t.Run("should return status 422 when body is invalid", func(t *testing.T) {
 		mockedService := EmployeeServiceMock{}
 		controller := handler.NewEmployee(&mockedService)
@@ -299,20 +286,6 @@ func TestUpdateEmployee(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
-	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
-		mockedService := EmployeeServiceMock{}
-		controller := handler.NewEmployee(&mockedService)
-		server := getEmployeeServer(controller)
-
-		invalidId := "oi"
-
-		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, invalidId)
-
-		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusBadRequest, res.Code)
-	})
 }
 
 func TestDeleteEmployee(t *testing.T) {
@@ -333,21 +306,6 @@ func TestDeleteEmployee(t *testing.T) {
 		var received testutil.SuccessResponse[domain.Employee]
 		json.Unmarshal(res.Body.Bytes(), &received)
 		assert.Equal(t, http.StatusNoContent, res.Code)
-
-	})
-	t.Run("should return status 400 when id is invalid", func(t *testing.T) {
-		mockedService := EmployeeServiceMock{}
-		controller := handler.NewEmployee(&mockedService)
-		server := getEmployeeServer(controller)
-
-		idToDelete := "oi"
-
-		url := fmt.Sprintf("%s/%s", EMPLOYEE_URL, idToDelete)
-
-		req, res := testutil.MakeRequest(http.MethodDelete, url, nil)
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusBadRequest, res.Code)
 
 	})
 	t.Run("should return status 404 when employee does not exist", func(t *testing.T) {

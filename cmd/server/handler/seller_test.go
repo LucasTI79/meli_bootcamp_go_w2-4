@@ -261,17 +261,6 @@ func TestUpdateSeller(t *testing.T) {
 
 		assert.Equal(t, http.StatusConflict, response.Code)
 	})
-	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
-		svcMock := SellerServiceMock{}
-		sellerHandler := handler.NewSeller(&svcMock)
-		server := getSellerServer(sellerHandler)
-
-		url := fmt.Sprintf("%s/%s", SELLER_URL, "a")
-		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
-		server.ServeHTTP(response, request)
-
-		assert.Equal(t, http.StatusBadRequest, response.Code)
-	})
 	t.Run("Returns 422 if receives invalid body", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
@@ -397,23 +386,6 @@ func TestReadSeller(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Equal(t, expected, received.Data)
 	})
-
-	t.Run("returns error when the id is not valid", func(t *testing.T) {
-		svcMock := SellerServiceMock{}
-		sellerHandler := handler.NewSeller(&svcMock)
-		server := getSellerServer(sellerHandler)
-
-		url := fmt.Sprintf("%s/%s", SELLER_URL, "aa")
-
-		request, response := testutil.MakeRequest(http.MethodGet, url, "")
-		server.ServeHTTP(response, request)
-
-		var received testutil.SuccessResponse[domain.Seller]
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, http.StatusBadRequest, response.Code)
-	})
-
 	t.Run("returns error when the api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)

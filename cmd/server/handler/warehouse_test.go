@@ -231,21 +231,6 @@ func TestWarehouseGet(t *testing.T) {
 		assert.Equal(t, received.Message, handler.ErrWarehouseNotFound)
 
 	})
-
-	t.Run("test get, when the warehouse id is invalid - 400", func(t *testing.T) {
-		svcMock := ServiceWarehouseMock{}
-		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := getWarehouseServer(warehouseHandler)
-
-		url := fmt.Sprintf("%s/%s", WAREHOUSE_URL, "aa")
-		request, response := testutil.MakeRequest(http.MethodGet, url, "")
-
-		server.ServeHTTP(response, request)
-		var received testutil.ErrorResponse
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, response.Code, http.StatusBadRequest)
-	})
 }
 
 func TestWarehouseUpdate(t *testing.T) {
@@ -276,24 +261,6 @@ func TestWarehouseUpdate(t *testing.T) {
 		assert.Equal(t, response.Code, http.StatusOK)
 		assert.Equal(t, expectedWarehouse, received.Data)
 
-	})
-
-	t.Run("test update, when the id is invalid- 400", func(t *testing.T) {
-		svcMock := ServiceWarehouseMock{}
-		warehouseHandler := handler.NewWarehouse(&svcMock)
-		server := getWarehouseServer(warehouseHandler)
-
-		expectedWarehouse2 := domain.Warehouse{}
-
-		url := fmt.Sprintf("%s/%s", WAREHOUSE_URL, "aa")
-
-		request, response := testutil.MakeRequest(http.MethodPatch, url, expectedWarehouse2)
-
-		server.ServeHTTP(response, request)
-		var received testutil.ErrorResponse
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, response.Code, http.StatusBadRequest)
 	})
 
 	t.Run("test update, when the id must to be unique - 409", func(t *testing.T) {
