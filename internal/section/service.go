@@ -38,11 +38,11 @@ var (
 )
 
 type Service interface {
-	Save(ctx context.Context, section CreateSection) (domain.Section, error)
+	Create(ctx context.Context, section CreateSection) (domain.Section, error)
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
-	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, dto UpdateSection, id int) (domain.Section, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type service struct {
@@ -55,7 +55,7 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) Save(ctx context.Context, createSection CreateSection) (domain.Section, error) {
+func (s *service) Create(ctx context.Context, createSection CreateSection) (domain.Section, error) {
 	existsSectionNumber := s.repository.Exists(ctx, createSection.SectionNumber)
 	if existsSectionNumber {
 		return domain.Section{}, ErrInvalidSectionNumber

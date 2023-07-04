@@ -103,7 +103,7 @@ func (s *Seller) Create() gin.HandlerFunc {
 			return
 		}
 
-		sellerSaved, err := s.sellerService.Save(c, req)
+		sellerSaved, err := s.sellerService.Create(c, req)
 		if err != nil {
 			if err == seller.ErrCidAlreadyExists {
 				web.Error(c, http.StatusConflict, err.Error())

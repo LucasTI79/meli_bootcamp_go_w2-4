@@ -33,7 +33,7 @@ func TestCreateSeller(t *testing.T) {
 			Address:     "test street",
 			Telephone:   "9999999",
 		}
-		svcMock.On("Save", mock.Anything, expected).Return(expected, nil)
+		svcMock.On("Create", mock.Anything, expected).Return(expected, nil)
 
 		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
@@ -138,7 +138,7 @@ func TestCreateSeller(t *testing.T) {
 			Address:     "test street",
 			Telephone:   "9999999",
 		}
-		svcMock.On("Save", mock.Anything, expected).Return(domain.Seller{}, seller.ErrCidAlreadyExists)
+		svcMock.On("Create", mock.Anything, expected).Return(domain.Seller{}, seller.ErrCidAlreadyExists)
 
 		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
@@ -157,7 +157,7 @@ func TestCreateSeller(t *testing.T) {
 			Address:     "test street",
 			Telephone:   "9999999",
 		}
-		svcMock.On("Save", mock.Anything, expected).Return(domain.Seller{}, errors.New(""))
+		svcMock.On("Create", mock.Anything, expected).Return(domain.Seller{}, errors.New(""))
 
 		request, response := testutil.MakeRequest(http.MethodPost, SELLER_URL, expected)
 		server.ServeHTTP(response, request)
@@ -441,7 +441,7 @@ func (svc *SellerServiceMock) Get(ctx context.Context, id int) (domain.Seller, e
 	return args.Get(0).(domain.Seller), args.Error(1)
 }
 
-func (svc *SellerServiceMock) Save(c context.Context, s domain.Seller) (domain.Seller, error) {
+func (svc *SellerServiceMock) Create(c context.Context, s domain.Seller) (domain.Seller, error) {
 	args := svc.Called(c, s)
 	return args.Get(0).(domain.Seller), args.Error(1)
 }

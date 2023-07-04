@@ -75,7 +75,7 @@ func TestCreate(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(sectionID, nil)
 
-		result, err := svc.Save(context.TODO(), body)
+		result, err := svc.Create(context.TODO(), body)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -88,7 +88,7 @@ func TestCreate(t *testing.T) {
 		body := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(true)
-		_, err := svc.Save(context.TODO(), body)
+		_, err := svc.Create(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrInvalidSectionNumber)
@@ -103,7 +103,7 @@ func TestCreate(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, section.ErrSavingSection)
 
-		_, err := svc.Save(context.TODO(), body)
+		_, err := svc.Create(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrSavingSection)

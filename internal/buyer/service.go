@@ -17,9 +17,9 @@ var (
 
 // Service is the buyer service interface
 type Service interface {
+	Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error)
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
-	Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error)
 	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
 	Delete(ctx context.Context, id int) error
 }
