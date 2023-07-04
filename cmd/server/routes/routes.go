@@ -114,14 +114,17 @@ func (r *router) buildWarehouseRoutes() {
 
 func (r *router) buildEmployeeRoutes() {
 	repo := employee.NewRepository(r.db)
-	service := employee.NewService(repo)
-	handler := handler.NewEmployee(service)
+	svc := employee.NewService(repo)
+	h := handler.NewEmployee(svc)
 
-	r.rg.GET("/employees", handler.GetAll())
-	r.rg.POST("/employees", handler.Create())
-	r.rg.GET("/employees/:id", handler.Get())
-	r.rg.PATCH("/employees/:id", handler.Update())
-	r.rg.DELETE("/employees/:id", handler.Delete())
+	employeeRG := r.rg.Group("/employees")
+	{
+		employeeRG.GET("", h.GetAll())
+		employeeRG.POST("", middleware.Body[domain.Employee](), h.Create())
+		employeeRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		employeeRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Employee](), h.Update())
+		employeeRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
 }
 
 func (r *router) buildBuyerRoutes() {
