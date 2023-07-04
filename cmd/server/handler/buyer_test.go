@@ -26,13 +26,13 @@ func TestBuyerCreate(t *testing.T) {
 		svcMock := ServiceMockBuyer{}
 		buyerHandler := handler.NewBuyer(&svcMock)
 		server := getBuyerServer(buyerHandler)
-		expected := domain.BuyerCreate{
+		expected := domain.Buyer{
 			ID:           1,
 			CardNumberID: "123",
 			FirstName:    "nome",
 			LastName:     "sobrenome",
 		}
-		svcMock.On("Create", mock.Anything, expected).Return(expected, nil)
+		svcMock.On("Create", mock.Anything, mock.Anything).Return(expected, nil)
 
 		request, response := testutil.MakeRequest(http.MethodPost, BUYER_URL, expected)
 		server.ServeHTTP(response, request)
@@ -64,15 +64,15 @@ func TestBuyerCreate(t *testing.T) {
 		buyerHandler := handler.NewBuyer(&svcMock)
 		server := getBuyerServer(buyerHandler)
 
-		expected := domain.BuyerCreate{
+		b := domain.Buyer{
 			ID:           1,
 			CardNumberID: "123",
 			FirstName:    "nome",
 			LastName:     "sobrenome",
 		}
-		svcMock.On("Create", mock.Anything, expected).Return(domain.BuyerCreate{}, errors.New("buyer already exists"))
+		svcMock.On("Create", mock.Anything, mock.Anything).Return(domain.Buyer{}, errors.New("buyer already exists"))
 
-		request, response := testutil.MakeRequest(http.MethodPost, BUYER_URL, expected)
+		request, response := testutil.MakeRequest(http.MethodPost, BUYER_URL, b)
 		server.ServeHTTP(response, request)
 
 		fmt.Println(response.Code)
@@ -303,9 +303,9 @@ func (svc *ServiceMockBuyer) Get(ctx context.Context, id int) (domain.Buyer, err
 	return args.Get(0).(domain.Buyer), args.Error(1)
 }
 
-func (svc *ServiceMockBuyer) Create(c context.Context, s domain.BuyerCreate) (domain.BuyerCreate, error) {
+func (svc *ServiceMockBuyer) Create(c context.Context, s domain.BuyerCreate) (domain.Buyer, error) {
 	args := svc.Called(c, s)
-	return args.Get(0).(domain.BuyerCreate), args.Error(1)
+	return args.Get(0).(domain.Buyer), args.Error(1)
 }
 
 func (svc *ServiceMockBuyer) Update(ctx context.Context, s domain.Buyer, id int) (domain.Buyer, error) {

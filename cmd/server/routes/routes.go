@@ -61,7 +61,7 @@ func (r *router) buildSellerRoutes() {
 	sellerGroup := r.rg.Group("/sellers")
 	{
 		sellerGroup.GET("/", handler.GetAll())
-		sellerGroup.GET("/:id", middleware.IntPathParam(), handler.GetById())
+		sellerGroup.GET("/:id", middleware.IntPathParam(), handler.Get())
 		sellerGroup.POST("/", middleware.Body[domain.Seller](), handler.Create())
 		sellerGroup.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Seller](), handler.Update())
 		sellerGroup.DELETE("/:id", middleware.IntPathParam(), handler.Delete())

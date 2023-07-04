@@ -110,7 +110,7 @@ func TestSectionCreate(t *testing.T) {
 		body := getTestCreateSection()
 		expected := getTestSections()[0]
 
-		sectionService.On("Save", mock.Anything, body).Return(expected, nil)
+		sectionService.On("Create", mock.Anything, body).Return(expected, nil)
 
 		res := requestPost(body, server, SECTIONS_URL)
 
@@ -129,14 +129,14 @@ func TestSectionCreate(t *testing.T) {
 		res := requestPost(body, server, SECTIONS_URL)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
-		sectionService.AssertNumberOfCalls(t, "Save", 0)
+		sectionService.AssertNumberOfCalls(t, "Create", 0)
 	})
 	t.Run("Does not create any section and returns error: conflict", func(t *testing.T) {
 		sectionService := SectionServiceMock{}
 		h := handler.NewSection(&sectionService)
 		server := getSectionServer(h)
 
-		sectionService.On("Save", mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
+		sectionService.On("Create", mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
 
 		body := getTestCreateSection()
 		res := requestPost(body, server, SECTIONS_URL)
@@ -148,7 +148,7 @@ func TestSectionCreate(t *testing.T) {
 		h := handler.NewSection(&sectionService)
 		server := getSectionServer(h)
 
-		sectionService.On("Save", mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
+		sectionService.On("Create", mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
 
 		body := getTestCreateSection()
 		res := requestPost(body, server, SECTIONS_URL)
@@ -348,7 +348,7 @@ type SectionServiceMock struct {
 	mock.Mock
 }
 
-func (s *SectionServiceMock) Save(ctx context.Context, section section.CreateSection) (domain.Section, error) {
+func (s *SectionServiceMock) Create(ctx context.Context, section section.CreateSection) (domain.Section, error) {
 	args := s.Called(ctx, section)
 	return args.Get(0).(domain.Section), args.Error(1)
 }

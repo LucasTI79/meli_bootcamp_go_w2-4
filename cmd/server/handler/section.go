@@ -85,7 +85,7 @@ func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		dto := middleware.GetBody[section.CreateSection](c)
 
-		sec, err := s.sectionService.Save(c, dto)
+		sec, err := s.sectionService.Create(c, dto)
 		if err != nil {
 			if err == section.ErrInvalidSectionNumber {
 				web.Error(c, http.StatusConflict, err.Error())

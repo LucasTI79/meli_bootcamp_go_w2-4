@@ -17,9 +17,9 @@ var (
 
 // Service is the interface for warehouse operations.
 type Service interface {
+	Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
 	GetAll(ctx context.Context) ([]domain.Warehouse, error)
 	Get(ctx context.Context, id int) (domain.Warehouse, error)
-	Create(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
 	Update(ctx context.Context, w domain.Warehouse) (domain.Warehouse, error)
 	Delete(ctx context.Context, id int) error
 }

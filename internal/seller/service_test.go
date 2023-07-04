@@ -29,7 +29,7 @@ func TestCreateSeller(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, 123).Return(false)
 		repositoryMock.On("Save", mock.Anything, seller).Return(1, nil)
 
-		received, err := svc.Save(context.TODO(), seller)
+		received, err := svc.Create(context.TODO(), seller)
 
 		assert.NoError(t, err)
 		assert.Equal(t, seller, received)
@@ -49,7 +49,7 @@ func TestCreateSeller(t *testing.T) {
 
 		repositoryMock.On("Exists", mock.Anything, 123).Return(true)
 
-		_, err := svc.Save(context.TODO(), expected)
+		_, err := svc.Create(context.TODO(), expected)
 
 		repositoryMock.AssertNumberOfCalls(t, "Save", 0)
 		assert.ErrorIs(t, err, seller.ErrCidAlreadyExists)
@@ -69,7 +69,7 @@ func TestCreateSeller(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, 123).Return(false)
 		repositoryMock.On("Save", mock.Anything, expected).Return(0, ErrRepository)
 
-		_, err := svc.Save(context.TODO(), expected)
+		_, err := svc.Create(context.TODO(), expected)
 		assert.ErrorIs(t, err, seller.ErrRepository)
 	})
 }

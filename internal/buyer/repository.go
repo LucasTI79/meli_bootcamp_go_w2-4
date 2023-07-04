@@ -3,6 +3,7 @@ package buyer
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -12,7 +13,7 @@ type Repository interface {
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Exists(ctx context.Context, cardNumberID string) bool
-	Save(ctx context.Context, b domain.BuyerCreate) (int, error)
+	Save(ctx context.Context, b domain.Buyer) (int, error)
 	Update(ctx context.Context, b domain.Buyer) error
 	Delete(ctx context.Context, id int) error
 }
@@ -51,6 +52,9 @@ func (r *repository) Get(ctx context.Context, id int) (domain.Buyer, error) {
 	b := domain.Buyer{}
 	err := row.Scan(&b.ID, &b.CardNumberID, &b.FirstName, &b.LastName)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Buyer{}, ErrNotFound
+		}
 		return domain.Buyer{}, err
 	}
 
@@ -64,7 +68,7 @@ func (r *repository) Exists(ctx context.Context, cardNumberID string) bool {
 	return err == nil
 }
 
-func (r *repository) Save(ctx context.Context, b domain.BuyerCreate) (int, error) {
+func (r *repository) Save(ctx context.Context, b domain.Buyer) (int, error) {
 	query := "INSERT INTO buyers(card_number_id,first_name,last_name) VALUES (?,?,?)"
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
@@ -96,9 +100,12 @@ func (r *repository) Update(ctx context.Context, b domain.Buyer) error {
 		return err
 	}
 
-	_, err = res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
+	}
+	if affected < 1 {
+		return ErrNotFound
 	}
 
 	return nil
@@ -116,12 +123,12 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 		return err
 	}
 
-	affect, err := res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	if affect < 1 {
+	if affected < 1 {
 		return ErrNotFound
 	}
 

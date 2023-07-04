@@ -16,17 +16,22 @@ func TestCreateBuyer(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 
-		buyer := domain.BuyerCreate{
+		buyer := domain.Buyer{
 			ID:           1,
 			CardNumberID: "123",
 			FirstName:    "nome",
 			LastName:     "sobrenome",
 		}
+		b := domain.BuyerCreate{
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
 
-		repositoryMock.On("Exists", mock.Anything, "123").Return(false)
-		repositoryMock.On("Save", mock.Anything, buyer).Return(1, nil)
+		repositoryMock.On("Exists", mock.Anything, b.CardNumberID).Return(false)
+		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(1, nil)
 
-		received, err := svc.Create(context.TODO(), buyer)
+		received, err := svc.Create(context.TODO(), b)
 
 		assert.NoError(t, err)
 		assert.Equal(t, buyer, received)
@@ -63,7 +68,7 @@ func TestCreateBuyer(t *testing.T) {
 		}
 
 		repositoryMock.On("Exists", mock.Anything, "123").Return(false)
-		repositoryMock.On("Save", mock.Anything, buyerMock).Return(1, buyer.ErrSavingBuyer)
+		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, buyer.ErrSavingBuyer)
 
 		_, err := svc.Create(context.TODO(), buyerMock)
 
@@ -110,12 +115,12 @@ func TestGetBuyer(t *testing.T) {
 		svc := buyer.NewService(&repositoryMock)
 
 		buyerMock := []domain.Buyer{
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
 				LastName:     "sobrenome"},
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
@@ -255,7 +260,7 @@ func (r *RepositoryMock) Exists(ctx context.Context, cardNumberID string) bool {
 	return args.Get(0).(bool)
 }
 
-func (r *RepositoryMock) Save(ctx context.Context, s domain.BuyerCreate) (int, error) {
+func (r *RepositoryMock) Save(ctx context.Context, s domain.Buyer) (int, error) {
 	args := r.Called(ctx, s)
 	return args.Get(0).(int), args.Error(1)
 }
