@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -51,6 +52,9 @@ func (r *repository) Get(ctx context.Context, id int) (domain.Product, error) {
 	p := domain.Product{}
 	err := row.Scan(&p.ID, &p.Description, &p.ExpirationRate, &p.FreezingRate, &p.Height, &p.Length, &p.Netweight, &p.ProductCode, &p.RecomFreezTemp, &p.Width, &p.ProductTypeID, &p.SellerID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Product{}, NewErrNotFound(id)
+		}
 		return domain.Product{}, err
 	}
 
@@ -96,9 +100,12 @@ func (r *repository) Update(ctx context.Context, p domain.Product) error {
 		return err
 	}
 
-	_, err = res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
+	}
+	if affected < 1 {
+		return NewErrNotFound(p.ID)
 	}
 
 	return nil
@@ -116,12 +123,12 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 		return err
 	}
 
-	affect, err := res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	if affect < 1 {
+	if affected < 1 {
 		return NewErrNotFound(id)
 	}
 
