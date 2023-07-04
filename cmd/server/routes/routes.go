@@ -7,6 +7,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
@@ -60,10 +61,10 @@ func (r *router) buildSellerRoutes() {
 	sellerGroup := r.rg.Group("/sellers")
 	{
 		sellerGroup.GET("/", handler.GetAll())
-		sellerGroup.GET("/:id", handler.GetById())
-		sellerGroup.POST("/", handler.Create())
-		sellerGroup.PATCH("/:id", handler.Update())
-		sellerGroup.DELETE("/:id", handler.Delete())
+		sellerGroup.GET("/:id", middleware.IntPathParam(), handler.GetById())
+		sellerGroup.POST("/", middleware.Body[domain.Seller](), handler.Create())
+		sellerGroup.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Seller](), handler.Update())
+		sellerGroup.DELETE("/:id", middleware.IntPathParam(), handler.Delete())
 	}
 }
 
@@ -85,49 +86,58 @@ func (r *router) buildProductRoutes() {
 func (r *router) buildSectionRoutes() {
 	repository := section.NewRepository(r.db)
 	service := section.NewService(repository)
-	handler := handler.NewSection(service)
-	sec := r.rg.Group("sections")
+	h := handler.NewSection(service)
+	sec := r.rg.Group("/sections")
 	{
-		sec.POST("/", handler.Create())
-		sec.GET("/", handler.GetAll())
-		sec.GET("/:id", handler.Get())
-		sec.DELETE("/:id", handler.Delete())
-		sec.PATCH(":id", handler.Update())
+		sec.POST("", middleware.Body[section.CreateSection](), h.Create())
+		sec.GET("", h.GetAll())
+		sec.GET("/:id", middleware.IntPathParam(), h.Get())
+		sec.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		sec.PATCH("/:id", middleware.IntPathParam(), middleware.Body[section.UpdateSection](), h.Update())
 	}
 }
 
 func (r *router) buildWarehouseRoutes() {
 	repo := warehouse.NewRepository(r.db)
 	service := warehouse.NewService(repo)
-	handler := handler.NewWarehouse(service)
-	r.rg.POST("/warehouses", handler.Create())
-	r.rg.GET("/warehouses", handler.GetAll())
-	r.rg.GET("/warehouses/:id", handler.Get())
-	r.rg.PATCH("/warehouses/:id", handler.Update())
-	r.rg.DELETE("/warehouses/:id", handler.Delete())
+	h := handler.NewWarehouse(service)
+
+	productRG := r.rg.Group("/warehouses")
+	{
+		productRG.POST("", middleware.Body[domain.Warehouse](), h.Create())
+		productRG.GET("", h.GetAll())
+		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
+		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
 }
 
 func (r *router) buildEmployeeRoutes() {
-	// Employee routes
-	// Example:
 	repo := employee.NewRepository(r.db)
-	service := employee.NewService(repo)
-	handler := handler.NewEmployee(service)
+	svc := employee.NewService(repo)
+	h := handler.NewEmployee(svc)
 
-	r.rg.GET("/employees", handler.GetAll())
-	r.rg.POST("/employees", handler.Create())
-	r.rg.GET("/employees/:id", handler.Get())
-	r.rg.PATCH("/employees/:id", handler.Update())
-	r.rg.DELETE("/employees/:id", handler.Delete())
+	employeeRG := r.rg.Group("/employees")
+	{
+		employeeRG.GET("", h.GetAll())
+		employeeRG.POST("", middleware.Body[domain.Employee](), h.Create())
+		employeeRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		employeeRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Employee](), h.Update())
+		employeeRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
 }
 
 func (r *router) buildBuyerRoutes() {
 	repo := buyer.NewRepository(r.db)
 	service := buyer.NewService(repo)
-	handler := handler.NewBuyer(service)
-	r.rg.GET("/buyers", handler.GetAll())
-	r.rg.POST("/buyers", handler.Create())
-	r.rg.GET("/buyers/:id", handler.Get())
-	r.rg.DELETE("/buyers/:id", handler.Delete())
-	r.rg.PATCH("/buyers/:id", handler.Update())
+	h := handler.NewBuyer(service)
+
+	buyerRG := r.rg.Group("/buyers")
+	{
+		buyerRG.GET("", h.GetAll())
+		buyerRG.POST("", middleware.Body[domain.BuyerCreate](), h.Create())
+		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
+	}
 }

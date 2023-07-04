@@ -12,19 +12,19 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-var SELLER_URL = "/api/v1/sellers"
-var SELLER_URL_ID_PATH = "/api/v1/sellers/:id"
+var SELLER_URL = "/sellers"
 
 func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 201 if successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -46,11 +46,10 @@ func TestCreateSeller(t *testing.T) {
 		fmt.Println(received)
 	})
 
-	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
+	t.Run("Returns 422 if receives invalid field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		body := map[string]any{
 			"cid":          "123", // passing CID as string instead of int
@@ -62,14 +61,13 @@ func TestCreateSeller(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		fmt.Println(response.Code)
-		assert.Equal(t, http.StatusBadRequest, response.Code)
+		assert.Equal(t, http.StatusUnprocessableEntity, response.Code)
 	})
 
 	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		body := map[string]any{
 			"cid": 123,
@@ -83,8 +81,7 @@ func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		body := map[string]any{
 			"cid":          123,
@@ -99,8 +96,7 @@ func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		body := map[string]any{
 			"cid":          123,
@@ -116,8 +112,7 @@ func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 422 if receives missing field type", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		body := map[string]any{
 			"company_name": "company",
@@ -134,8 +129,7 @@ func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 409 if CID already exists", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -154,8 +148,7 @@ func TestCreateSeller(t *testing.T) {
 	t.Run("Returns 500 if api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.POST(SELLER_URL, sellerHandler.Create())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -176,8 +169,7 @@ func TestDeleteSeller(t *testing.T) {
 	t.Run("returns 404 when id does not exist", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+		server := getSellerServer(sellerHandler)
 
 		idToDelete := 1
 		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
@@ -190,23 +182,10 @@ func TestDeleteSeller(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, response.Code)
 
 	})
-	t.Run("returns 400 if receives invalid field type", func(t *testing.T) {
-		svcMock := SellerServiceMock{}
-		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(SELLER_URL, sellerHandler.Delete())
-
-		request, response := testutil.MakeRequest(http.MethodDelete, SELLER_URL, nil)
-		server.ServeHTTP(response, request)
-
-		assert.Equal(t, http.StatusBadRequest, response.Code)
-
-	})
 	t.Run("returns if api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+		server := getSellerServer(sellerHandler)
 
 		idToDelete := 1
 		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
@@ -222,8 +201,7 @@ func TestDeleteSeller(t *testing.T) {
 	t.Run("returns 204 when sucessfull", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.DELETE(SELLER_URL_ID_PATH, sellerHandler.Delete())
+		server := getSellerServer(sellerHandler)
 
 		idToDelete := 1
 		url := fmt.Sprintf("%s/%d", SELLER_URL, idToDelete)
@@ -241,8 +219,7 @@ func TestUpdateSeller(t *testing.T) {
 	t.Run("Returns 200 if update is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -266,8 +243,7 @@ func TestUpdateSeller(t *testing.T) {
 	t.Run("Returns 409  if cid already exist", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -285,23 +261,10 @@ func TestUpdateSeller(t *testing.T) {
 
 		assert.Equal(t, http.StatusConflict, response.Code)
 	})
-	t.Run("Returns 400 if receives invalid field type", func(t *testing.T) {
-		svcMock := SellerServiceMock{}
-		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
-
-		url := fmt.Sprintf("%s/%s", SELLER_URL, "a")
-		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
-		server.ServeHTTP(response, request)
-
-		assert.Equal(t, http.StatusBadRequest, response.Code)
-	})
 	t.Run("Returns 422 if receives invalid body", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server := getSellerServer(sellerHandler)
 
 		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
 		request, response := testutil.MakeRequest(http.MethodPatch, url, "")
@@ -312,8 +275,7 @@ func TestUpdateSeller(t *testing.T) {
 	t.Run("Returns 404 when id does not exist", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server := getSellerServer(sellerHandler)
 
 		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
 		svcMock.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Seller{}, seller.ErrNotFound)
@@ -326,8 +288,7 @@ func TestUpdateSeller(t *testing.T) {
 	t.Run("Returns 500 api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.PATCH(SELLER_URL_ID_PATH, sellerHandler.Update())
+		server := getSellerServer(sellerHandler)
 
 		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
 		svcMock.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Seller{}, errors.New(""))
@@ -342,8 +303,7 @@ func TestReadSeller(t *testing.T) {
 	t.Run("returns 200 if getAll is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL, sellerHandler.GetAll())
+		server := getSellerServer(sellerHandler)
 
 		expected := []domain.Seller{
 			{
@@ -376,8 +336,7 @@ func TestReadSeller(t *testing.T) {
 	t.Run("returns error when the api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL, sellerHandler.GetAll())
+		server := getSellerServer(sellerHandler)
 
 		svcMock.On("GetAll", mock.Anything).Return([]domain.Seller{}, errors.New(""))
 
@@ -389,8 +348,7 @@ func TestReadSeller(t *testing.T) {
 	t.Run("returns 204 when there's no sellers", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL, sellerHandler.GetAll())
+		server := getSellerServer(sellerHandler)
 
 		svcMock.On("GetAll", mock.Anything).Return([]domain.Seller{}, nil)
 
@@ -406,8 +364,7 @@ func TestReadSeller(t *testing.T) {
 	t.Run("returns 200 if get is successful", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
+		server := getSellerServer(sellerHandler)
 
 		expected := domain.Seller{
 			ID:          1,
@@ -429,29 +386,10 @@ func TestReadSeller(t *testing.T) {
 		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Equal(t, expected, received.Data)
 	})
-
-	t.Run("returns error when the id is not valid", func(t *testing.T) {
-		svcMock := SellerServiceMock{}
-		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
-
-		url := fmt.Sprintf("%s/%s", SELLER_URL, "aa")
-
-		request, response := testutil.MakeRequest(http.MethodGet, url, "")
-		server.ServeHTTP(response, request)
-
-		var received testutil.SuccessResponse[domain.Seller]
-		json.Unmarshal(response.Body.Bytes(), &received)
-
-		assert.Equal(t, http.StatusBadRequest, response.Code)
-	})
-
 	t.Run("returns error when the api is not valid", func(t *testing.T) {
 		svcMock := SellerServiceMock{}
 		sellerHandler := handler.NewSeller(&svcMock)
-		server := testutil.CreateServer()
-		server.GET(SELLER_URL_ID_PATH, sellerHandler.GetById())
+		server := getSellerServer(sellerHandler)
 
 		url := fmt.Sprintf("%s/%d", SELLER_URL, 1)
 
@@ -472,6 +410,21 @@ func TestReadSeller(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, response.Code)
 	})
+}
+
+func getSellerServer(h *handler.Seller) *gin.Engine {
+	s := testutil.CreateServer()
+
+	sellerRG := s.Group(SELLER_URL)
+	{
+		sellerRG.GET("", h.GetAll())
+		sellerRG.GET("/:id", middleware.IntPathParam(), h.GetById())
+		sellerRG.POST("", middleware.Body[domain.Seller](), h.Create())
+		sellerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Seller](), h.Update())
+		sellerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+	}
+
+	return s
 }
 
 type SellerServiceMock struct {
