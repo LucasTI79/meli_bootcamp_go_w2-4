@@ -11,9 +11,9 @@ import (
 type Repository interface {
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
-	Exists(ctx context.Context, SectionNumber int) bool
+	Exists(ctx context.Context, sectionNumber int) bool
 	Save(ctx context.Context, s domain.Section) (int, error)
-	Update(ctx context.Context, s domain.Section) (domain.Section, error)
+	Update(ctx context.Context, s domain.Section) error
 	Delete(ctx context.Context, id int) error
 }
 
@@ -84,24 +84,24 @@ func (r *repository) Save(ctx context.Context, s domain.Section) (int, error) {
 	return int(id), nil
 }
 
-func (r *repository) Update(ctx context.Context, s domain.Section) (domain.Section, error) {
+func (r *repository) Update(ctx context.Context, s domain.Section) error {
 	query := "UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, id_product_type=? WHERE id=?;"
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
-		return domain.Section{}, err
+		return err
 	}
 
 	res, err := stmt.Exec(&s.SectionNumber, &s.CurrentTemperature, &s.MinimumTemperature, &s.CurrentCapacity, &s.MinimumCapacity, &s.MaximumCapacity, &s.WarehouseID, &s.ProductTypeID, &s.ID)
 	if err != nil {
-		return domain.Section{}, err
+		return err
 	}
 
 	_, err = res.RowsAffected()
 	if err != nil {
-		return domain.Section{}, err
+		return err
 	}
 
-	return s, nil
+	return nil
 }
 
 func (r *repository) Delete(ctx context.Context, id int) error {

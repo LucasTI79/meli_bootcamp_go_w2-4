@@ -115,17 +115,46 @@ func TestUpdate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		actualSection := getTestSections()[0]
+		actualSection := domain.Section{
+			ID:                 1,
+			SectionNumber:      123,
+			CurrentTemperature: 10,
+			MinimumTemperature: 5,
+			CurrentCapacity:    15,
+			MinimumCapacity:    10,
+			MaximumCapacity:    20,
+			WarehouseID:        321,
+			ProductTypeID:      2,
+		}
 
-		body := getUpdateSection()
+		updates := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(1234),
+			CurrentTemperature: testutil.ToPtr(11),
+			MinimumTemperature: testutil.ToPtr(0),
+			CurrentCapacity:    testutil.ToPtr(16),
+			MinimumCapacity:    testutil.ToPtr(0),
+			MaximumCapacity:    testutil.ToPtr(21),
+			WarehouseID:        testutil.ToPtr(3210),
+			ProductTypeID:      testutil.ToPtr(3),
+		}
 
-		expected := getTestSections()[1]
+		expected := domain.Section{
+			ID:                 1,
+			SectionNumber:      1234,
+			CurrentTemperature: 11,
+			MinimumTemperature: 0,
+			CurrentCapacity:    16,
+			MinimumCapacity:    0,
+			MaximumCapacity:    21,
+			WarehouseID:        3210,
+			ProductTypeID:      3,
+		}
 
 		repositoryMock.On("Get", mock.Anything, mock.Anything).Return(actualSection, nil)
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
-		repositoryMock.On("Update", mock.Anything, mock.Anything).Return(expected, nil)
+		repositoryMock.On("Update", mock.Anything, mock.Anything).Return(nil)
 
-		result, err := svc.Update(context.TODO(), body, sectionID)
+		result, err := svc.Update(context.TODO(), updates, sectionID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -258,8 +287,8 @@ func (r *RepositoryMock) Get(ctx context.Context, id int) (domain.Section, error
 	return args.Get(0).(domain.Section), args.Error(1)
 }
 
-func (r *RepositoryMock) Exists(ctx context.Context, SectionNumber int) bool {
-	args := r.Called(ctx, SectionNumber)
+func (r *RepositoryMock) Exists(ctx context.Context, sectionNumber int) bool {
+	args := r.Called(ctx, sectionNumber)
 	return args.Get(0).(bool)
 }
 
@@ -268,9 +297,9 @@ func (r *RepositoryMock) Save(ctx context.Context, s domain.Section) (int, error
 	return args.Get(0).(int), args.Error(1)
 }
 
-func (r *RepositoryMock) Update(ctx context.Context, s domain.Section) (domain.Section, error) {
+func (r *RepositoryMock) Update(ctx context.Context, s domain.Section) error {
 	args := r.Called(ctx, s)
-	return args.Get(0).(domain.Section), args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {

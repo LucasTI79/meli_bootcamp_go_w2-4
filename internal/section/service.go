@@ -119,7 +119,7 @@ func (s *service) Update(ctx context.Context, dto UpdateSection, id int) (domain
 		}
 	}
 	applyValues(&sec, dto)
-	sec, err = s.repository.Update(ctx, sec)
+	err = s.repository.Update(ctx, sec)
 	return sec, err
 }
 
