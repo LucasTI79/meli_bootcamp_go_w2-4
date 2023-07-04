@@ -17,7 +17,7 @@ var (
 
 // Service is the buyer service interface
 type Service interface {
-	Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error)
+	Create(ctx context.Context, b domain.BuyerCreate) (domain.Buyer, error)
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
@@ -28,17 +28,18 @@ type service struct {
 	repository Repository
 }
 
-func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error) {
+func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.Buyer, error) {
 	ex := s.repository.Exists(ctx, b.CardNumberID)
 	if ex {
-		return domain.BuyerCreate{}, ErrAlreadyExists
+		return domain.Buyer{}, ErrAlreadyExists
 	}
-	id, err := s.repository.Save(ctx, b)
+	buyerDomain := *mapCreateToDomain(b)
+	id, err := s.repository.Save(ctx, buyerDomain)
 	if err != nil {
-		return domain.BuyerCreate{}, ErrSavingBuyer
+		return domain.Buyer{}, ErrSavingBuyer
 	}
-	b.ID = id
-	return b, nil
+	buyerDomain.ID = id
+	return buyerDomain, nil
 }
 
 func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error) {
@@ -91,5 +92,13 @@ func (s *service) Delete(ctx context.Context, id int) error {
 func NewService(r Repository) Service {
 	return &service{
 		r,
+	}
+}
+
+func mapCreateToDomain(b domain.BuyerCreate) *domain.Buyer {
+	return &domain.Buyer{
+		CardNumberID: b.CardNumberID,
+		FirstName:    b.FirstName,
+		LastName:     b.LastName,
 	}
 }
