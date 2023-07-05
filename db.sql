@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`warehouses` (
   `address` VARCHAR(255) NOT NULL,
   `telephone` VARCHAR(255) NOT NULL,
   `warehouse_code` VARCHAR(255) NOT NULL,
-  `minimun_capacity` INT NOT NULL,
-  `minimun_temperature` DECIMAL(19,2) NOT NULL,
+  `minimum_capacity` INT NOT NULL,
+  `minimum_temperature` DECIMAL(19,2) NOT NULL,
   `locality_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `locality_id_idx` (`locality_id` ASC) VISIBLE,
@@ -480,8 +480,8 @@ INSERT INTO `melisprint`.`product_types` (`description`) VALUES ('Type 5');
 INSERT INTO `melisprint`.`products` (`product_code`, `description`, `width`, `height`, `length`, `net_weight`, `expiration_rate`, `recommended_freezing_temperature`, `freezing_rate`, `product_type_id`, `seller_id`) VALUES ('P001', 'Product 1', '10', 5.5, 8.2, 100.25, 0.8, -18, 0.5, 1, 1);
 INSERT INTO `melisprint`.`products` (`product_code`, `description`, `width`, `height`, `length`, `net_weight`, `expiration_rate`, `recommended_freezing_temperature`, `freezing_rate`, `product_type_id`, `seller_id`) VALUES ('P002', 'Product 2', '7.5', 3.2, 6.7, 75.5, 0.9, -15, 0.3, 2, 2);
 
-INSERT INTO `melisprint`.`warehouses` (`address`, `telephone`, `warehouse_code`, `minimun_capacity`, `minimun_temperature`, `locality_id`) VALUES ('Warehouse 1 Address', '111111111', 'W001', 100, -20, 1);
-INSERT INTO `melisprint`.`warehouses` (`address`, `telephone`, `warehouse_code`, `minimun_capacity`, `minimun_temperature`, `locality_id`) VALUES ('Warehouse 2 Address', '222222222', 'W002', 150, -18, 2);
+INSERT INTO `melisprint`.`warehouses` (`address`, `telephone`, `warehouse_code`, `minimum_capacity`, `minimum_temperature`, `locality_id`) VALUES ('Warehouse 1 Address', '111111111', 'W001', 100, -20, 1);
+INSERT INTO `melisprint`.`warehouses` (`address`, `telephone`, `warehouse_code`, `minimum_capacity`, `minimum_temperature`, `locality_id`) VALUES ('Warehouse 2 Address', '222222222', 'W002', 150, -18, 2);
 
 INSERT INTO `melisprint`.`sections` (`section_number`, `current_temperature`, `minimum_temperature`, `current_capacity`, `minimum_capacity`, `maximum_capacity`, `warehouse_id`, `product_type_id`) VALUES (1, -18, -20, 50, 20, 100, 1, 1);
 INSERT INTO `melisprint`.`sections` (`section_number`, `current_temperature`, `minimum_temperature`, `current_capacity`, `minimum_capacity`, `maximum_capacity`, `warehouse_id`, `product_type_id`) VALUES (2, -15, -18, 60, 30, 150, 2, 2);
