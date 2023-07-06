@@ -124,6 +124,9 @@ func (s *service) Update(ctx context.Context, w domain.Warehouse) (domain.Wareho
 	if w.MinimumTemperature != 0 {
 		currentWarehouse.MinimumTemperature = w.MinimumTemperature
 	}
+	if w.LocalityID != 0 {
+		currentWarehouse.LocalityID = w.LocalityID
+	}
 
 	err = s.repository.Update(ctx, currentWarehouse)
 	if err != nil {
