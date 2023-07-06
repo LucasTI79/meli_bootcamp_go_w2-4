@@ -7,6 +7,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/carrier"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
@@ -43,6 +44,7 @@ func (r *router) MapRoutes() {
 	r.buildWarehouseRoutes()
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
+	r.buildCarrierRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -139,5 +141,16 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
+	}
+}
+
+func (r *router) buildCarrierRoutes() {
+	repo := carrier.NewRepository(r.db)
+	service := carrier.NewService(repo)
+	h := handler.NewCarrier(service)
+
+	productRG := r.rg.Group("/carrier")
+	{
+		productRG.POST("/", middleware.Body[handler.CarrierRequest](), h.Create())
 	}
 }
