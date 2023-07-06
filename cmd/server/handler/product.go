@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
@@ -27,6 +28,13 @@ type CreateRequest struct {
 	Width      *float32 `binding:"required" json:"width"`
 	TypeID     *int     `binding:"required" json:"product_type_id"`
 	SellerID   *int     `json:"seller_id"`
+}
+
+type CreateRequestRecord struct {
+	LastDate      *string  `binding:"required" json:"last_update_date"`
+	PurchasePrice *float64 `binding:"required" json:"purchase_price"`
+	SalePrice     *float64 `binding:"required" json:"sale_price"`
+	ProductID     *int     `binding:"required" json:"product_id"`
 }
 
 // UpdateRequest contains pointers so that the Handler is able to
@@ -96,6 +104,30 @@ func (p *Product) Get() gin.HandlerFunc {
 		id := c.GetInt("id")
 
 		p, err := p.productService.Get(c.Request.Context(), id)
+
+		if err != nil {
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
+			return
+		}
+		web.Success(c, http.StatusOK, p)
+	}
+}
+
+func (p *Product) GetRecords() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.GetInt("id")
+		if id != 0 {
+			p, err := p.productService.GetRecords(c.Request.Context(), id)
+			if err != nil {
+				errStatus := mapErrorToStatus(err)
+				web.Error(c, errStatus, err.Error())
+				return
+			}
+			web.Success(c, http.StatusOK, p)
+			return
+		}
+		p, err := p.productService.GetAllRecords(c.Request.Context())
 
 		if err != nil {
 			errStatus := mapErrorToStatus(err)
@@ -194,6 +226,22 @@ func (p *Product) Delete() gin.HandlerFunc {
 	}
 }
 
+func (p *Product) CreateRecord() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		req := middleware.GetBody[CreateRequestRecord](c)
+		dto := mapCreateRequestRecord(&req)
+		productRecord, err := p.productService.CreateRecord(c.Request.Context(), *dto)
+		if err != nil {
+			fmt.Println(err.Error())
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
+			return
+		}
+
+		web.Success(c, http.StatusCreated, productRecord)
+	}
+}
+
 func mapErrorToStatus(err error) int {
 	var invalidProductCode *product.ErrInvalidProductCode
 	var notFound *product.ErrNotFound
@@ -236,5 +284,14 @@ func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 		Width:      *req.Width,
 		TypeID:     *req.TypeID,
 		SellerID:   *req.SellerID,
+	}
+}
+
+func mapCreateRequestRecord(req *CreateRequestRecord) *product.CreateRecordDTO {
+	return &product.CreateRecordDTO{
+		LastDate:      *req.LastDate,
+		PurchasePrice: *req.PurchasePrice,
+		SalePrice:     *req.SalePrice,
+		ProductID:     *req.ProductID,
 	}
 }
