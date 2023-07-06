@@ -163,3 +163,35 @@ func (s *Section) Delete() gin.HandlerFunc {
 
 	}
 }
+
+func (s *Section) GetReportProducts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.GetInt("id")
+
+		report, err := s.sectionService.GetReportProducts(c.Request.Context(), id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		web.Success(c, http.StatusOK, report)
+	}
+}
+
+func (s *Section) GetAllReportProducts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		report, err := s.sectionService.GetAllReportProducts(c.Request.Context())
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		if len(report) == 0 {
+			web.Success(c, http.StatusNoContent, report)
+			return
+		}
+
+		web.Success(c, http.StatusOK, report)
+	}
+}
