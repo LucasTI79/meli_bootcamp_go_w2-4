@@ -21,6 +21,7 @@ import (
 
 var sectionID = 1
 var SECTIONS_URL = "/sections"
+var SECTIONS_URL_ID = fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
 
 // Units tests
 func TestSectionRead(t *testing.T) {
@@ -78,8 +79,7 @@ func TestSectionRead(t *testing.T) {
 		expected := getTestSections()[0]
 		sectionService.On("Get", mock.Anything, sectionID).Return(expected, nil)
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestGet(server, urlWithID)
+		res := requestGet(server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -94,8 +94,7 @@ func TestSectionRead(t *testing.T) {
 
 		sectionService.On("Get", mock.Anything, sectionID).Return(domain.Section{}, errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestGet(server, urlWithID)
+		res := requestGet(server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -169,8 +168,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(expected, nil)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, expected.ID)
-		res := requestPatch(body, server, urlWithID)
+		res := requestPatch(body, server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -186,8 +184,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrNotFound)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -197,8 +194,7 @@ func TestSectionUpdate(t *testing.T) {
 		server := getSectionServer(h)
 
 		body := []section.UpdateSection{}
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 		sectionService.AssertNumberOfCalls(t, "Update", 0)
@@ -211,8 +207,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusConflict, res.Code)
 	})
@@ -225,8 +220,7 @@ func TestSectionUpdate(t *testing.T) {
 
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
@@ -240,8 +234,7 @@ func TestSectionDelete(t *testing.T) {
 
 		sectionService.On("Delete", mock.Anything, sectionID).Return(nil)
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestDelete(server, urlWithID)
+		res := requestDelete(server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -256,8 +249,7 @@ func TestSectionDelete(t *testing.T) {
 
 		sectionService.On("Delete", mock.Anything, mock.Anything).Return(errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestDelete(server, urlWithID)
+		res := requestDelete(server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
