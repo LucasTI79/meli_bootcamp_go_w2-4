@@ -132,6 +132,7 @@ func TestUpdateSeller(t *testing.T) {
 			CompanyName: "TEST",
 			Address:     "test street",
 			Telephone:   "9999999",
+			LocalityID:  1,
 		}
 		sellerUpdate := domain.Seller{
 			ID:          1,
@@ -139,6 +140,7 @@ func TestUpdateSeller(t *testing.T) {
 			CompanyName: "Meli",
 			Address:     "Osasco",
 			Telephone:   "1134489093",
+			LocalityID:  2,
 		}
 		repositoryMock.On("Get", mock.Anything, 1).Return(seller, nil)
 		repositoryMock.On("Update", mock.Anything, sellerUpdate).Return(nil)
