@@ -6,6 +6,7 @@ import (
 	_ "github.com/extmatperez/meli_bootcamp_go_w2-4/docs"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/batches"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
@@ -43,6 +44,7 @@ func (r *router) MapRoutes() {
 	r.buildWarehouseRoutes()
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
+	r.buildBatchRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -87,6 +89,7 @@ func (r *router) buildSectionRoutes() {
 	repository := section.NewRepository(r.db)
 	service := section.NewService(repository)
 	h := handler.NewSection(service)
+
 	sec := r.rg.Group("/sections")
 	{
 		sec.POST("", middleware.Body[section.CreateSection](), h.Create())
@@ -94,6 +97,8 @@ func (r *router) buildSectionRoutes() {
 		sec.GET("/:id", middleware.IntPathParam(), h.Get())
 		sec.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		sec.PATCH("/:id", middleware.IntPathParam(), middleware.Body[section.UpdateSection](), h.Update())
+		sec.GET("/report-products", h.GetAllReportProducts())
+		sec.GET("/report-products/:id", middleware.IntPathParam(), h.GetReportProducts())
 	}
 }
 
@@ -139,5 +144,16 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
+	}
+}
+
+func (r *router) buildBatchRoutes() {
+	repo := batches.NewRepository(r.db)
+	service := batches.NewService(repo)
+	h := handler.NewBatches(service)
+
+	batchRG := r.rg.Group("/product-batches")
+	{
+		batchRG.POST("", middleware.Body[handler.CreateBatchesRequest](), h.Create())
 	}
 }
