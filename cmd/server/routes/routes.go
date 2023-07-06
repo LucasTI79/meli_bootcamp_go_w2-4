@@ -9,6 +9,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
+	inboundOrder "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/inbound_order"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
@@ -43,6 +44,7 @@ func (r *router) MapRoutes() {
 	r.buildWarehouseRoutes()
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
+	r.buildInboundOrderRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -122,6 +124,8 @@ func (r *router) buildEmployeeRoutes() {
 		employeeRG.GET("", h.GetAll())
 		employeeRG.POST("", middleware.Body[domain.Employee](), h.Create())
 		employeeRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		employeeRG.GET("/report-inbound-orders/:id", middleware.IntPathParam(), h.GetInboundReport())
+		employeeRG.GET("/report-inbound-orders/", h.GetInboundReport())
 		employeeRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Employee](), h.Update())
 		employeeRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
@@ -139,5 +143,15 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
+	}
+}
+func (r *router) buildInboundOrderRoutes() {
+	repo := inboundOrder.NewRepository(r.db)
+	service := inboundOrder.NewService(repo)
+	h := handler.NewInboundOrder(service)
+
+	buyerRG := r.rg.Group("/inbound-orders")
+	{
+		buyerRG.POST("", middleware.Body[handler.InboundOrderRequest](), h.Create())
 	}
 }

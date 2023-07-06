@@ -159,3 +159,18 @@ func (e *Employee) Delete() gin.HandlerFunc {
 		web.Success(c, http.StatusNoContent, nil)
 	}
 }
+
+func (e *Employee) GetInboundReport() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := 0
+		if _, exists := c.Params.Get("id"); exists {
+			id = c.GetInt("id")
+		}
+		report, err := e.employeeService.GetInboundReport(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		web.Success(c, http.StatusOK, report)
+	}
+}
