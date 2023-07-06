@@ -57,10 +57,11 @@ func (i *Carrier) Create() gin.HandlerFunc {
 }
 
 func checkError(err error) int {
-	if errors.Is(err, carrier.ErrInternalServerError) {
-		return http.StatusInternalServerError
+	if errors.Is(err, carrier.ErrAlreadyExists) ||
+		errors.Is(err, carrier.ErrLocalityIDNotFound) {
+		return http.StatusConflict
 	}
-	return http.StatusConflict
+	return http.StatusInternalServerError
 }
 
 func mapCarrierRequestToDTO(req *CarrierRequest) *carrier.CarrierDTO {

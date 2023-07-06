@@ -39,7 +39,7 @@ func (s *service) Create(c context.Context, carrier CarrierDTO) (domain.Carrier,
 	}
 
 	i := mapCarrierDTOToDomain(&carrier)
-	id, err := s.repo.Create(c, *i)
+	id, err := s.repo.Create(c, i)
 	if err != nil {
 		var errMsg error
 		switch {
@@ -55,11 +55,11 @@ func (s *service) Create(c context.Context, carrier CarrierDTO) (domain.Carrier,
 	}
 
 	i.ID = id
-	return *i, nil
+	return i, nil
 }
 
-func mapCarrierDTOToDomain(carrier *CarrierDTO) *domain.Carrier {
-	return &domain.Carrier{
+func mapCarrierDTOToDomain(carrier *CarrierDTO) domain.Carrier {
+	return domain.Carrier{
 		CID:         carrier.CID,
 		CompanyName: carrier.CompanyName,
 		Address:     carrier.Address,

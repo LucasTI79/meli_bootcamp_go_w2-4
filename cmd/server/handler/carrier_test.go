@@ -3,7 +3,9 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
@@ -32,8 +34,7 @@ func TestCarrierCreate(t *testing.T) {
 
 		carrierService.On("Create", mock.Anything, mock.Anything).Return(expected, nil)
 
-		req, res := testutil.MakeRequest(http.MethodPost, CARRIER_URL, body)
-		server.ServeHTTP(res, req)
+		res := requestCarrierPost(body, server)
 
 		var received testutil.SuccessResponse[domain.Carrier]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -41,6 +42,42 @@ func TestCarrierCreate(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, res.Code)
 		assert.Equal(t, expected, received.Data)
 	})
+	t.Run("Does not create any carrier and returns error: unprocessable content", func(t *testing.T) {
+		carrierService := CarrierServiceMock{}
+		h := handler.NewCarrier(&carrierService)
+		server := getCarrierServer(h)
+
+		body := handler.CarrierRequest{}
+		res := requestCarrierPost(body, server)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
+		carrierService.AssertNumberOfCalls(t, "Create", 0)
+	})
+	t.Run("Does not create any carrier and returns error: conflict", func(t *testing.T) {
+		carrierService := CarrierServiceMock{}
+		h := handler.NewCarrier(&carrierService)
+		server := getCarrierServer(h)
+
+		carrierService.On("Create", mock.Anything, mock.Anything).Return(domain.Carrier{}, carrier.ErrAlreadyExists)
+
+		body := getTestCarrierRequest()
+		res := requestCarrierPost(body, server)
+
+		assert.Equal(t, http.StatusConflict, res.Code)
+	})
+	t.Run("Does not create any carrier and returns error: internal server error", func(t *testing.T) {
+		carrierService := CarrierServiceMock{}
+		h := handler.NewCarrier(&carrierService)
+		server := getCarrierServer(h)
+
+		carrierService.On("Create", mock.Anything, mock.Anything).Return(domain.Carrier{}, errors.New(""))
+
+		body := getTestCarrierRequest()
+		res := requestCarrierPost(body, server)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
+
 }
 
 func getCarrierServer(h *handler.Carrier) *gin.Engine {
@@ -83,6 +120,12 @@ func getTestCarrier() domain.Carrier {
 		Telephone:   "12345689",
 		LocalityID:  5,
 	}
+}
+
+func requestCarrierPost(body any, server *gin.Engine) *httptest.ResponseRecorder {
+	req, res := testutil.MakeRequest(http.MethodPost, CARRIER_URL, body)
+	server.ServeHTTP(res, req)
+	return res
 }
 
 type CarrierServiceMock struct {
