@@ -312,7 +312,7 @@ func (r *RepositoryMock) GetReportProducts(ctx context.Context, id int) (domain.
 	return args.Get(0).(domain.GetOneData), args.Error(1)
 }
 
-func (r *RepositoryMock) GetAllReportProducts(ctx context.Context) ([]domain.Section, error) {
+func (r *RepositoryMock) GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error) {
 	args := r.Called(ctx)
-	return args.Get(0).([]domain.Section), args.Error(1)
+	return args.Get(0).([]domain.GetOneData), args.Error(1)
 }

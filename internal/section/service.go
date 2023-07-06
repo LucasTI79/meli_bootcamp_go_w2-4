@@ -175,7 +175,7 @@ func mapCreateToDomain(section *CreateSection) *domain.Section {
 func (s *service) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
 	section, err := s.repository.GetAllReportProducts(ctx)
 	if err != nil {
-		return domain.GetOneData{}, ErrNotFound
+		return domain.GetOneData{}, ErrGetSections
 	}
 
 	for _, s := range section {
