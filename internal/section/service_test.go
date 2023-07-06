@@ -129,8 +129,8 @@ func TestUpdate(t *testing.T) {
 
 		updates := section.UpdateSection{
 			SectionNumber:      testutil.ToPtr(1234),
-			CurrentTemperature: testutil.ToPtr(11),
-			MinimumTemperature: testutil.ToPtr(0),
+			CurrentTemperature: testutil.ToPtr(11.0),
+			MinimumTemperature: testutil.ToPtr(0.0),
 			CurrentCapacity:    testutil.ToPtr(16),
 			MinimumCapacity:    testutil.ToPtr(0),
 			MaximumCapacity:    testutil.ToPtr(21),
@@ -261,8 +261,8 @@ func getTestCreateSections() section.CreateSection {
 func getUpdateSection() section.UpdateSection {
 	return section.UpdateSection{
 		SectionNumber:      testutil.ToPtr(123),
-		CurrentTemperature: testutil.ToPtr(11),
-		MinimumTemperature: testutil.ToPtr(6),
+		CurrentTemperature: testutil.ToPtr(11.0),
+		MinimumTemperature: testutil.ToPtr(6.0),
 		CurrentCapacity:    testutil.ToPtr(16),
 		MinimumCapacity:    testutil.ToPtr(11),
 		MaximumCapacity:    testutil.ToPtr(21),
@@ -305,4 +305,14 @@ func (r *RepositoryMock) Update(ctx context.Context, s domain.Section) error {
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (r *RepositoryMock) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).(domain.GetOneData), args.Error(1)
+}
+
+func (r *RepositoryMock) GetAllReportProducts(ctx context.Context) ([]domain.Section, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.Section), args.Error(1)
 }

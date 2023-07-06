@@ -372,3 +372,13 @@ func (s *SectionServiceMock) Delete(ctx context.Context, id int) error {
 	args := s.Called(ctx, id)
 	return args.Error(0)
 }
+
+func (s *SectionServiceMock) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
+	args := s.Called(ctx, id)
+	return args.Get(0).(domain.GetOneData), args.Error(1)
+}
+
+func (s *SectionServiceMock) GetAllReportProducts(ctx context.Context) ([]domain.Section, error) {
+	args := s.Called(ctx)
+	return args.Get(0).([]domain.Section), args.Error(1)
+}
