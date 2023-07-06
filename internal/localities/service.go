@@ -15,6 +15,7 @@ type CreateDTO struct {
 }
 
 type SellersByLocality struct {
+	ID    int
 	Name  string
 	Count int
 }
@@ -39,7 +40,7 @@ func NewService(repo Repository) Service {
 func (svc *service) Create(c context.Context, loc CreateDTO) (domain.Locality, error) {
 	locDomain := MapCreateToDomain(loc)
 
-	id, err := svc.repo.Create(c, locDomain)
+	id, err := svc.repo.Save(c, locDomain)
 	if err != nil {
 		var errInvalidLoc *ErrInvalidLocality
 		if errors.As(err, &errInvalidLoc) {
@@ -82,6 +83,7 @@ func (svc *service) CountSellers(c context.Context, id optional.Opt[int]) ([]Sel
 
 func newSellersByLocality(loc domain.Locality, count int) SellersByLocality {
 	return SellersByLocality{
+		ID:    loc.ID,
 		Name:  loc.Name,
 		Count: count,
 	}

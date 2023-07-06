@@ -15,7 +15,7 @@ type SellerCount struct {
 }
 
 type Repository interface {
-	Create(c context.Context, loc domain.Locality) (int, error)
+	Save(c context.Context, loc domain.Locality) (int, error)
 	GetAll(c context.Context) ([]domain.Locality, error)
 	CountSellersByLocalities(c context.Context, ids []int) ([]SellerCount, error)
 }
@@ -30,7 +30,7 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
-func (r *repository) Create(ctx context.Context, loc domain.Locality) (int, error) {
+func (r *repository) Save(ctx context.Context, loc domain.Locality) (int, error) {
 	// This query inserts the domain's locality across 3 tables.
 	// It tries to inser the province and country names if they
 	// don't exist, ignoring possible unique-constraint violations.
