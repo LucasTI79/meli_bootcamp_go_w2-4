@@ -2,6 +2,7 @@ package localities_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
@@ -10,6 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+var ErrRepository = errors.New("error in the repository layer")
 
 func TestCreate(t *testing.T) {
 	t.Run("Creates valid locality", func(t *testing.T) {
@@ -50,6 +53,23 @@ func TestCreate(t *testing.T) {
 		}
 		var expectedErr *localities.ErrInvalidLocality
 		repo.On("Save", mock.Anything, mock.Anything).Return(0, localities.NewErrInvalidLocality(loc))
+
+		_, err := svc.Create(context.TODO(), dto)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		dto := localities.CreateDTO{
+			Name:     "Melicidade",
+			Province: "SP",
+			Country:  "Brasil",
+		}
+
+		var expectedErr *localities.ErrGeneric
+		repo.On("Save", mock.Anything, mock.Anything).Return(0, ErrRepository)
 
 		_, err := svc.Create(context.TODO(), dto)
 
@@ -158,6 +178,34 @@ func TestReport(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Len(t, received, 0)
+	})
+	t.Run("Returns generic domain error if repository GetAll fails", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+		var expectedErr *localities.ErrGeneric
+
+		repo.On("GetAll", mock.Anything).Return([]domain.Locality{}, ErrRepository)
+
+		_, err := svc.CountSellers(context.TODO(), noID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository SellerCount fails", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+		var expectedErr *localities.ErrGeneric
+
+		locs := getLocalities()
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountSellersByLocalities", mock.Anything, mock.Anything).Return([]localities.SellerCount{}, ErrRepository)
+
+		_, err := svc.CountSellers(context.TODO(), noID)
+
+		assert.ErrorAs(t, err, &expectedErr)
 	})
 }
 
