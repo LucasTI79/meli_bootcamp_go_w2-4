@@ -21,6 +21,18 @@ func NewLocality(svc localities.Service) *Locality {
 	}
 }
 
+// Create godoc
+//
+//	@Summary	Create new locality
+//	@Tags		Localities
+//	@Accept		json
+//	@Produce	json
+//	@Param		locality	body		localities.CreateDTO	true	"Locality to be added"
+//	@Success	201			{object}	web.response			"Returns created locality"
+//	@Failure	409			{object}	web.errorResponse		"Locality is not unique"
+//	@Failure	422			{object}	web.errorResponse		"Missing fields or invalid field types"
+//	@Failure	500			{object}	web.errorResponse		"Could not save locality"
+//	@Router		/api/v1/localities [post]
 func (h *Locality) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		dto := middleware.GetBody[localities.CreateDTO](c)
@@ -36,6 +48,16 @@ func (h *Locality) Create() gin.HandlerFunc {
 	}
 }
 
+// ReportAll godoc
+//
+//	@Summary	Return seller count for each locality
+//	@Tags		Localities
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns seller count for localities"
+//	@Success	204	{object}	web.response		"No content was found"
+//	@Failure	500	{object}	web.errorResponse	"Could not save locality"
+//	@Router		/api/v1/localities/report-sellers [get]
 func (h *Locality) SellerReport() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var id optional.Opt[int]
@@ -58,6 +80,19 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 		web.Success(c, http.StatusOK, report)
 	}
 }
+
+// ReportByID godoc
+//
+//	@Summary	Return seller count for given locality
+//	@Tags		Localities
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int					true	"Locality ID"
+//	@Success	200	{object}	web.response		"Returns seller count for locality"
+//	@Failure	404	{object}	web.response		"ID was not found"
+//	@Failure	500	{object}	web.errorResponse	"Could not save locality"
+//	@Router		/api/v1/localities/report-sellers/{id} [get]x
+func _() {} // Implementation is in the SellerReport function
 
 func mapLocalityErrToStatus(err error) int {
 	var invalidLocality *localities.ErrInvalidLocality
