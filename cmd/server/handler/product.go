@@ -114,6 +114,28 @@ func (p *Product) Get() gin.HandlerFunc {
 	}
 }
 
+// Get godoc
+//
+//	@Summary	Get all product records
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns products records"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find product"
+//	@Router		/api/v1/products/report-records [get]
+//
+// Get godoc
+//
+//	@Summary	Get product records by productID
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int					true	"Product ID"
+//	@Success	200	{object}	web.response		"Returns product"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find product"
+//	@Router		/api/v1/products/report-records/{id} [get]
 func (p *Product) GetRecords() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetInt("id")
@@ -226,6 +248,18 @@ func (p *Product) Delete() gin.HandlerFunc {
 	}
 }
 
+// Create godoc
+//
+//	@Summary	Create new product record
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Param		product	record body		CreateRequestRecord		true	"Product record to be added"
+//	@Success	201		{object}	web.response		"Returns created product record"
+//	@Failure	409		{object}	web.errorResponse	"`product_code` is not unique"
+//	@Failure	422		{object}	web.errorResponse	"Missing fields or invalid field types"
+//	@Failure	500		{object}	web.errorResponse	"Could not save product"
+//	@Router		/api/v1/product-records [post]
 func (p *Product) CreateRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := middleware.GetBody[CreateRequestRecord](c)
