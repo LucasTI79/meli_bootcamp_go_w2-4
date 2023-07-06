@@ -101,16 +101,6 @@ func getTestCarrierRequest() handler.CarrierRequest {
 	}
 }
 
-// func getTestCarrierDTO() carrier.CarrierDTO {
-// 	return carrier.CarrierDTO{
-// 		CID:         10,
-// 		CompanyName: "mercado livre",
-// 		Address:     "osasco",
-// 		Telephone:   "12345689",
-// 		LocalityID:  5,
-// 	}
-// }
-
 func getTestCarrier() domain.Carrier {
 	return domain.Carrier{
 		ID:          carrierID,
