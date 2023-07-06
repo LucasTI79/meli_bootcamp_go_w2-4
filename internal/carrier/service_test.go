@@ -2,6 +2,7 @@ package carrier_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
@@ -31,6 +32,45 @@ func TestCreate(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
 		assert.EqualValues(t, carrierID, result.ID)
+	})
+	t.Run("Does not create any carrier and returns error: cid alredy exists", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := carrier.NewService(&repositoryMock)
+
+		body := getTestCarrierDTO()
+
+		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(true)
+
+		_, err := svc.Create(context.TODO(), body)
+
+		assert.ErrorIs(t, err, carrier.ErrAlreadyExists)
+		repositoryMock.AssertNumberOfCalls(t, "Create", 0)
+	})
+	t.Run("Does not create any carrier and returns error: locality_id not found", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := carrier.NewService(&repositoryMock)
+
+		body := getTestCarrierDTO()
+
+		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
+		repositoryMock.On("Create", mock.Anything, mock.Anything).Return(0, carrier.ErrLocalityIDNotFound)
+
+		_, err := svc.Create(context.TODO(), body)
+
+		assert.ErrorIs(t, err, carrier.ErrLocalityIDNotFound)
+	})
+	t.Run("Does not create any carrier and returns error: internal server error", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := carrier.NewService(&repositoryMock)
+
+		body := getTestCarrierDTO()
+
+		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
+		repositoryMock.On("Create", mock.Anything, mock.Anything).Return(0, errors.New(""))
+
+		_, err := svc.Create(context.TODO(), body)
+
+		assert.ErrorIs(t, err, carrier.ErrInternalServerError)
 	})
 }
 

@@ -47,7 +47,7 @@ func (i *Carrier) Create() gin.HandlerFunc {
 		p, err := i.carrierService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			errStatus := checkError(err)
+			errStatus := checkErrorStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -56,7 +56,7 @@ func (i *Carrier) Create() gin.HandlerFunc {
 	}
 }
 
-func checkError(err error) int {
+func checkErrorStatus(err error) int {
 	if errors.Is(err, carrier.ErrAlreadyExists) ||
 		errors.Is(err, carrier.ErrLocalityIDNotFound) {
 		return http.StatusConflict

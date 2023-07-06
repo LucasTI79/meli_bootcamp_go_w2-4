@@ -41,17 +41,10 @@ func (s *service) Create(c context.Context, carrier CarrierDTO) (domain.Carrier,
 	i := mapCarrierDTOToDomain(&carrier)
 	id, err := s.repo.Create(c, i)
 	if err != nil {
-		var errMsg error
-		switch {
-		case errors.Is(err, ErrAlreadyExists):
-			errMsg = ErrAlreadyExists
-		case errors.Is(err, ErrLocalityIDNotFound):
-			errMsg = ErrLocalityIDNotFound
-		default:
-			errMsg = ErrInternalServerError
+		if errors.Is(err, ErrLocalityIDNotFound) {
+			return domain.Carrier{}, ErrLocalityIDNotFound
 		}
-
-		return domain.Carrier{}, errMsg
+		return domain.Carrier{}, ErrInternalServerError
 	}
 
 	i.ID = id
