@@ -257,25 +257,25 @@ func TestSectionDelete(t *testing.T) {
 
 // Requests
 
-func requestGet(server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionGet(server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodGet, url, "")
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestPost(body section.CreateSection, server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionPost(body section.CreateSection, server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodPost, url, body)
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestPatch(body any, server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionPatch(body any, server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodPatch, url, body)
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestDelete(server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionDelete(server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodDelete, url, "")
 	server.ServeHTTP(res, req)
 	return res
