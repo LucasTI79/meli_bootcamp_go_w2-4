@@ -255,6 +255,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`carriers` (
   `telephone` VARCHAR(255) NOT NULL,
   `locality_id` INT NOT NULL,
   PRIMARY KEY (`id`),
+  CONSTRAINT `cid` UNIQUE (`cid`),
   INDEX `locality_id_idx` (`locality_id` ASC) VISIBLE,
   CONSTRAINT `fk_locality_carrier`
     FOREIGN KEY (`locality_id`)
