@@ -255,6 +255,101 @@ func TestSectionDelete(t *testing.T) {
 	})
 }
 
+func TestGetAllReportProducts(t *testing.T) {
+	t.Run("get all the products of sections and the result be zero", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		sectionService.On("GetAllReportProducts", mock.Anything).Return([]domain.GetOneData{}, nil)
+
+		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
+
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
+
+		var received testutil.SuccessResponse[[]domain.GetOneData]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		fmt.Fprintln(res.Body)
+		assert.Equal(t, http.StatusNoContent, res.Code)
+		assert.Len(t, received.Data, 0)
+	})
+
+	t.Run("get a error 404 in the getallreportproducts", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		sectionService.On("GetAllReportProducts", mock.Anything).Return([]domain.GetOneData{}, section.ErrNotFound)
+
+		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
+
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("get all the products of sections", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+		expected := []domain.GetOneData{
+			{
+				SectionId:     123,
+				SectionNumber: 2,
+				ProductCount:  0,
+			},
+		}
+
+		sectionService.On("GetAllReportProducts", mock.Anything).Return(expected, nil)
+
+		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
+
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
+		var received testutil.SuccessResponse[[]domain.GetOneData]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+}
+
+func TestGetReportProducts(t *testing.T) {
+	t.Run("get the products of section", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+		expected := domain.GetOneData{
+			SectionId:     123,
+			SectionNumber: 2,
+			ProductCount:  0,
+		}
+
+		sectionService.On("GetReportProducts", mock.Anything, mock.Anything).Return(expected, nil)
+
+		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s/%d", SECTIONS_URL, "report-products", 123)
+
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
+		var received testutil.SuccessResponse[domain.GetOneData]
+
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, expected, received.Data)
+	})
+	t.Run("get the products not found", func(t *testing.T) {
+		sectionService := SectionServiceMock{}
+		h := handler.NewSection(&sectionService)
+		server := getSectionServer(h)
+
+		sectionService.On("GetReportProducts", mock.Anything, mock.Anything).Return(domain.GetOneData{}, section.ErrNotFound)
+
+		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s/%d", SECTIONS_URL, "report-products", 123)
+
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+}
+
 // Requests
 
 func requestSectionGet(server *gin.Engine, url string) *httptest.ResponseRecorder {
@@ -293,6 +388,8 @@ func getSectionServer(h *handler.Section) *gin.Engine {
 		sectionRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		sectionRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		sectionRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[section.UpdateSection](), h.Update())
+		sectionRG.GET("/report-products", h.GetAllReportProducts())
+		sectionRG.GET("/report-products/:id", middleware.IntPathParam(), h.GetReportProducts())
 	}
 
 	return server
@@ -330,7 +427,7 @@ func getTestCreateSection() section.CreateSection {
 func getUpdateSection() section.UpdateSection {
 	return section.UpdateSection{
 		SectionNumber:      testutil.ToPtr(123),
-		CurrentTemperature: testutil.ToPtr(11),
+		CurrentTemperature: testutil.ToPtr(11.0),
 	}
 }
 
@@ -363,4 +460,14 @@ func (s *SectionServiceMock) Update(ctx context.Context, dto section.UpdateSecti
 func (s *SectionServiceMock) Delete(ctx context.Context, id int) error {
 	args := s.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (s *SectionServiceMock) GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error) {
+	args := s.Called(ctx)
+	return args.Get(0).([]domain.GetOneData), args.Error(1)
+}
+
+func (s *SectionServiceMock) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
+	args := s.Called(ctx, id)
+	return args.Get(0).(domain.GetOneData), args.Error(1)
 }
