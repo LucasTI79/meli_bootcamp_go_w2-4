@@ -403,3 +403,18 @@ func (s *ProductServiceMock) Delete(c context.Context, id int) error {
 	args := s.Called(c, id)
 	return args.Error(0)
 }
+
+func (r *ProductServiceMock) CreateRecord(ctx context.Context, product product.CreateRecordDTO) (domain.Product_Records, error) {
+	args := r.Called(ctx, product)
+	return args.Get(0).(domain.Product_Records), args.Error(1)
+}
+
+func (r *ProductServiceMock) GetAllRecords(ctx context.Context) ([]domain.Product_Records, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
+}
+
+func (r *ProductServiceMock) GetRecords(ctx context.Context, id int) ([]domain.Product_Records, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
+}
