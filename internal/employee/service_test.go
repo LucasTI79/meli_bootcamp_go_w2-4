@@ -244,6 +244,74 @@ func TestDeleteEmployee(t *testing.T) {
 		assert.ErrorIs(t, err, employee.ErrNotFound)
 	})
 }
+func TestGetInboundReport(t *testing.T) {
+	t.Run("return correct report for valid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		r := domain.InboundReport{
+			ID:           1,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("GetInboundReport", mock.Anything, r.ID).Return(r, nil)
+		report, err := s.GetInboundReport(context.TODO(), 1)
+		assert.NoError(t, err)
+		assert.Equal(t, []domain.InboundReport{r}, report)
+	})
+	t.Run("return all reports when a id is not received", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		r := []domain.InboundReport{{
+			ID:                 1,
+			CardNumberID:       "126",
+			FirstName:          "Lucas",
+			LastName:           "Melo",
+			WarehouseID:        1,
+			InboundOrdersCount: 5,
+		}, {
+			ID:                 2,
+			CardNumberID:       "125",
+			FirstName:          "Func2",
+			LastName:           "FuncLastName2",
+			WarehouseID:        1,
+			InboundOrdersCount: 10,
+		}}
+
+		mockedRepository.On("GetAllInboundReports", mock.Anything).Return(r, nil)
+		reports, err := s.GetInboundReport(context.TODO(), 0)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, r, reports)
+	})
+	t.Run("returns a error when id is not found", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		r := domain.InboundReport{
+			ID:           1000000,
+			CardNumberID: "126",
+			FirstName:    "Lucas",
+			LastName:     "Melo",
+			WarehouseID:  1,
+		}
+
+		mockedRepository.On("GetInboundReport", mock.Anything, r.ID).Return(domain.InboundReport{}, employee.ErrNotFound)
+		_, err := s.GetInboundReport(context.TODO(), r.ID)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
+	})
+	t.Run("return an error when there isnt any report", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := employee.NewService(&mockedRepository)
+
+		mockedRepository.On("GetAllInboundReports", mock.Anything).Return([]domain.InboundReport{}, employee.ErrNotFound)
+		_, err := s.GetInboundReport(context.TODO(), 0)
+		assert.ErrorIs(t, err, employee.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
@@ -277,4 +345,12 @@ func (r *RepositoryMock) Update(ctx context.Context, s domain.Employee) error {
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
+}
+func (r *RepositoryMock) GetAllInboundReports(ctx context.Context) ([]domain.InboundReport, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.InboundReport), args.Error(1)
+}
+func (r *RepositoryMock) GetInboundReport(ctx context.Context, id int) (domain.InboundReport, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).(domain.InboundReport), args.Error(1)
 }
