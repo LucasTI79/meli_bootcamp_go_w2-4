@@ -90,7 +90,7 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 //	@Param			warehouse	body		domain.Warehouse	true	"Warehouse object"
 //	@Success		201			{object}	domain.Warehouse
 //	@Failure		422			{string}	string	"warehousecode need to be passed, it can't be empty"
-//	@Failure		500			{string}	string	 "something went wrong with the request"
+//	@Failure		500			{string}	string	"something went wrong with the request"
 //	@Failure		409			{string}	string	"warehouse can be alreary exist"
 //	@Router			/api/v1/warehouses [post]
 func (w *Warehouse) Create() gin.HandlerFunc {

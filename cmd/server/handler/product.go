@@ -74,7 +74,7 @@ func (p *Product) GetAll() gin.HandlerFunc {
 		ps, err := p.productService.GetAll(c.Request.Context())
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -105,7 +105,7 @@ func (p *Product) Get() gin.HandlerFunc {
 		p, err := p.productService.Get(c.Request.Context(), id)
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -178,7 +178,7 @@ func (p *Product) Create() gin.HandlerFunc {
 		p, err := p.productService.Create(c.Request.Context(), *dto)
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -211,7 +211,7 @@ func (p *Product) Update() gin.HandlerFunc {
 		p, err := p.productService.Update(c.Request.Context(), id, *dto)
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -239,7 +239,7 @@ func (p *Product) Delete() gin.HandlerFunc {
 		err := p.productService.Delete(c.Request.Context(), id)
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}

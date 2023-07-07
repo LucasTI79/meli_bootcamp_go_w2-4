@@ -24,6 +24,7 @@ USE `melisprint` ;
 CREATE TABLE IF NOT EXISTS `melisprint`.`countries` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `country_name` VARCHAR(255) NOT NULL,
+  CONSTRAINT `country_name_UNIQUE` UNIQUE (`country_name`),
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`provinces` (
   `country_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `country_id_idx` (`country_id` ASC) VISIBLE,
+  CONSTRAINT `province_UNIQUE` UNIQUE (`province_name`, `country_id`),
   CONSTRAINT `fk_country_provinces`
     FOREIGN KEY (`country_id`)
     REFERENCES `melisprint`.`countries` (`id`)
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`localities` (
   `province_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `province_id_idx` (`province_id` ASC) VISIBLE,
+  CONSTRAINT `locality_UNIQUE` UNIQUE (`locality_name`, `province_id`),
   CONSTRAINT `fk_province_localities`
     FOREIGN KEY (`province_id`)
     REFERENCES `melisprint`.`provinces` (`id`)
@@ -374,6 +377,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`inbound_orders` (
   `employee_id` INT NOT NULL,
   `product_batch_id` INT NOT NULL,
   `warehouse_id` INT NOT NULL,
+  CONSTRAINT `order_number` UNIQUE (`order_number`),
   PRIMARY KEY (`id`),
   INDEX `employee_id_idx` (`employee_id` ASC) VISIBLE,
   INDEX `product_batch_id_idx` (`product_batch_id` ASC) VISIBLE,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -16,6 +17,7 @@ type Repository interface {
 	Save(ctx context.Context, s domain.Section) (int, error)
 	Update(ctx context.Context, s domain.Section) error
 	Delete(ctx context.Context, id int) error
+	GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error)
 }
 
 type repository struct {
@@ -133,4 +135,24 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (r *repository) GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error) {
+	var sections []domain.GetOneData
+	query := "SELECT s.id, s.section_number, COUNT(p.id) AS products_count FROM sections s INNER JOIN product_batches pb ON s.ID = pb.section_id INNER JOIN products p ON pb.product_id = p.id GROUP by s.id, s.section_number;"
+	rows, err := r.db.Query(query)
+	if err != nil {
+		fmt.Println(err.Error())
+		return sections, err
+	}
+	for rows.Next() {
+		s := domain.GetOneData{}
+		err = rows.Scan(&s.SectionId, &s.SectionNumber, &s.ProductCount)
+		if err != nil {
+			fmt.Println(err.Error())
+			return sections, err
+		}
+		sections = append(sections, s)
+	}
+	return sections, nil
 }
