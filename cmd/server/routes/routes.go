@@ -155,6 +155,8 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.GET("", h.GetAll())
 		buyerRG.POST("", middleware.Body[domain.BuyerCreate](), h.Create())
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		buyerRG.GET("/report-purchase-orders/:id", middleware.IntPathParam(), h.PurchaseOrderReport())
+		buyerRG.GET("/report-purchase-orders/", h.PurchaseOrderReport())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
 	}
