@@ -84,7 +84,7 @@ func TestReport(t *testing.T) {
 
 		noID := optional.Opt[int]{}
 
-		expected := []localities.SellersByLocality{
+		expected := []localities.CountByLocality{
 			{
 				ID:    1,
 				Name:  "Melicidade",
@@ -96,14 +96,14 @@ func TestReport(t *testing.T) {
 				Count: 1,
 			},
 		}
-		counts := []localities.SellerCount{
+		counts := []localities.Count{
 			{
-				LocalityID:  1,
-				SellerCount: 2,
+				LocalityID: 1,
+				Count:      2,
 			},
 			{
-				LocalityID:  2,
-				SellerCount: 1,
+				LocalityID: 2,
+				Count:      1,
 			},
 		}
 		locs := getLocalities()
@@ -122,17 +122,17 @@ func TestReport(t *testing.T) {
 
 		id := *optional.FromVal(2)
 
-		expected := []localities.SellersByLocality{
+		expected := []localities.CountByLocality{
 			{
 				ID:    2,
 				Name:  "Tesla",
 				Count: 1,
 			},
 		}
-		counts := []localities.SellerCount{
+		counts := []localities.Count{
 			{
-				LocalityID:  2,
-				SellerCount: 1,
+				LocalityID: 2,
+				Count:      1,
 			},
 		}
 		locs := getLocalities()
@@ -151,7 +151,7 @@ func TestReport(t *testing.T) {
 
 		id := *optional.FromVal(7)
 
-		counts := []localities.SellerCount{}
+		counts := []localities.Count{}
 		locs := getLocalities()
 		var expectedErr *localities.ErrNotFound
 
@@ -168,7 +168,7 @@ func TestReport(t *testing.T) {
 
 		noID := optional.Opt[int]{}
 
-		counts := []localities.SellerCount{}
+		counts := []localities.Count{}
 		locs := getLocalities()
 
 		repo.On("GetAll", mock.Anything).Return(locs, nil)
@@ -192,7 +192,7 @@ func TestReport(t *testing.T) {
 
 		assert.ErrorAs(t, err, &expectedErr)
 	})
-	t.Run("Returns generic domain error if repository SellerCount fails", func(t *testing.T) {
+	t.Run("Returns generic domain error if repository Count fails", func(t *testing.T) {
 		repo := RepositoryMock{}
 		svc := localities.NewService(&repo)
 
@@ -201,7 +201,7 @@ func TestReport(t *testing.T) {
 
 		locs := getLocalities()
 		repo.On("GetAll", mock.Anything).Return(locs, nil)
-		repo.On("CountSellersByLocalities", mock.Anything, mock.Anything).Return([]localities.SellerCount{}, ErrRepository)
+		repo.On("CountSellersByLocalities", mock.Anything, mock.Anything).Return([]localities.Count{}, ErrRepository)
 
 		_, err := svc.CountSellers(context.TODO(), noID)
 
@@ -236,7 +236,12 @@ func (r *RepositoryMock) GetAll(c context.Context) ([]domain.Locality, error) {
 	return args.Get(0).([]domain.Locality), args.Error(1)
 }
 
-func (r *RepositoryMock) CountSellersByLocalities(c context.Context, ids []int) ([]localities.SellerCount, error) {
+func (r *RepositoryMock) CountSellersByLocalities(c context.Context, ids []int) ([]localities.Count, error) {
 	args := r.Called(c, ids)
-	return args.Get(0).([]localities.SellerCount), args.Error(1)
+	return args.Get(0).([]localities.Count), args.Error(1)
+}
+
+func (r *RepositoryMock) CountCarriersByLocalities(c context.Context, ids []int) ([]localities.Count, error) {
+	args := r.Called(c, ids)
+	return args.Get(0).([]localities.Count), args.Error(1)
 }

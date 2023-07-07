@@ -79,7 +79,7 @@ func TestLocalityReport(t *testing.T) {
 		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.SellersByLocality]
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -98,7 +98,7 @@ func TestLocalityReport(t *testing.T) {
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.SellersByLocality]
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -110,7 +110,7 @@ func TestLocalityReport(t *testing.T) {
 		server := getLocalityServer(h)
 
 		id := *optional.FromVal(42)
-		svc.On("CountSellers", mock.Anything, id).Return([]localities.SellersByLocality{}, localities.NewErrNotFound(id.Val))
+		svc.On("CountSellers", mock.Anything, id).Return([]localities.CountByLocality{}, localities.NewErrNotFound(id.Val))
 
 		url := fmt.Sprintf("%s/%d", LOCALITY_URL, id.Val)
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
@@ -125,12 +125,12 @@ func TestLocalityReport(t *testing.T) {
 			server := getLocalityServer(h)
 
 			id := optional.Opt[int]{}
-			svc.On("CountSellers", mock.Anything, id).Return([]localities.SellersByLocality{}, nil)
+			svc.On("CountSellers", mock.Anything, id).Return([]localities.CountByLocality{}, nil)
 
 			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
 			server.ServeHTTP(res, req)
 
-			var response testutil.SuccessResponse[[]localities.SellersByLocality]
+			var response testutil.SuccessResponse[[]localities.CountByLocality]
 			json.Unmarshal(res.Body.Bytes(), &response)
 
 			assert.Equal(t, http.StatusNoContent, res.Code)
@@ -142,7 +142,7 @@ func TestLocalityReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		svc.On("CountSellers", mock.Anything, mock.Anything).Return([]localities.SellersByLocality{}, localities.NewErrGeneric(""))
+		svc.On("CountSellers", mock.Anything, mock.Anything).Return([]localities.CountByLocality{}, localities.NewErrGeneric(""))
 
 		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
 		server.ServeHTTP(res, req)
@@ -151,8 +151,8 @@ func TestLocalityReport(t *testing.T) {
 	})
 }
 
-func getSellerCounts() []localities.SellersByLocality {
-	return []localities.SellersByLocality{
+func getSellerCounts() []localities.CountByLocality {
+	return []localities.CountByLocality{
 		{
 			ID:    1,
 			Name:  "Melicidade",
@@ -186,7 +186,12 @@ func (s *LocalityServiceMock) Create(c context.Context, loc localities.CreateDTO
 	return args.Get(0).(domain.Locality), args.Error(1)
 }
 
-func (s *LocalityServiceMock) CountSellers(c context.Context, id optional.Opt[int]) ([]localities.SellersByLocality, error) {
+func (s *LocalityServiceMock) CountSellers(c context.Context, id optional.Opt[int]) ([]localities.CountByLocality, error) {
 	args := s.Called(c, id)
-	return args.Get(0).([]localities.SellersByLocality), args.Error(1)
+	return args.Get(0).([]localities.CountByLocality), args.Error(1)
+}
+
+func (s *LocalityServiceMock) CountCarriers(c context.Context, id optional.Opt[int]) ([]localities.CountByLocality, error) {
+	args := s.Called(c, id)
+	return args.Get(0).([]localities.CountByLocality), args.Error(1)
 }

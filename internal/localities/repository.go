@@ -9,15 +9,16 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
 
-type SellerCount struct {
-	LocalityID  int
-	SellerCount int
+type Count struct {
+	LocalityID int
+	Count      int
 }
 
 type Repository interface {
 	Save(c context.Context, loc domain.Locality) (int, error)
 	GetAll(c context.Context) ([]domain.Locality, error)
-	CountSellersByLocalities(c context.Context, ids []int) ([]SellerCount, error)
+	CountSellersByLocalities(c context.Context, ids []int) ([]Count, error)
+	CountCarriersByLocalities(c context.Context, ids []int) ([]Count, error)
 }
 
 type repository struct {
@@ -89,9 +90,9 @@ func (r *repository) GetAll(c context.Context) ([]domain.Locality, error) {
 	return locs, nil
 }
 
-func (r *repository) CountSellersByLocalities(c context.Context, ids []int) ([]SellerCount, error) {
+func (r *repository) CountSellersByLocalities(c context.Context, ids []int) ([]Count, error) {
 	if len(ids) == 0 {
-		return make([]SellerCount, 0), nil
+		return make([]Count, 0), nil
 	}
 
 	query := `SELECT l.id, COUNT(s.id)
@@ -106,10 +107,41 @@ func (r *repository) CountSellersByLocalities(c context.Context, ids []int) ([]S
 		return nil, err
 	}
 
-	counts := make([]SellerCount, 0)
+	counts := make([]Count, 0)
 	for rows.Next() {
-		var count SellerCount
-		err := rows.Scan(&count.LocalityID, &count.SellerCount)
+		var count Count
+		err := rows.Scan(&count.LocalityID, &count.Count)
+		if err != nil {
+			log.Println(err.Error())
+			return nil, err
+		}
+		counts = append(counts, count)
+	}
+
+	return counts, nil
+}
+
+func (r *repository) CountCarriersByLocalities(c context.Context, ids []int) ([]Count, error) {
+	if len(ids) == 0 {
+		return make([]Count, 0), nil
+	}
+
+	query := `SELECT l.id, COUNT(c.id)
+		FROM localities l
+		LEFT JOIN carriers c ON c.locality_id = l.id
+		WHERE l.id IN (?` + strings.Repeat(",?", len(ids)-1) + `)
+		GROUP BY l.id, l.locality_name;`
+
+	queryArgs := convertToAny(ids)
+	rows, err := r.db.Query(query, queryArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	counts := make([]Count, 0)
+	for rows.Next() {
+		var count Count
+		err := rows.Scan(&count.LocalityID, &count.Count)
 		if err != nil {
 			log.Println(err.Error())
 			return nil, err
