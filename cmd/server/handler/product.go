@@ -141,7 +141,7 @@ func (p *Product) GetRecords() gin.HandlerFunc {
 		if id != 0 {
 			p, err := p.productService.GetRecords(c.Request.Context(), id)
 			if err != nil {
-				errStatus := mapErrorToStatus(err)
+				errStatus := mapProductErrToStatus(err)
 				web.Error(c, errStatus, err.Error())
 				return
 			}
@@ -151,7 +151,7 @@ func (p *Product) GetRecords() gin.HandlerFunc {
 		p, err := p.productService.GetAllRecords(c.Request.Context())
 
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -265,7 +265,7 @@ func (p *Product) CreateRecord() gin.HandlerFunc {
 		dto := mapCreateRequestRecord(&req)
 		productRecord, err := p.productService.CreateRecord(c.Request.Context(), *dto)
 		if err != nil {
-			errStatus := mapErrorToStatus(err)
+			errStatus := mapProductErrToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -274,7 +274,7 @@ func (p *Product) CreateRecord() gin.HandlerFunc {
 	}
 }
 
-func mapErrorToStatus(err error) int {
+func mapProductErrToStatus(err error) int {
 	var invalidProductCode *product.ErrInvalidProductCode
 	var notFound *product.ErrNotFound
 
