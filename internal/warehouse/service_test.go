@@ -162,6 +162,7 @@ func TestUpdateWarehouse(t *testing.T) {
 			Telephone:          "11111111",
 			MinimumCapacity:    10,
 			MinimumTemperature: 2,
+			LocalityID:         2,
 		}
 
 		repositoryMock.On("Get", mock.Anything, expectedWarehouse.ID).Return(expectedWarehouse, nil)

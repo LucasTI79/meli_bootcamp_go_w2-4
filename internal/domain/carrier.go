@@ -1,6 +1,6 @@
 package domain
 
-type Seller struct {
+type Carrier struct {
 	ID          int    `json:"id"`
 	CID         int    `json:"cid"`
 	CompanyName string `json:"company_name"`

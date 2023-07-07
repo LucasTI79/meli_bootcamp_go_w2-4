@@ -21,6 +21,7 @@ import (
 
 var sectionID = 1
 var SECTIONS_URL = "/sections"
+var SECTIONS_URL_ID = fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
 
 // Units tests
 func TestSectionRead(t *testing.T) {
@@ -32,7 +33,7 @@ func TestSectionRead(t *testing.T) {
 		expected := getTestSections()
 		sectionService.On("GetAll", mock.Anything).Return(expected, nil)
 
-		res := requestGet(server, SECTIONS_URL)
+		res := requestSectionGet(server, SECTIONS_URL)
 
 		var received testutil.SuccessResponse[[]domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -47,7 +48,7 @@ func TestSectionRead(t *testing.T) {
 
 		sectionService.On("GetAll", mock.Anything).Return(make([]domain.Section, 0), nil)
 
-		res := requestGet(server, SECTIONS_URL)
+		res := requestSectionGet(server, SECTIONS_URL)
 
 		var received testutil.SuccessResponse[[]domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -62,7 +63,7 @@ func TestSectionRead(t *testing.T) {
 
 		sectionService.On("GetAll", mock.Anything).Return(make([]domain.Section, 0), errors.New(""))
 
-		res := requestGet(server, SECTIONS_URL)
+		res := requestSectionGet(server, SECTIONS_URL)
 
 		var received testutil.SuccessResponse[[]domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -78,8 +79,7 @@ func TestSectionRead(t *testing.T) {
 		expected := getTestSections()[0]
 		sectionService.On("Get", mock.Anything, sectionID).Return(expected, nil)
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestGet(server, urlWithID)
+		res := requestSectionGet(server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -94,8 +94,7 @@ func TestSectionRead(t *testing.T) {
 
 		sectionService.On("Get", mock.Anything, sectionID).Return(domain.Section{}, errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestGet(server, urlWithID)
+		res := requestSectionGet(server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -112,7 +111,7 @@ func TestSectionCreate(t *testing.T) {
 
 		sectionService.On("Create", mock.Anything, body).Return(expected, nil)
 
-		res := requestPost(body, server, SECTIONS_URL)
+		res := requestSectionPost(body, server, SECTIONS_URL)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -126,7 +125,7 @@ func TestSectionCreate(t *testing.T) {
 		server := getSectionServer(h)
 
 		body := section.CreateSection{}
-		res := requestPost(body, server, SECTIONS_URL)
+		res := requestSectionPost(body, server, SECTIONS_URL)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 		sectionService.AssertNumberOfCalls(t, "Create", 0)
@@ -139,7 +138,7 @@ func TestSectionCreate(t *testing.T) {
 		sectionService.On("Create", mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
 
 		body := getTestCreateSection()
-		res := requestPost(body, server, SECTIONS_URL)
+		res := requestSectionPost(body, server, SECTIONS_URL)
 
 		assert.Equal(t, http.StatusConflict, res.Code)
 	})
@@ -151,7 +150,7 @@ func TestSectionCreate(t *testing.T) {
 		sectionService.On("Create", mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
 
 		body := getTestCreateSection()
-		res := requestPost(body, server, SECTIONS_URL)
+		res := requestSectionPost(body, server, SECTIONS_URL)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
@@ -169,8 +168,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(expected, nil)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, expected.ID)
-		res := requestPatch(body, server, urlWithID)
+		res := requestSectionPatch(body, server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -186,8 +184,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrNotFound)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestSectionPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -197,8 +194,7 @@ func TestSectionUpdate(t *testing.T) {
 		server := getSectionServer(h)
 
 		body := []section.UpdateSection{}
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestSectionPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusUnprocessableEntity, res.Code)
 		sectionService.AssertNumberOfCalls(t, "Update", 0)
@@ -211,8 +207,7 @@ func TestSectionUpdate(t *testing.T) {
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, section.ErrInvalidSectionNumber)
 
 		body := getUpdateSection()
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestSectionPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusConflict, res.Code)
 	})
@@ -225,8 +220,7 @@ func TestSectionUpdate(t *testing.T) {
 
 		sectionService.On("Update", mock.Anything, mock.Anything, mock.Anything).Return(domain.Section{}, errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestPatch(body, server, urlWithID)
+		res := requestSectionPatch(body, server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
@@ -240,8 +234,7 @@ func TestSectionDelete(t *testing.T) {
 
 		sectionService.On("Delete", mock.Anything, sectionID).Return(nil)
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestDelete(server, urlWithID)
+		res := requestSectionDelete(server, SECTIONS_URL_ID)
 
 		var received testutil.SuccessResponse[domain.Section]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -256,8 +249,7 @@ func TestSectionDelete(t *testing.T) {
 
 		sectionService.On("Delete", mock.Anything, mock.Anything).Return(errors.New(""))
 
-		urlWithID := fmt.Sprintf("%s/%d", SECTIONS_URL, 1)
-		res := requestDelete(server, urlWithID)
+		res := requestSectionDelete(server, SECTIONS_URL_ID)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -273,7 +265,7 @@ func TestGetAllReportProducts(t *testing.T) {
 
 		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
 
-		res := requestGet(server, SECTIONS_REPOST_URL)
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
 
 		var received testutil.SuccessResponse[[]domain.GetOneData]
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -291,7 +283,7 @@ func TestGetAllReportProducts(t *testing.T) {
 
 		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
 
-		res := requestGet(server, SECTIONS_REPOST_URL)
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -311,7 +303,7 @@ func TestGetAllReportProducts(t *testing.T) {
 
 		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s", SECTIONS_URL, "report-products")
 
-		res := requestGet(server, SECTIONS_REPOST_URL)
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
 		var received testutil.SuccessResponse[[]domain.GetOneData]
 		json.Unmarshal(res.Body.Bytes(), &received)
 
@@ -335,7 +327,7 @@ func TestGetReportProducts(t *testing.T) {
 
 		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s/%d", SECTIONS_URL, "report-products", 123)
 
-		res := requestGet(server, SECTIONS_REPOST_URL)
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
 		var received testutil.SuccessResponse[domain.GetOneData]
 
 		json.Unmarshal(res.Body.Bytes(), &received)
@@ -352,7 +344,7 @@ func TestGetReportProducts(t *testing.T) {
 
 		SECTIONS_REPOST_URL := fmt.Sprintf("%s/%s/%d", SECTIONS_URL, "report-products", 123)
 
-		res := requestGet(server, SECTIONS_REPOST_URL)
+		res := requestSectionGet(server, SECTIONS_REPOST_URL)
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
@@ -360,25 +352,25 @@ func TestGetReportProducts(t *testing.T) {
 
 // Requests
 
-func requestGet(server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionGet(server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodGet, url, "")
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestPost(body section.CreateSection, server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionPost(body section.CreateSection, server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodPost, url, body)
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestPatch(body any, server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionPatch(body any, server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodPatch, url, body)
 	server.ServeHTTP(res, req)
 	return res
 }
 
-func requestDelete(server *gin.Engine, url string) *httptest.ResponseRecorder {
+func requestSectionDelete(server *gin.Engine, url string) *httptest.ResponseRecorder {
 	req, res := testutil.MakeRequest(http.MethodDelete, url, "")
 	server.ServeHTTP(res, req)
 	return res
