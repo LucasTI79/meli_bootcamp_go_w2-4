@@ -5,10 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/carrier"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
-	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -72,16 +70,6 @@ func TestCreate(t *testing.T) {
 
 		assert.ErrorIs(t, err, carrier.ErrInternalServerError)
 	})
-}
-
-func getTestCarrierRequest() handler.CarrierRequest {
-	return handler.CarrierRequest{
-		CID:         testutil.ToPtr(10),
-		CompanyName: testutil.ToPtr("mercado livre"),
-		Address:     testutil.ToPtr("osasco"),
-		Telephone:   testutil.ToPtr("123456789"),
-		LocalityID:  testutil.ToPtr(5),
-	}
 }
 
 func getTestCarrierDTO() carrier.CarrierDTO {

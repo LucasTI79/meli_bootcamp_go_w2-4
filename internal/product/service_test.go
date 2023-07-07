@@ -296,6 +296,96 @@ func TestDelete(t *testing.T) {
 	})
 }
 
+func TestCreateRecord(t *testing.T) {
+	t.Run("Creates valid product record", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		dto := product.CreateRecordDTO{
+			LastDate:      "2022-15-11",
+			PurchasePrice: 23.7,
+			SalePrice:     31.8,
+			ProductID:     1,
+		}
+		expected := *product.MapCreateRecord(&dto)
+		expected.ID = 1
+
+		mockRepo.On("SaveRecord", mock.Anything, mock.Anything).Return(expected.ID, nil)
+
+		p, err := svc.CreateRecord(context.TODO(), dto)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, p)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		dto := product.CreateRecordDTO{
+			LastDate:      "2022-15-11",
+			PurchasePrice: 23.7,
+			SalePrice:     31.8,
+			ProductID:     1,
+		}
+
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("SaveRecord", mock.Anything, mock.Anything).Return(0, ErrRepository)
+		_, err := svc.CreateRecord(context.TODO(), dto)
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+}
+
+func TestReadRecords(t *testing.T) {
+	t.Run("Gets all product records", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		expected := getTestProductRecord()
+
+		mockRepo.On("GetAllRecords", mock.Anything).Return(expected, nil)
+		ps, err := svc.GetAllRecords(context.TODO())
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, expected, ps)
+	})
+	t.Run("Gets correct product records by ID", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		expected := getTestProductRecord()
+
+		mockRepo.On("GetRecordsbyProd", mock.Anything, expected[0].ID).Return(expected, nil)
+		p, err := svc.GetRecords(context.TODO(), expected[0].ID)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, p)
+	})
+	t.Run("Returns not found for nonexistent ID", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		p := getTestProductRecord()
+		var expectedErr *product.ErrNotFound
+
+		mockRepo.On("GetRecordsbyProd", mock.Anything, p[0].ID).Return([]domain.Product_Records{}, product.NewErrNotFound(p[0].ID))
+		_, err := svc.GetRecords(context.TODO(), p[0].ID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		var expectedErr *product.ErrGeneric
+
+		mockRepo.On("GetAllRecords", mock.Anything).Return([]domain.Product_Records{}, ErrRepository)
+		_, err := svc.GetAllRecords(context.TODO())
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+}
+
 func getTestProducts() []domain.Product {
 	return []domain.Product{
 		{
@@ -325,6 +415,25 @@ func getTestProducts() []domain.Product {
 			Width:          7,
 			ProductTypeID:  8,
 			SellerID:       9,
+		},
+	}
+}
+
+func getTestProductRecord() []domain.Product_Records {
+	return []domain.Product_Records{
+		{
+			ID:             1,
+			LastUpdateDate: "2022-10-11",
+			PurchasePrice:  10.5,
+			SalePrice:      27.6,
+			ProductID:      3,
+		},
+		{
+			ID:             2,
+			LastUpdateDate: "2022-02-01",
+			PurchasePrice:  10.5,
+			SalePrice:      27.6,
+			ProductID:      3,
 		},
 	}
 }
@@ -361,4 +470,19 @@ func (r *RepositoryMock) Update(ctx context.Context, p domain.Product) error {
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (r *RepositoryMock) SaveRecord(ctx context.Context, p domain.Product_Records) (int, error) {
+	args := r.Called(ctx, p)
+	return args.Get(0).(int), args.Error(1)
+}
+
+func (r *RepositoryMock) GetAllRecords(ctx context.Context) ([]domain.Product_Records, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
+}
+
+func (r *RepositoryMock) GetRecordsbyProd(ctx context.Context, id int) ([]domain.Product_Records, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
 }
