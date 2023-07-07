@@ -167,5 +167,7 @@ func (r *router) buildLocalityRoutes() {
 		rg.POST("", middleware.Body[localities.CreateDTO](), h.Create())
 		rg.GET("/report-sellers", h.SellerReport())
 		rg.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
+		rg.GET("/report-carriers", h.CarrierReport())
+		rg.GET("/report-carriers/:id", middleware.IntPathParam(), h.CarrierReport())
 	}
 }
