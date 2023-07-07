@@ -149,6 +149,7 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
 	}
 }
+
 func (r *router) buildInboundOrderRoutes() {
 	repo := inboundOrder.NewRepository(r.db)
 	service := inboundOrder.NewService(repo)
