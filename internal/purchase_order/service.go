@@ -42,7 +42,7 @@ func (s *service) Create(c context.Context, purchaseOrder PurchaseOrderDTO) (dom
 		return domain.PurchaseOrder{}, ErrAlreadyExists
 	}
 
-	i := mapPurchaseOrderDTOToDomain(&purchaseOrder)
+	i := MapPurchaseOrderDTOToDomain(&purchaseOrder)
 	id, err := s.repo.Create(c, i)
 	if err != nil {
 		if errors.Is(err, ErrFKNotFound) {
@@ -58,7 +58,7 @@ func (s *service) Create(c context.Context, purchaseOrder PurchaseOrderDTO) (dom
 	return i, nil
 }
 
-func mapPurchaseOrderDTOToDomain(purchaseOrder *PurchaseOrderDTO) domain.PurchaseOrder {
+func MapPurchaseOrderDTOToDomain(purchaseOrder *PurchaseOrderDTO) domain.PurchaseOrder {
 	return domain.PurchaseOrder{
 		OrderNumber:     purchaseOrder.OrderNumber,
 		OrderDate:       purchaseOrder.OrderDate,
