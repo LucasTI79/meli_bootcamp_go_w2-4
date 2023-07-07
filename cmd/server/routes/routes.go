@@ -10,6 +10,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/carrier"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/localities"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
@@ -45,6 +46,7 @@ func (r *router) MapRoutes() {
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
 	r.buildCarrierRoutes()
+	r.buildLocalityRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -104,13 +106,13 @@ func (r *router) buildWarehouseRoutes() {
 	service := warehouse.NewService(repo)
 	h := handler.NewWarehouse(service)
 
-	productRG := r.rg.Group("/warehouses")
+	rg := r.rg.Group("/warehouses")
 	{
-		productRG.POST("", middleware.Body[domain.Warehouse](), h.Create())
-		productRG.GET("", h.GetAll())
-		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
-		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
-		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		rg.POST("", middleware.Body[domain.Warehouse](), h.Create())
+		rg.GET("", h.GetAll())
+		rg.GET("/:id", middleware.IntPathParam(), h.Get())
+		rg.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
+		rg.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
 }
 
@@ -152,5 +154,18 @@ func (r *router) buildCarrierRoutes() {
 	productRG := r.rg.Group("/carrier")
 	{
 		productRG.POST("/", middleware.Body[handler.CarrierRequest](), h.Create())
+	}
+}
+
+func (r *router) buildLocalityRoutes() {
+	repo := localities.NewRepository(r.db)
+	service := localities.NewService(repo)
+	h := handler.NewLocality(service)
+
+	rg := r.rg.Group("/localities")
+	{
+		rg.POST("", middleware.Body[localities.CreateDTO](), h.Create())
+		rg.GET("/report-sellers", h.SellerReport())
+		rg.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
 	}
 }
