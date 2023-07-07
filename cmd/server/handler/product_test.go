@@ -443,66 +443,6 @@ func TestProductRecordRead(t *testing.T) {
 
 		assert.NotEqual(t, http.StatusOK, res.Code)
 	})
-	/*t.Run("Returns 500 if service throws generic error", func(t *testing.T) {
-		mockSvc := ProductServiceMock{}
-		h := handler.NewProduct(&mockSvc)
-		server := getProductServer(h)
-
-		mockSvc.On("GetAll", mock.Anything).Return([]domain.Product{}, product.NewErrGeneric(""))
-
-		req, res := testutil.MakeRequest(http.MethodGet, "/products/", "")
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusInternalServerError, res.Code)
-	})
-	t.Run("Returns 204 when GetAll returns no products", func(t *testing.T) {
-		mockSvc := ProductServiceMock{}
-		h := handler.NewProduct(&mockSvc)
-		server := getProductServer(h)
-
-		mockSvc.On("GetAll", mock.Anything).Return(make([]domain.Product, 0), nil)
-
-		req, res := testutil.MakeRequest(http.MethodGet, "/products/", "")
-		server.ServeHTTP(res, req)
-
-		var received testutil.SuccessResponse[[]domain.Product]
-		json.Unmarshal(res.Body.Bytes(), &received)
-
-		assert.Equal(t, http.StatusNoContent, res.Code)
-		assert.Len(t, received.Data, 0)
-	})
-	t.Run("Returns existing product on Get by ID", func(t *testing.T) {
-		mockSvc := ProductServiceMock{}
-		h := handler.NewProduct(&mockSvc)
-		server := getProductServer(h)
-
-		p := getTestProducts()[0]
-		mockSvc.On("Get", mock.Anything, p.ID).Return(p, nil)
-
-		url := fmt.Sprintf("/products/%d", p.ID)
-		req, res := testutil.MakeRequest(http.MethodGet, url, "")
-		server.ServeHTTP(res, req)
-
-		var received testutil.SuccessResponse[domain.Product]
-		json.Unmarshal(res.Body.Bytes(), &received)
-
-		assert.Equal(t, http.StatusOK, res.Code)
-		assert.Equal(t, p, received.Data)
-	})
-	t.Run("Returns 404 when ID is not found", func(t *testing.T) {
-		mockSvc := ProductServiceMock{}
-		h := handler.NewProduct(&mockSvc)
-		server := getProductServer(h)
-
-		p := getTestProducts()[0]
-		mockSvc.On("Get", mock.Anything, p.ID).Return(domain.Product{}, product.NewErrNotFound(p.ID))
-
-		url := fmt.Sprintf("/products/%d", p.ID)
-		req, res := testutil.MakeRequest(http.MethodGet, url, "")
-		server.ServeHTTP(res, req)
-
-		assert.Equal(t, http.StatusNotFound, res.Code)
-	})*/
 }
 
 func getProductServer(h *handler.Product) *gin.Engine {
