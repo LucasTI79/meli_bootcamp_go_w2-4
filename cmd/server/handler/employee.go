@@ -160,6 +160,14 @@ func (e *Employee) Delete() gin.HandlerFunc {
 	}
 }
 
+// @Summary	Get specific inbound order report from employee by ID
+// @Tags		Employees
+// @Accept		json
+// @Produce	json
+// @Param     id      path    int    true "Employee ID"
+// @Success	200	{object}	web.response		"returns the specified report"
+// @Failure	404	{object}	web.errorResponse	"no report to be returned"
+// @Router		/api/v1/employees/report-inbound-orders/{id} [get]
 func (e *Employee) GetInboundReport() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := 0
@@ -174,3 +182,12 @@ func (e *Employee) GetInboundReport() gin.HandlerFunc {
 		web.Success(c, http.StatusOK, report)
 	}
 }
+
+// @Summary	Get all inbound orders reports
+// @Tags		Employees
+// @Accept		json
+// @Produce	json
+// @Success	200	{object}	web.response		"returns all of the reports"
+// @Failure	404	{object}	web.errorResponse	"no report to be returned"
+// @Router		/api/v1/employees/report-inbound-orders [get]
+func _() {} //

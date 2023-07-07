@@ -23,6 +23,20 @@ func NewInboundOrder(i inboundOrder.Service) *InboundOrder {
 	}
 }
 
+// Create new inbound order.
+//
+//		@Summary		Creates a new inbound order
+//		@Description	Creates a new inbound order based on the data provided
+//	    @Description    The date field in the inboundOrder body should follow the ISO-8601 standard, "2023-07-06T14:30:00Z"
+//		@Tags			InboundOrder
+//		@Accept			json
+//		@Produce		json
+//		@Param			inboundOrder body		domain.InboundOrder true	"new inbound order"
+//		@Success		201			{object}	web.response		"returns inbound order"
+//		@Failure		409			{object}    web.errorResponse	"error creating inbound order"
+//		@Failure		400		    {object}    web.errorResponse	"missing fields"
+//		@Failure		422			{object}    web.errorResponse	"invalid fields"
+//		@Router			/api/v1/inbound-orders [post]
 func (i *InboundOrder) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		inboundOrder := middleware.GetBody[InboundOrderRequest](c)

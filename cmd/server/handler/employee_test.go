@@ -334,7 +334,7 @@ func TestGetInboundReports(t *testing.T) {
 		server := getEmployeeServer(controller)
 		r := []domain.InboundReport{{
 			ID:                 1,
-			CardNumberID:       130,
+			CardNumberID:       "130",
 			FirstName:          "Mario",
 			LastName:           "Kart",
 			WarehouseID:        1,
@@ -372,7 +372,7 @@ func TestGetInboundReports(t *testing.T) {
 		server := getEmployeeServer(controller)
 		r := []domain.InboundReport{{
 			ID:                 1,
-			CardNumberID:       130,
+			CardNumberID:       "130",
 			FirstName:          "Mario",
 			LastName:           "Kart",
 			WarehouseID:        1,
@@ -380,7 +380,7 @@ func TestGetInboundReports(t *testing.T) {
 		},
 			{
 				ID:                 2,
-				CardNumberID:       122,
+				CardNumberID:       "122",
 				FirstName:          "Me",
 				LastName:           "Tony",
 				WarehouseID:        22,
