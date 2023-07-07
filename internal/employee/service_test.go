@@ -251,7 +251,7 @@ func TestGetInboundReport(t *testing.T) {
 
 		r := domain.InboundReport{
 			ID:           1,
-			CardNumberID: 126,
+			CardNumberID: "126",
 			FirstName:    "Lucas",
 			LastName:     "Melo",
 			WarehouseID:  1,
@@ -268,14 +268,14 @@ func TestGetInboundReport(t *testing.T) {
 
 		r := []domain.InboundReport{{
 			ID:                 1,
-			CardNumberID:       126,
+			CardNumberID:       "126",
 			FirstName:          "Lucas",
 			LastName:           "Melo",
 			WarehouseID:        1,
 			InboundOrdersCount: 5,
 		}, {
 			ID:                 2,
-			CardNumberID:       125,
+			CardNumberID:       "125",
 			FirstName:          "Func2",
 			LastName:           "FuncLastName2",
 			WarehouseID:        1,
@@ -293,7 +293,7 @@ func TestGetInboundReport(t *testing.T) {
 
 		r := domain.InboundReport{
 			ID:           1000000,
-			CardNumberID: 126,
+			CardNumberID: "126",
 			FirstName:    "Lucas",
 			LastName:     "Melo",
 			WarehouseID:  1,
