@@ -164,6 +164,17 @@ func (s *Section) Delete() gin.HandlerFunc {
 	}
 }
 
+// GetReportProducts godoc
+//
+// @Summary	Get report of products for a section
+// @Tags		Sections
+// @Accept		json
+// @Produce	json
+// @Param		id	path	int	true	"Section ID"
+// @Success	200	{object}	web.response	"Report of products"
+// @Failure	400	{object}	web.errorResponse	"Invalid ID type"
+// @Failure	404	{object}	web.errorResponse	"Could not find section"
+// @Router	/api/v1/sections/{id}/report-products [get]
 func (s *Section) GetReportProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.GetInt("id")
@@ -178,6 +189,16 @@ func (s *Section) GetReportProducts() gin.HandlerFunc {
 	}
 }
 
+// GetAllReportProducts godoc
+//
+// @Summary	Get report of products for all sections
+// @Tags		Sections
+// @Accept		json
+// @Produce	json
+// @Success	200	{object}	web.response	"Report of products"
+// @Failure	404	{object}	web.errorResponse	"Could not find any section"
+// @Failure	500	{object}	web.errorResponse	"Failed to retrieve report"
+// @Router	/api/v1/sections/report-products [get]
 func (s *Section) GetAllReportProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
