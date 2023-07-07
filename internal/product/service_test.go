@@ -310,6 +310,7 @@ func TestCreateRecord(t *testing.T) {
 		expected := *product.MapCreateRecord(&dto)
 		expected.ID = 1
 
+		mockRepo.On("Get", mock.Anything, mock.Anything).Return(domain.Product{}, nil)
 		mockRepo.On("SaveRecord", mock.Anything, mock.Anything).Return(expected.ID, nil)
 
 		p, err := svc.CreateRecord(context.TODO(), dto)
@@ -330,6 +331,25 @@ func TestCreateRecord(t *testing.T) {
 
 		var expectedErr *product.ErrGeneric
 
+		mockRepo.On("Get", mock.Anything, mock.Anything).Return(domain.Product{}, nil)
+		mockRepo.On("SaveRecord", mock.Anything, mock.Anything).Return(0, ErrRepository)
+		_, err := svc.CreateRecord(context.TODO(), dto)
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository fails", func(t *testing.T) {
+		mockRepo := RepositoryMock{}
+		svc := product.NewService(&mockRepo)
+
+		dto := product.CreateRecordDTO{
+			LastDate:      "2022-15-11",
+			PurchasePrice: 23.7,
+			SalePrice:     31.8,
+			ProductID:     1000,
+		}
+
+		var expectedErr *product.ErrInvalidProductCode
+
+		mockRepo.On("Get", mock.Anything, mock.Anything).Return(domain.Product{}, product.ErrInvalidProductCode{})
 		mockRepo.On("SaveRecord", mock.Anything, mock.Anything).Return(0, ErrRepository)
 		_, err := svc.CreateRecord(context.TODO(), dto)
 		assert.ErrorAs(t, err, &expectedErr)
