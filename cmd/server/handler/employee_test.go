@@ -327,6 +327,78 @@ func TestDeleteEmployee(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
 }
+func TestGetInboundReports(t *testing.T) {
+	t.Run("should return status 200 when id is valid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := getEmployeeServer(controller)
+		r := []domain.InboundReport{{
+			ID:                 1,
+			CardNumberID:       "130",
+			FirstName:          "Mario",
+			LastName:           "Kart",
+			WarehouseID:        1,
+			InboundOrdersCount: 1,
+		}}
+		url := fmt.Sprintf("%s/report-inbound-orders/%d", EMPLOYEE_URL, 1)
+
+		mockedService.On("GetInboundReport", mock.Anything, 1).Return(r, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.InboundReport]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, r, received.Data)
+	})
+	t.Run("should return status 404 when id not found", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := getEmployeeServer(controller)
+
+		url := fmt.Sprintf("%s/report-inbound-orders/%d", EMPLOYEE_URL, 1)
+
+		mockedService.On("GetInboundReport", mock.Anything, 1).Return([]domain.InboundReport{}, employee.ErrNotFound)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("should return status 200 when id is valid", func(t *testing.T) {
+		mockedService := EmployeeServiceMock{}
+		controller := handler.NewEmployee(&mockedService)
+		server := getEmployeeServer(controller)
+		r := []domain.InboundReport{{
+			ID:                 1,
+			CardNumberID:       "130",
+			FirstName:          "Mario",
+			LastName:           "Kart",
+			WarehouseID:        1,
+			InboundOrdersCount: 1,
+		},
+			{
+				ID:                 2,
+				CardNumberID:       "122",
+				FirstName:          "Me",
+				LastName:           "Tony",
+				WarehouseID:        22,
+				InboundOrdersCount: 2,
+			}}
+		url := fmt.Sprintf("%s/report-inbound-orders/", EMPLOYEE_URL)
+
+		mockedService.On("GetInboundReport", mock.Anything, 0).Return(r, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.InboundReport]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, r, received.Data)
+	})
+}
 
 func getEmployeeServer(h *handler.Employee) *gin.Engine {
 	s := testutil.CreateServer()
@@ -336,6 +408,8 @@ func getEmployeeServer(h *handler.Employee) *gin.Engine {
 		employeeRG.GET("", h.GetAll())
 		employeeRG.POST("", middleware.Body[domain.Employee](), h.Create())
 		employeeRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		employeeRG.GET("/report-inbound-orders/:id", middleware.IntPathParam(), h.GetInboundReport())
+		employeeRG.GET("/report-inbound-orders/", h.GetInboundReport())
 		employeeRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Employee](), h.Update())
 		employeeRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
@@ -370,4 +444,8 @@ func (svc *EmployeeServiceMock) Update(ctx context.Context, s domain.Employee) (
 func (svc *EmployeeServiceMock) Delete(ctx context.Context, id int) error {
 	args := svc.Called(ctx, id)
 	return args.Error(0)
+}
+func (svc *EmployeeServiceMock) GetInboundReport(ctx context.Context, id int) ([]domain.InboundReport, error) {
+	args := svc.Called(ctx, id)
+	return args.Get(0).([]domain.InboundReport), args.Error(1)
 }
