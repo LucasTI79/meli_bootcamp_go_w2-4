@@ -47,7 +47,7 @@ func (r *repository) Create(ctx context.Context, b domain.Batches) (domain.Batch
 }
 
 func (r *repository) Exists(ctx context.Context, batchNumber int) bool {
-	query := "SELECT batch_number FROM products_batches WHERE batch_number=?;"
+	query := "SELECT batch_number FROM product_batches WHERE batch_number=?;"
 	row := r.db.QueryRow(query, batchNumber)
 	err := row.Scan(&batchNumber)
 	return err == nil
