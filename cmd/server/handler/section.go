@@ -143,8 +143,7 @@ func (s *Section) Update() gin.HandlerFunc {
 //	@Accept		json
 //	@Produce	json
 //	@Param		id	path		int					true	"Section ID"
-//	@Success	200	{object}	web.response		"Section deleted successfully"
-//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Success	204	{object}	web.response		"Section deleted successfully"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"
 //	@Failure	500	{object}	web.errorResponse	"Could not delete section"
 //	@Router		/api/v1/sections/{id} [delete]
@@ -172,8 +171,8 @@ func (s *Section) Delete() gin.HandlerFunc {
 // @Produce	json
 // @Param		id	path	int	true	"Section ID"
 // @Success	200	{object}	web.response	"Report of products"
-// @Failure	400	{object}	web.errorResponse	"Invalid ID type"
 // @Failure	404	{object}	web.errorResponse	"Could not find section"
+// @Failure	500	{object}	web.errorResponse	"Could not report"
 // @Router	/api/v1/sections/{id}/report-products [get]
 func (s *Section) GetReportProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -196,8 +195,8 @@ func (s *Section) GetReportProducts() gin.HandlerFunc {
 // @Accept		json
 // @Produce	json
 // @Success	200	{object}	web.response	"Report of products"
+// @Success	204	{object}	web.errorResponse	"Status No Content"
 // @Failure	404	{object}	web.errorResponse	"Could not find any section"
-// @Failure	500	{object}	web.errorResponse	"Failed to retrieve report"
 // @Router	/api/v1/sections/report-products [get]
 func (s *Section) GetAllReportProducts() gin.HandlerFunc {
 	return func(c *gin.Context) {
