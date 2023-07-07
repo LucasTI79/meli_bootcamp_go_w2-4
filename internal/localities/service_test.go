@@ -77,7 +77,7 @@ func TestCreate(t *testing.T) {
 	})
 }
 
-func TestReport(t *testing.T) {
+func TestSellerReport(t *testing.T) {
 	t.Run("Returns all localities when id is omitted", func(t *testing.T) {
 		repo := RepositoryMock{}
 		svc := localities.NewService(&repo)
@@ -204,6 +204,138 @@ func TestReport(t *testing.T) {
 		repo.On("CountSellersByLocalities", mock.Anything, mock.Anything).Return([]localities.Count{}, ErrRepository)
 
 		_, err := svc.CountSellers(context.TODO(), noID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+}
+
+func TestCarrierReport(t *testing.T) {
+	t.Run("Returns all localities when id is omitted", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+
+		expected := []localities.CountByLocality{
+			{
+				ID:    1,
+				Name:  "Melicidade",
+				Count: 2,
+			},
+			{
+				ID:    2,
+				Name:  "Tesla",
+				Count: 1,
+			},
+		}
+		counts := []localities.Count{
+			{
+				LocalityID: 1,
+				Count:      2,
+			},
+			{
+				LocalityID: 2,
+				Count:      1,
+			},
+		}
+		locs := getLocalities()
+
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountCarriersByLocalities", mock.Anything, mock.Anything).Return(counts, nil)
+
+		received, err := svc.CountCarriers(context.TODO(), noID)
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, expected, received)
+	})
+	t.Run("Returns specific locality if id is provided", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		id := *optional.FromVal(2)
+
+		expected := []localities.CountByLocality{
+			{
+				ID:    2,
+				Name:  "Tesla",
+				Count: 1,
+			},
+		}
+		counts := []localities.Count{
+			{
+				LocalityID: 2,
+				Count:      1,
+			},
+		}
+		locs := getLocalities()
+
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountCarriersByLocalities", mock.Anything, []int{id.Val}).Return(counts, nil)
+
+		received, err := svc.CountCarriers(context.TODO(), id)
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, expected, received)
+	})
+	t.Run("Returns NotFound if id doesn't exist", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		id := *optional.FromVal(7)
+
+		counts := []localities.Count{}
+		locs := getLocalities()
+		var expectedErr *localities.ErrNotFound
+
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountCarriersByLocalities", mock.Anything, []int{id.Val}).Return(counts, nil)
+
+		_, err := svc.CountCarriers(context.TODO(), id)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Doesn't return NotFound if id is omitted but no data exists", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+
+		counts := []localities.Count{}
+		locs := getLocalities()
+
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountSellersByLocalities", mock.Anything, mock.Anything).Return(counts, nil)
+
+		received, err := svc.CountSellers(context.TODO(), noID)
+
+		assert.NoError(t, err)
+		assert.Len(t, received, 0)
+	})
+	t.Run("Returns generic domain error if repository GetAll fails", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+		var expectedErr *localities.ErrGeneric
+
+		repo.On("GetAll", mock.Anything).Return([]domain.Locality{}, ErrRepository)
+
+		_, err := svc.CountCarriers(context.TODO(), noID)
+
+		assert.ErrorAs(t, err, &expectedErr)
+	})
+	t.Run("Returns generic domain error if repository Count fails", func(t *testing.T) {
+		repo := RepositoryMock{}
+		svc := localities.NewService(&repo)
+
+		noID := optional.Opt[int]{}
+		var expectedErr *localities.ErrGeneric
+
+		locs := getLocalities()
+		repo.On("GetAll", mock.Anything).Return(locs, nil)
+		repo.On("CountCarriersByLocalities", mock.Anything, mock.Anything).Return([]localities.Count{}, ErrRepository)
+
+		_, err := svc.CountCarriers(context.TODO(), noID)
 
 		assert.ErrorAs(t, err, &expectedErr)
 	})
