@@ -56,6 +56,18 @@ func NewBatches(s batches.Service) *Batches {
 	}
 }
 
+// Create godoc
+//
+// @Summary	Create a new batch
+// @Tags		Batches
+// @Accept		json
+// @Produce	json
+// @Param		request	body	CreateBatchesRequest	true	"Batch data"
+// @Success	201	{object}	web.response	"Created batch"
+// @Failure	400	{object}	web.errorResponse	"Invalid request body"
+// @Failure	409	{object}	web.errorResponse	"Batch number already exists"
+// @Failure	500	{object}	web.errorResponse	"Failed to create batch"
+// @Router	/api/v1/batches [post]
 func (s *Batches) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		dto := middleware.GetBody[CreateBatchesRequest](c)
