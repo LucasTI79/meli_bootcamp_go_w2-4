@@ -328,9 +328,127 @@ func TestProductDelete(t *testing.T) {
 	})
 }
 
+func TestProductRecordCreate(t *testing.T) {
+	t.Run("Returns 201 when creation succeeds", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := handler.CreateRequestRecord{
+			LastDate:      testutil.ToPtr("2022-01-03"),
+			PurchasePrice: testutil.ToPtr[float64](20.20),
+			SalePrice:     testutil.ToPtr[float64](30.30),
+			ProductID:     testutil.ToPtr(4),
+		}
+		created := domain.Product_Records{
+			ID:             12,
+			LastUpdateDate: "2022-01-03",
+			PurchasePrice:  20.20,
+			SalePrice:      30.30,
+			ProductID:      5,
+		}
+
+		mockSvc.On("CreateRecord", mock.Anything, mock.Anything).Return(created, nil)
+
+		req, res := testutil.MakeRequest(http.MethodPost, "/product-records/", body)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusCreated, res.Code)
+	})
+	t.Run("Returns 422 when entity is missing fields", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		body := handler.CreateRequestRecord{
+			LastDate:      testutil.ToPtr("2022-01-03"),
+			PurchasePrice: testutil.ToPtr[float64](20.20),
+			SalePrice:     testutil.ToPtr[float64](30.30),
+			ProductID:     testutil.ToPtr(4),
+		}
+
+		mockSvc.On("CreateRecord", mock.Anything, mock.Anything).Return(domain.Product_Records{}, product.NewErrGeneric(""))
+		req, res := testutil.MakeRequest(http.MethodPost, "/product-records/", body)
+		server.ServeHTTP(res, req)
+
+		assert.NotEqual(t, http.StatusCreated, res.Code)
+	})
+}
+
+func TestProductRecordRead(t *testing.T) {
+	t.Run("Returns all products records", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		expected := getTestProductRecord()
+		mockSvc.On("GetAllRecords", mock.Anything).Return(expected, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, "/products/report-records", "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product_Records]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, expected, received.Data)
+	})
+	t.Run("Returns existing product record on Get by ID", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		p := getTestProductRecord()
+		mockSvc.On("GetRecords", mock.Anything, p[0].ID).Return(p, nil)
+
+		url := fmt.Sprintf("/products/report-records/%d", p[0].ID)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product_Records]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, p, received.Data)
+	})
+	t.Run("Returns error on Getby ID", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		p := getTestProductRecord()
+		mockSvc.On("GetRecords", mock.Anything, p[0].ID).Return([]domain.Product_Records{}, product.NewErrGeneric(""))
+
+		url := fmt.Sprintf("/products/report-records/%d", p[0].ID)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product_Records]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.NotEqual(t, http.StatusOK, res.Code)
+	})
+	t.Run("Returns all products records", func(t *testing.T) {
+		mockSvc := ProductServiceMock{}
+		h := handler.NewProduct(&mockSvc)
+		server := getProductServer(h)
+
+		mockSvc.On("GetAllRecords", mock.Anything).Return([]domain.Product_Records{}, product.NewErrGeneric(""))
+
+		req, res := testutil.MakeRequest(http.MethodGet, "/products/report-records", "")
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.Product_Records]
+		json.Unmarshal(res.Body.Bytes(), &received)
+
+		assert.NotEqual(t, http.StatusOK, res.Code)
+	})
+}
+
 func getProductServer(h *handler.Product) *gin.Engine {
 	server := testutil.CreateServer()
 
+	server.POST("/product-records/", middleware.Body[handler.CreateRequestRecord](), h.CreateRecord())
 	productRG := server.Group(PRODUCTS_URL)
 	{
 		productRG.POST("/", middleware.Body[handler.CreateRequest](), h.Create())
@@ -338,6 +456,8 @@ func getProductServer(h *handler.Product) *gin.Engine {
 		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[handler.UpdateRequest](), h.Update())
 		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		productRG.GET("/report-records", h.GetRecords())
+		productRG.GET("/report-records/:id", middleware.IntPathParam(), h.GetRecords())
 	}
 
 	return server
@@ -374,6 +494,24 @@ func getTestProducts() []domain.Product {
 		},
 	}
 }
+func getTestProductRecord() []domain.Product_Records {
+	return []domain.Product_Records{
+		{
+			ID:             1,
+			LastUpdateDate: "2022-10-11",
+			PurchasePrice:  10.5,
+			SalePrice:      27.6,
+			ProductID:      3,
+		},
+		{
+			ID:             2,
+			LastUpdateDate: "2022-02-01",
+			PurchasePrice:  10.5,
+			SalePrice:      27.6,
+			ProductID:      3,
+		},
+	}
+}
 
 type ProductServiceMock struct {
 	mock.Mock
@@ -402,4 +540,19 @@ func (s *ProductServiceMock) Update(c context.Context, id int, updates product.U
 func (s *ProductServiceMock) Delete(c context.Context, id int) error {
 	args := s.Called(c, id)
 	return args.Error(0)
+}
+
+func (r *ProductServiceMock) CreateRecord(ctx context.Context, product product.CreateRecordDTO) (domain.Product_Records, error) {
+	args := r.Called(ctx, product)
+	return args.Get(0).(domain.Product_Records), args.Error(1)
+}
+
+func (r *ProductServiceMock) GetAllRecords(ctx context.Context) ([]domain.Product_Records, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
+}
+
+func (r *ProductServiceMock) GetRecords(ctx context.Context, id int) ([]domain.Product_Records, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).([]domain.Product_Records), args.Error(1)
 }

@@ -29,6 +29,13 @@ type CreateRequest struct {
 	SellerID   *int     `json:"seller_id"`
 }
 
+type CreateRequestRecord struct {
+	LastDate      *string  `binding:"required" json:"last_update_date"`
+	PurchasePrice *float64 `binding:"required" json:"purchase_price"`
+	SalePrice     *float64 `binding:"required" json:"sale_price"`
+	ProductID     *int     `binding:"required" json:"product_id"`
+}
+
 // UpdateRequest contains pointers so that the Handler is able to
 // distinguish between omitted (nil) and given (not-nil) fields.
 // This does not affect the way the user passes the Request body.
@@ -99,6 +106,52 @@ func (p *Product) Get() gin.HandlerFunc {
 
 		if err != nil {
 			errStatus := mapProductErrToStatus(err)
+			web.Error(c, errStatus, err.Error())
+			return
+		}
+		web.Success(c, http.StatusOK, p)
+	}
+}
+
+// Get godoc
+//
+//	@Summary	Get all product records
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns products records"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find product"
+//	@Router		/api/v1/products/report-records [get]
+//
+// Get godoc
+//
+//	@Summary	Get product records by productID
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int					true	"Product ID"
+//	@Success	200	{object}	web.response		"Returns product"
+//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Failure	404	{object}	web.errorResponse	"Could not find product"
+//	@Router		/api/v1/products/report-records/{id} [get]
+func (p *Product) GetRecords() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.GetInt("id")
+		if id != 0 {
+			p, err := p.productService.GetRecords(c.Request.Context(), id)
+			if err != nil {
+				errStatus := mapErrorToStatus(err)
+				web.Error(c, errStatus, err.Error())
+				return
+			}
+			web.Success(c, http.StatusOK, p)
+			return
+		}
+		p, err := p.productService.GetAllRecords(c.Request.Context())
+
+		if err != nil {
+			errStatus := mapErrorToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
 		}
@@ -194,7 +247,34 @@ func (p *Product) Delete() gin.HandlerFunc {
 	}
 }
 
-func mapProductErrToStatus(err error) int {
+// Create godoc
+//
+//	@Summary	Create new product record
+//	@Tags		Products
+//	@Accept		json
+//	@Produce	json
+//	@Param		product	record body		CreateRequestRecord		true	"Product record to be added"
+//	@Success	201		{object}	web.response		"Returns created product record"
+//	@Failure	409		{object}	web.errorResponse	"`product_code` is not unique"
+//	@Failure	422		{object}	web.errorResponse	"Missing fields or invalid field types"
+//	@Failure	500		{object}	web.errorResponse	"Could not save product"
+//	@Router		/api/v1/product-records [post]
+func (p *Product) CreateRecord() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		req := middleware.GetBody[CreateRequestRecord](c)
+		dto := mapCreateRequestRecord(&req)
+		productRecord, err := p.productService.CreateRecord(c.Request.Context(), *dto)
+		if err != nil {
+			errStatus := mapErrorToStatus(err)
+			web.Error(c, errStatus, err.Error())
+			return
+		}
+
+		web.Success(c, http.StatusCreated, productRecord)
+	}
+}
+
+func mapErrorToStatus(err error) int {
 	var invalidProductCode *product.ErrInvalidProductCode
 	var notFound *product.ErrNotFound
 
@@ -236,5 +316,14 @@ func mapCreateRequestToDTO(req *CreateRequest) *product.CreateDTO {
 		Width:      *req.Width,
 		TypeID:     *req.TypeID,
 		SellerID:   *req.SellerID,
+	}
+}
+
+func mapCreateRequestRecord(req *CreateRequestRecord) *product.CreateRecordDTO {
+	return &product.CreateRecordDTO{
+		LastDate:      *req.LastDate,
+		PurchasePrice: *req.PurchasePrice,
+		SalePrice:     *req.SalePrice,
+		ProductID:     *req.ProductID,
 	}
 }

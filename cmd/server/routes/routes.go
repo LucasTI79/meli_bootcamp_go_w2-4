@@ -81,6 +81,7 @@ func (r *router) buildProductRoutes() {
 	service := product.NewService(repo)
 	h := handler.NewProduct(service)
 
+	r.rg.POST("/product-records/", middleware.Body[handler.CreateRequestRecord](), h.CreateRecord())
 	productRG := r.rg.Group("/products")
 	{
 		productRG.POST("/", middleware.Body[handler.CreateRequest](), h.Create())
@@ -88,6 +89,8 @@ func (r *router) buildProductRoutes() {
 		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
 		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[handler.UpdateRequest](), h.Update())
 		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		productRG.GET("/report-records", h.GetRecords())
+		productRG.GET("/report-records/:id", middleware.IntPathParam(), h.GetRecords())
 	}
 }
 
