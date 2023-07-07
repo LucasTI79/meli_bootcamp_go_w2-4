@@ -19,6 +19,8 @@ import (
 )
 
 const LOCALITY_URL = "/localities"
+const SELLER_REPORT_URL = "/report-sellers"
+const CARRIER_REPORT_URL = "/report-carriers"
 
 func TestLocalityCreate(t *testing.T) {
 	t.Run("Returns 201 if locality is created successfully", func(t *testing.T) {
@@ -67,7 +69,7 @@ func TestLocalityCreate(t *testing.T) {
 	})
 }
 
-func TestLocalityReport(t *testing.T) {
+func TestLocalitySellerReport(t *testing.T) {
 	t.Run("Returns all localities if id is omitted", func(t *testing.T) {
 		svc := LocalityServiceMock{}
 		h := handler.NewLocality(&svc)
@@ -76,10 +78,10 @@ func TestLocalityReport(t *testing.T) {
 		expected := getSellerCounts()
 		svc.On("CountSellers", mock.Anything, mock.Anything).Return(expected, nil)
 
-		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
+		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+SELLER_REPORT_URL, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.SellersByLocality]
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -94,11 +96,11 @@ func TestLocalityReport(t *testing.T) {
 		id := *optional.FromVal(expected[0].ID)
 		svc.On("CountSellers", mock.Anything, id).Return(expected, nil)
 
-		url := fmt.Sprintf("%s/%d", LOCALITY_URL, id.Val)
+		url := fmt.Sprintf("%s/%d", LOCALITY_URL+SELLER_REPORT_URL, id.Val)
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.SellersByLocality]
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -110,9 +112,9 @@ func TestLocalityReport(t *testing.T) {
 		server := getLocalityServer(h)
 
 		id := *optional.FromVal(42)
-		svc.On("CountSellers", mock.Anything, id).Return([]localities.SellersByLocality{}, localities.NewErrNotFound(id.Val))
+		svc.On("CountSellers", mock.Anything, id).Return([]localities.CountByLocality{}, localities.NewErrNotFound(id.Val))
 
-		url := fmt.Sprintf("%s/%d", LOCALITY_URL, id.Val)
+		url := fmt.Sprintf("%s/%d", LOCALITY_URL+SELLER_REPORT_URL, id.Val)
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
@@ -125,12 +127,12 @@ func TestLocalityReport(t *testing.T) {
 			server := getLocalityServer(h)
 
 			id := optional.Opt[int]{}
-			svc.On("CountSellers", mock.Anything, id).Return([]localities.SellersByLocality{}, nil)
+			svc.On("CountSellers", mock.Anything, id).Return([]localities.CountByLocality{}, nil)
 
-			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
+			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+SELLER_REPORT_URL, nil)
 			server.ServeHTTP(res, req)
 
-			var response testutil.SuccessResponse[[]localities.SellersByLocality]
+			var response testutil.SuccessResponse[[]localities.CountByLocality]
 			json.Unmarshal(res.Body.Bytes(), &response)
 
 			assert.Equal(t, http.StatusNoContent, res.Code)
@@ -142,17 +144,101 @@ func TestLocalityReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		svc.On("CountSellers", mock.Anything, mock.Anything).Return([]localities.SellersByLocality{}, localities.NewErrGeneric(""))
+		svc.On("CountSellers", mock.Anything, mock.Anything).Return([]localities.CountByLocality{}, localities.NewErrGeneric(""))
 
-		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL, nil)
+		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+SELLER_REPORT_URL, nil)
 		server.ServeHTTP(res, req)
 
 		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
 }
 
-func getSellerCounts() []localities.SellersByLocality {
-	return []localities.SellersByLocality{
+func TestLocalityCarrierReport(t *testing.T) {
+	t.Run("Returns all localities if id is omitted", func(t *testing.T) {
+		svc := LocalityServiceMock{}
+		h := handler.NewLocality(&svc)
+		server := getLocalityServer(h)
+
+		expected := getSellerCounts()
+		svc.On("CountCarriers", mock.Anything, mock.Anything).Return(expected, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+CARRIER_REPORT_URL, nil)
+		server.ServeHTTP(res, req)
+
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		json.Unmarshal(res.Body.Bytes(), &response)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, expected, response.Data)
+	})
+	t.Run("Returns single locality if id is given", func(t *testing.T) {
+		svc := LocalityServiceMock{}
+		h := handler.NewLocality(&svc)
+		server := getLocalityServer(h)
+
+		expected := getSellerCounts()[:1]
+		id := *optional.FromVal(expected[0].ID)
+		svc.On("CountCarriers", mock.Anything, id).Return(expected, nil)
+
+		url := fmt.Sprintf("%s/%d", LOCALITY_URL+CARRIER_REPORT_URL, id.Val)
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		json.Unmarshal(res.Body.Bytes(), &response)
+
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, expected, response.Data)
+	})
+	t.Run("Returns 404 if id is not found", func(t *testing.T) {
+		svc := LocalityServiceMock{}
+		h := handler.NewLocality(&svc)
+		server := getLocalityServer(h)
+
+		id := *optional.FromVal(42)
+		svc.On("CountCarriers", mock.Anything, id).Return([]localities.CountByLocality{}, localities.NewErrNotFound(id.Val))
+
+		url := fmt.Sprintf("%s/%d", LOCALITY_URL+CARRIER_REPORT_URL, id.Val)
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("Returns 201 if no id is given and there is no data", func(t *testing.T) {
+		t.Run("Returns 404 if id is not found", func(t *testing.T) {
+			svc := LocalityServiceMock{}
+			h := handler.NewLocality(&svc)
+			server := getLocalityServer(h)
+
+			id := optional.Opt[int]{}
+			svc.On("CountCarriers", mock.Anything, id).Return([]localities.CountByLocality{}, nil)
+
+			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+CARRIER_REPORT_URL, nil)
+			server.ServeHTTP(res, req)
+
+			var response testutil.SuccessResponse[[]localities.CountByLocality]
+			json.Unmarshal(res.Body.Bytes(), &response)
+
+			assert.Equal(t, http.StatusNoContent, res.Code)
+			assert.Len(t, response.Data, 0)
+		})
+	})
+	t.Run("Returns 590 if repository fails", func(t *testing.T) {
+		svc := LocalityServiceMock{}
+		h := handler.NewLocality(&svc)
+		server := getLocalityServer(h)
+
+		svc.On("CountCarriers", mock.Anything, mock.Anything).Return([]localities.CountByLocality{}, localities.NewErrGeneric(""))
+
+		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+CARRIER_REPORT_URL, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
+	})
+}
+
+func getSellerCounts() []localities.CountByLocality {
+	return []localities.CountByLocality{
 		{
 			ID:    1,
 			Name:  "Melicidade",
@@ -171,8 +257,10 @@ func getLocalityServer(h *handler.Locality) *gin.Engine {
 	rg := s.Group(LOCALITY_URL)
 	{
 		rg.POST("", middleware.Body[localities.CreateDTO](), h.Create())
-		rg.GET("", h.SellerReport())
-		rg.GET("/:id", middleware.IntPathParam(), h.SellerReport())
+		rg.GET(SELLER_REPORT_URL, h.SellerReport())
+		rg.GET(SELLER_REPORT_URL+"/:id", middleware.IntPathParam(), h.SellerReport())
+		rg.GET(CARRIER_REPORT_URL, h.CarrierReport())
+		rg.GET(CARRIER_REPORT_URL+"/:id", middleware.IntPathParam(), h.CarrierReport())
 	}
 	return s
 }
@@ -186,7 +274,12 @@ func (s *LocalityServiceMock) Create(c context.Context, loc localities.CreateDTO
 	return args.Get(0).(domain.Locality), args.Error(1)
 }
 
-func (s *LocalityServiceMock) CountSellers(c context.Context, id optional.Opt[int]) ([]localities.SellersByLocality, error) {
+func (s *LocalityServiceMock) CountSellers(c context.Context, id optional.Opt[int]) ([]localities.CountByLocality, error) {
 	args := s.Called(c, id)
-	return args.Get(0).([]localities.SellersByLocality), args.Error(1)
+	return args.Get(0).([]localities.CountByLocality), args.Error(1)
+}
+
+func (s *LocalityServiceMock) CountCarriers(c context.Context, id optional.Opt[int]) ([]localities.CountByLocality, error) {
+	args := s.Called(c, id)
+	return args.Get(0).([]localities.CountByLocality), args.Error(1)
 }

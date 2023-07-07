@@ -48,7 +48,7 @@ func (h *Locality) Create() gin.HandlerFunc {
 	}
 }
 
-// ReportAll godoc
+// ReportAllSellers godoc
 //
 //	@Summary	Return seller count for each locality
 //	@Tags		Localities
@@ -56,7 +56,7 @@ func (h *Locality) Create() gin.HandlerFunc {
 //	@Produce	json
 //	@Success	200	{object}	web.response		"Returns seller count for localities"
 //	@Success	204	{object}	web.response		"No content was found"
-//	@Failure	500	{object}	web.errorResponse	"Could not save locality"
+//	@Failure	500	{object}	web.errorResponse	"Could not generate report"
 //	@Router		/api/v1/localities/report-sellers [get]
 func (h *Locality) SellerReport() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -81,7 +81,7 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 	}
 }
 
-// ReportByID godoc
+// ReportSellerByID godoc
 //
 //	@Summary	Return seller count for given locality
 //	@Tags		Localities
@@ -90,9 +90,55 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 //	@Param		id	path		int					true	"Locality ID"
 //	@Success	200	{object}	web.response		"Returns seller count for locality"
 //	@Failure	404	{object}	web.response		"ID was not found"
-//	@Failure	500	{object}	web.errorResponse	"Could not save locality"
+//	@Failure	500	{object}	web.errorResponse	"Could generate report"
 //	@Router		/api/v1/localities/report-sellers/{id} [get]
 func _() {} // Implementation is in the SellerReport function
+
+// ReportAllCarriers godoc
+//
+//	@Summary	Return carrier count for each locality
+//	@Tags		Localities
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns carrier count for localities"
+//	@Success	204	{object}	web.response		"No content was found"
+//	@Failure	500	{object}	web.errorResponse	"Could not generate report"
+//	@Router		/api/v1/localities/report-carriers [get]
+func (h *Locality) CarrierReport() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var id optional.Opt[int]
+		if _, hasId := c.Params.Get("id"); hasId {
+			id = *optional.FromVal(c.GetInt("id"))
+		}
+
+		report, err := h.locService.CountCarriers(c, id)
+
+		if err != nil {
+			status := mapLocalityErrToStatus(err)
+			web.Error(c, status, err.Error())
+			return
+		}
+
+		if len(report) == 0 {
+			web.Success(c, http.StatusNoContent, report)
+			return
+		}
+		web.Success(c, http.StatusOK, report)
+	}
+}
+
+// ReportCarriersByID godoc
+//
+//	@Summary	Return carrier count for given locality
+//	@Tags		Localities
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int					true	"Locality ID"
+//	@Success	200	{object}	web.response		"Returns carrier count for locality"
+//	@Failure	404	{object}	web.response		"ID was not found"
+//	@Failure	500	{object}	web.errorResponse	"Could not generate report"
+//	@Router		/api/v1/localities/report-carriers/{id} [get]
+func _() {} // Implementation is in the CarrierReport function
 
 func mapLocalityErrToStatus(err error) int {
 	var invalidLocality *localities.ErrInvalidLocality

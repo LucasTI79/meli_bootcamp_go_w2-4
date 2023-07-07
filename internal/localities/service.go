@@ -14,7 +14,7 @@ type CreateDTO struct {
 	Country  string
 }
 
-type SellersByLocality struct {
+type CountByLocality struct {
 	ID    int
 	Name  string
 	Count int
@@ -26,7 +26,12 @@ type Service interface {
 	//  Returns slice of Seller count by Locality. If id is specified,
 	//  the slice will only contain the count for that locality; otherwise,
 	//  the slice will contain all localities.
-	CountSellers(c context.Context, id optional.Opt[int]) ([]SellersByLocality, error)
+	CountSellers(c context.Context, id optional.Opt[int]) ([]CountByLocality, error)
+	// godoc CountCarriers
+	//  Returns slice of Carrier count by Locality. If id is specified,
+	//  the slice will only contain the count for that locality; otherwise,
+	//  the slice will contain all localities.
+	CountCarriers(c context.Context, id optional.Opt[int]) ([]CountByLocality, error)
 }
 
 type service struct {
@@ -54,7 +59,7 @@ func (svc *service) Create(c context.Context, loc CreateDTO) (domain.Locality, e
 	return locDomain, nil
 }
 
-func (svc *service) CountSellers(c context.Context, id optional.Opt[int]) ([]SellersByLocality, error) {
+func (svc *service) CountSellers(c context.Context, id optional.Opt[int]) ([]CountByLocality, error) {
 	locs, err := svc.repo.GetAll(c)
 	if err != nil {
 		return nil, NewErrGeneric("error fetching localities")
@@ -71,18 +76,45 @@ func (svc *service) CountSellers(c context.Context, id optional.Opt[int]) ([]Sel
 		return nil, NewErrNotFound(id.Val)
 	}
 
-	report := make([]SellersByLocality, 0)
+	report := make([]CountByLocality, 0)
 	for _, stat := range stats {
 		loc := index[stat.LocalityID]
-		locCount := newSellersByLocality(loc, stat.SellerCount)
+		locCount := newSellersByLocality(loc, stat.Count)
 		report = append(report, locCount)
 	}
 
 	return report, nil
 }
 
-func newSellersByLocality(loc domain.Locality, count int) SellersByLocality {
-	return SellersByLocality{
+func (svc *service) CountCarriers(c context.Context, id optional.Opt[int]) ([]CountByLocality, error) {
+	locs, err := svc.repo.GetAll(c)
+	if err != nil {
+		return nil, NewErrGeneric("error fetching localities")
+	}
+
+	index := getLocalityIndex(locs)
+	ids := getReportIDs(id, index)
+
+	stats, err := svc.repo.CountCarriersByLocalities(c, ids)
+	if err != nil {
+		return nil, NewErrGeneric("error counting carriers")
+	}
+	if id.HasVal && len(stats) == 0 {
+		return nil, NewErrNotFound(id.Val)
+	}
+
+	report := make([]CountByLocality, 0)
+	for _, stat := range stats {
+		loc := index[stat.LocalityID]
+		locCount := newSellersByLocality(loc, stat.Count)
+		report = append(report, locCount)
+	}
+
+	return report, nil
+}
+
+func newSellersByLocality(loc domain.Locality, count int) CountByLocality {
+	return CountByLocality{
 		ID:    loc.ID,
 		Name:  loc.Name,
 		Count: count,

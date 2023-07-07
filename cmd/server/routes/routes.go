@@ -7,6 +7,7 @@ import (
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/carrier"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	inboundOrder "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/inbound_order"
@@ -46,6 +47,7 @@ func (r *router) MapRoutes() {
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
 	r.buildInboundOrderRoutes()
+	r.buildCarrierRoutes()
 	r.buildLocalityRoutes()
 }
 
@@ -106,13 +108,13 @@ func (r *router) buildWarehouseRoutes() {
 	service := warehouse.NewService(repo)
 	h := handler.NewWarehouse(service)
 
-	productRG := r.rg.Group("/warehouses")
+	rg := r.rg.Group("/warehouses")
 	{
-		productRG.POST("", middleware.Body[domain.Warehouse](), h.Create())
-		productRG.GET("", h.GetAll())
-		productRG.GET("/:id", middleware.IntPathParam(), h.Get())
-		productRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
-		productRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
+		rg.POST("", middleware.Body[domain.Warehouse](), h.Create())
+		rg.GET("", h.GetAll())
+		rg.GET("/:id", middleware.IntPathParam(), h.Get())
+		rg.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Warehouse](), h.Update())
+		rg.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 	}
 }
 
@@ -147,6 +149,7 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
 	}
 }
+
 func (r *router) buildInboundOrderRoutes() {
 	repo := inboundOrder.NewRepository(r.db)
 	service := inboundOrder.NewService(repo)
@@ -158,15 +161,28 @@ func (r *router) buildInboundOrderRoutes() {
 	}
 }
 
+func (r *router) buildCarrierRoutes() {
+	repo := carrier.NewRepository(r.db)
+	service := carrier.NewService(repo)
+	h := handler.NewCarrier(service)
+
+	productRG := r.rg.Group("/carrier")
+	{
+		productRG.POST("/", middleware.Body[handler.CarrierRequest](), h.Create())
+	}
+}
+
 func (r *router) buildLocalityRoutes() {
 	repo := localities.NewRepository(r.db)
 	service := localities.NewService(repo)
 	h := handler.NewLocality(service)
 
-	buyerRG := r.rg.Group("/localities")
+	rg := r.rg.Group("/localities")
 	{
-		buyerRG.POST("", middleware.Body[localities.CreateDTO](), h.Create())
-		buyerRG.GET("/report-sellers", h.SellerReport())
-		buyerRG.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
+		rg.POST("", middleware.Body[localities.CreateDTO](), h.Create())
+		rg.GET("/report-sellers", h.SellerReport())
+		rg.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
+		rg.GET("/report-carriers", h.CarrierReport())
+		rg.GET("/report-carriers/:id", middleware.IntPathParam(), h.CarrierReport())
 	}
 }
