@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
@@ -266,7 +265,6 @@ func (p *Product) CreateRecord() gin.HandlerFunc {
 		dto := mapCreateRequestRecord(&req)
 		productRecord, err := p.productService.CreateRecord(c.Request.Context(), *dto)
 		if err != nil {
-			fmt.Println(err.Error())
 			errStatus := mapErrorToStatus(err)
 			web.Error(c, errStatus, err.Error())
 			return
