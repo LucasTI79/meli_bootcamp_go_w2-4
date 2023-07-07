@@ -374,6 +374,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`inbound_orders` (
   `employee_id` INT NOT NULL,
   `product_batch_id` INT NOT NULL,
   `warehouse_id` INT NOT NULL,
+  CONSTRAINT `order_number` UNIQUE (`order_number`),
   PRIMARY KEY (`id`),
   INDEX `employee_id_idx` (`employee_id` ASC) VISIBLE,
   INDEX `product_batch_id_idx` (`product_batch_id` ASC) VISIBLE,
