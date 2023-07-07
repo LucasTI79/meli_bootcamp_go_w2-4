@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`product_batches` (
   PRIMARY KEY (`id`),
   INDEX `product_id_idx` (`product_id` ASC) VISIBLE,
   INDEX `section_id_idx` (`section_id` ASC) VISIBLE,
+  CONSTRAINT `batch_number` UNIQUE (`batch_number`),
   CONSTRAINT `fk_product_product_batches`
     FOREIGN KEY (`product_id`)
     REFERENCES `melisprint`.`products` (`id`)
