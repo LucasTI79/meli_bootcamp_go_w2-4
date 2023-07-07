@@ -10,6 +10,7 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	inboundOrder "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/inbound_order"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/localities"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
@@ -45,6 +46,7 @@ func (r *router) MapRoutes() {
 	r.buildEmployeeRoutes()
 	r.buildBuyerRoutes()
 	r.buildInboundOrderRoutes()
+	r.buildLocalityRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -153,5 +155,18 @@ func (r *router) buildInboundOrderRoutes() {
 	buyerRG := r.rg.Group("/inbound-orders")
 	{
 		buyerRG.POST("", middleware.Body[handler.InboundOrderRequest](), h.Create())
+	}
+}
+
+func (r *router) buildLocalityRoutes() {
+	repo := localities.NewRepository(r.db)
+	service := localities.NewService(repo)
+	h := handler.NewLocality(service)
+
+	buyerRG := r.rg.Group("/localities")
+	{
+		buyerRG.POST("", middleware.Body[localities.CreateDTO](), h.Create())
+		buyerRG.GET("/report-sellers", h.SellerReport())
+		buyerRG.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
 	}
 }
