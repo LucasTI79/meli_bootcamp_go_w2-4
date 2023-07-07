@@ -210,7 +210,6 @@ func TestBuyerDelete(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, response.Code)
 	})
-
 }
 
 func TestBuyerUpdate(t *testing.T) {
@@ -274,6 +273,77 @@ func TestBuyerUpdate(t *testing.T) {
 	})
 }
 
+func TestGetPurchaseOrderReports(t *testing.T) {
+	t.Run("should return status 200 when id is valid", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := getBuyerServer(buyerHandler)
+		expected := []buyer.CountByBuyer{{
+			ID:           10,
+			CardNumberID: 10,
+			FirstName:    "meli",
+			LastName:     "osasco",
+			Count:        10,
+		}}
+		url := fmt.Sprintf("%s/report-purchase-orders/%d", BUYER_URL, 1)
+
+		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return(expected, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]buyer.CountByBuyer]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.ElementsMatch(t, expected, received.Data)
+	})
+	t.Run("should return status 404 when id not found", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := getBuyerServer(buyerHandler)
+
+		url := fmt.Sprintf("%s/report-purchase-orders/%d", BUYER_URL, 1)
+
+		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return([]buyer.CountByBuyer{}, buyer.ErrNotFound)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusNotFound, res.Code)
+	})
+	t.Run("should return status 200 when id is valid", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := getBuyerServer(buyerHandler)
+		expected := []buyer.CountByBuyer{{
+			ID:           10,
+			CardNumberID: 10,
+			FirstName:    "meli",
+			LastName:     "osasco",
+			Count:        10,
+		},
+			{
+				ID:           11,
+				CardNumberID: 11,
+				FirstName:    "meli",
+				LastName:     "osasco",
+				Count:        5,
+			}}
+		url := fmt.Sprintf("%s/report-purchase-orders/%d", BUYER_URL, 1)
+
+		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return(expected, nil)
+
+		svcMock.On("CountPurchaseOrders", mock.Anything, 0).Return(expected, nil)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		var received testutil.SuccessResponse[[]domain.InboundReport]
+		json.Unmarshal(res.Body.Bytes(), &received)
+		assert.Equal(t, http.StatusOK, res.Code)
+	})
+}
+
 func getBuyerServer(h *handler.Buyer) *gin.Engine {
 	s := testutil.CreateServer()
 
@@ -282,6 +352,8 @@ func getBuyerServer(h *handler.Buyer) *gin.Engine {
 		buyerRG.GET("", h.GetAll())
 		buyerRG.POST("", middleware.Body[domain.BuyerCreate](), h.Create())
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		buyerRG.GET("/report-purchase-orders/:id", middleware.IntPathParam(), h.PurchaseOrderReport())
+		buyerRG.GET("/report-purchase-orders/", h.PurchaseOrderReport())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
 	}
@@ -316,4 +388,9 @@ func (svc *ServiceMockBuyer) Update(ctx context.Context, s domain.Buyer, id int)
 func (svc *ServiceMockBuyer) Delete(ctx context.Context, id int) error {
 	args := svc.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (svc *ServiceMockBuyer) CountPurchaseOrders(ctx context.Context, id int) ([]buyer.CountByBuyer, error) {
+	args := svc.Called(ctx, id)
+	return args.Get(0).([]buyer.CountByBuyer), args.Error(1)
 }

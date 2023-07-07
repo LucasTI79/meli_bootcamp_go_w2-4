@@ -274,3 +274,11 @@ func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
 }
+func (r *RepositoryMock) GetAllPurchaseOrders(ctx context.Context) ([]buyer.CountByBuyer, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]buyer.CountByBuyer), args.Error(1)
+}
+func (r *RepositoryMock) GetPurchaseOrderByID(ctx context.Context, id int) (buyer.CountByBuyer, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).(buyer.CountByBuyer), args.Error(1)
+}
