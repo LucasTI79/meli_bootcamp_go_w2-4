@@ -165,7 +165,7 @@ func (r *repository) GetAllInboundReports(ctx context.Context) ([]domain.Inbound
 
 	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, ErrInternalServerError
+		return []domain.InboundReport{}, ErrInternalServerError
 	}
 	defer rows.Close()
 
@@ -174,17 +174,17 @@ func (r *repository) GetAllInboundReports(ctx context.Context) ([]domain.Inbound
 		var e domain.InboundReport
 		err := rows.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID, &e.InboundOrdersCount)
 		if err != nil {
-			return nil, ErrInternalServerError
+			return []domain.InboundReport{}, ErrInternalServerError
 		}
 		reports = append(reports, e)
 	}
 	err = rows.Err()
 	if err != nil {
-		return nil, ErrInternalServerError
+		return []domain.InboundReport{}, ErrInternalServerError
 	}
 
 	if len(reports) == 0 {
-		return nil, ErrNotFound
+		return []domain.InboundReport{}, ErrNotFound
 	}
 
 	return reports, nil
