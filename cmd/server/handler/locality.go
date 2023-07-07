@@ -91,7 +91,7 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 //	@Success	200	{object}	web.response		"Returns seller count for locality"
 //	@Failure	404	{object}	web.response		"ID was not found"
 //	@Failure	500	{object}	web.errorResponse	"Could not save locality"
-//	@Router		/api/v1/localities/report-sellers/{id} [get]x
+//	@Router		/api/v1/localities/report-sellers/{id} [get]
 func _() {} // Implementation is in the SellerReport function
 
 func mapLocalityErrToStatus(err error) int {

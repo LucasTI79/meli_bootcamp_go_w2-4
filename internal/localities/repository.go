@@ -32,9 +32,10 @@ func NewRepository(db *sql.DB) Repository {
 
 func (r *repository) Save(ctx context.Context, loc domain.Locality) (int, error) {
 	// This query inserts the domain's locality across 3 tables.
-	// It tries to inser the province and country names if they
+	// It tries to insert the province and country names if they
 	// don't exist, ignoring possible unique-constraint violations.
-	// The last INSERT should not be ignored, since it's
+	// The last INSERT should not be ignored, since its failure means
+	// that the whole locality already exists.
 	countryQuery := `INSERT IGNORE INTO countries (country_name) VALUES (?);`
 	provinceQuery := `
 		INSERT IGNORE INTO provinces (province_name, country_id)
