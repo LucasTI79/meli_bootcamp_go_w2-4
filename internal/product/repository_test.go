@@ -7,7 +7,6 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	product "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/testutil"
-	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/stretchr/testify/assert"
 )
