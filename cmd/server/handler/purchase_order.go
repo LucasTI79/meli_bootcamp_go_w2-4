@@ -48,6 +48,7 @@ func (i *PurchaseOrder) Create() gin.HandlerFunc {
 		dto, err := mapPurchaseOrderRequestToDTO(&req)
 		if err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, err.Error())
+			return
 		}
 		i, err := i.purchaseOrderService.Create(c.Request.Context(), *dto)
 
