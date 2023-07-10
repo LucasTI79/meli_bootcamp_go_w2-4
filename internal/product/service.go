@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
@@ -19,6 +20,13 @@ type CreateDTO struct {
 	Width      float32
 	TypeID     int
 	SellerID   int
+}
+
+type CreateRecordDTO struct {
+	LastDate      string
+	PurchasePrice float64
+	SalePrice     float64
+	ProductID     int
 }
 
 type UpdateDTO struct {
@@ -41,6 +49,9 @@ type Service interface {
 	Get(c context.Context, id int) (domain.Product, error)
 	Update(c context.Context, id int, updates UpdateDTO) (domain.Product, error)
 	Delete(c context.Context, id int) error
+	CreateRecord(c context.Context, product CreateRecordDTO) (domain.Product_Records, error)
+	GetAllRecords(c context.Context) ([]domain.Product_Records, error)
+	GetRecords(c context.Context, id int) ([]domain.Product_Records, error)
 }
 
 type service struct {
@@ -66,12 +77,45 @@ func (s *service) Create(c context.Context, product CreateDTO) (domain.Product, 
 	return *p, nil
 }
 
+func (s *service) CreateRecord(c context.Context, product CreateRecordDTO) (domain.Product_Records, error) {
+	idProd := product.ProductID
+	_, err := s.repo.Get(c, idProd)
+	if err != nil {
+		return domain.Product_Records{}, NewErrInvalidProductCode(strconv.Itoa(idProd))
+	}
+	p := MapCreateRecord(&product)
+	id, err := s.repo.SaveRecord(c, *p)
+	if err != nil {
+		return domain.Product_Records{}, NewErrGeneric("error saving product record")
+	}
+
+	p.ID = id
+	return *p, nil
+}
+
 func (s *service) GetAll(c context.Context) ([]domain.Product, error) {
 	ps, err := s.repo.GetAll(c)
 	if err != nil {
 		return nil, NewErrGeneric("could not fetch products")
 	}
 	return ps, nil
+}
+
+func (s *service) GetAllRecords(c context.Context) ([]domain.Product_Records, error) {
+	ps, err := s.repo.GetAllRecords(c)
+	if err != nil {
+		return nil, NewErrGeneric("could not fetch product records")
+	}
+	return ps, nil
+}
+
+func (s *service) GetRecords(c context.Context, id int) ([]domain.Product_Records, error) {
+	p, err := s.repo.GetRecordsbyProd(c, id)
+	if err != nil {
+		// TODO: Properly handle DB communication error differently
+		return []domain.Product_Records{}, NewErrNotFound(id)
+	}
+	return p, nil
 }
 
 func (s *service) Get(c context.Context, id int) (domain.Product, error) {
@@ -127,6 +171,15 @@ func MapCreateToDomain(product *CreateDTO) *domain.Product {
 		Width:          product.Width,
 		ProductTypeID:  product.TypeID,
 		SellerID:       product.SellerID,
+	}
+}
+
+func MapCreateRecord(productRec *CreateRecordDTO) *domain.Product_Records {
+	return &domain.Product_Records{
+		LastUpdateDate: productRec.LastDate,
+		PurchasePrice:  productRec.PurchasePrice,
+		SalePrice:      productRec.SalePrice,
+		ProductID:      productRec.ProductID,
 	}
 }
 

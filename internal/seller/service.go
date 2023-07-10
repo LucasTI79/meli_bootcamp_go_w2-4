@@ -16,9 +16,9 @@ var (
 )
 
 type Service interface {
+	Create(c context.Context, s domain.Seller) (domain.Seller, error)
 	GetAll(c context.Context) ([]domain.Seller, error)
 	Get(ctx context.Context, id int) (domain.Seller, error)
-	Save(c context.Context, s domain.Seller) (domain.Seller, error)
 	Update(ctx context.Context, id int, s domain.Seller) (domain.Seller, error)
 	Delete(ctx context.Context, id int) error
 }
@@ -49,7 +49,7 @@ func (s *service) Get(c context.Context, id int) (domain.Seller, error) {
 	return seller, nil
 }
 
-func (s *service) Save(c context.Context, seller domain.Seller) (domain.Seller, error) {
+func (s *service) Create(c context.Context, seller domain.Seller) (domain.Seller, error) {
 	cidAlreadyExists := s.repository.Exists(c, seller.CID)
 	if cidAlreadyExists {
 		return domain.Seller{}, ErrCidAlreadyExists
@@ -87,6 +87,9 @@ func (s *service) Update(c context.Context, id int, newSeller domain.Seller) (do
 	}
 	if newSeller.Telephone != "" {
 		seller.Telephone = newSeller.Telephone
+	}
+	if newSeller.LocalityID != 0 {
+		seller.LocalityID = newSeller.LocalityID
 	}
 
 	errUpdate := s.repository.Update(c, seller)

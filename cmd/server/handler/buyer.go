@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/buyer"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,11 +33,8 @@ func NewBuyer(b buyer.Service) *Buyer {
 //	@Router			/api/v1/buyers/{id} [get]
 func (b *Buyer) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid ID")
-			return
-		}
+		id := c.GetInt("id")
+
 		buyer, err := b.buyerService.Get(c, id)
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "buyer not found")
@@ -58,12 +56,9 @@ func (b *Buyer) Get() gin.HandlerFunc {
 //	@Router			/api/v1/buyers/{id} [delete]
 func (b *Buyer) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid ID")
-			return
-		}
-		err = b.buyerService.Delete(c, id)
+		id := c.GetInt("id")
+
+		err := b.buyerService.Delete(c, id)
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "buyer not found")
 			return
@@ -108,11 +103,8 @@ func (b *Buyer) GetAll() gin.HandlerFunc {
 //	@Router			/api/v1/buyers [post]
 func (b *Buyer) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var buyer domain.BuyerCreate
-		if err := c.ShouldBindJSON(&buyer); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
-			return
-		}
+		buyer := middleware.GetBody[domain.BuyerCreate](c)
+
 		buyerF, err := b.buyerService.Create(c.Request.Context(), buyer)
 		if err != nil {
 			web.Error(c, http.StatusConflict, "buyer not created")
@@ -136,16 +128,9 @@ func (b *Buyer) Create() gin.HandlerFunc {
 //	@Router			/api/v1/buyers/{id} [patch]
 func (b *Buyer) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var buyer domain.Buyer
-		if err := c.ShouldBindJSON(&buyer); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "buyer not created")
-			return
-		}
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid ID")
-			return
-		}
+		id := c.GetInt("id")
+		buyer := middleware.GetBody[domain.Buyer](c)
+
 		buyerUpdated, err := b.buyerService.Update(c, buyer, id)
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "buyer not updated")
@@ -153,4 +138,58 @@ func (b *Buyer) Update() gin.HandlerFunc {
 		}
 		web.Success(c, http.StatusOK, buyerUpdated)
 	}
+}
+
+// ReportAllPurchaseOrders godoc
+//
+//	@Summary	Return purchaseOrder count for each buyer
+//	@Description	Return purchaseOrder count for each buyer
+//	@Tags		Buyers
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	web.response		"Returns purchaseOrder count for buyers"
+//	@Success	204	{object}	web.response		"No content was found"
+//	@Failure	500	{object}	web.errorResponse	"Could not generate report"
+//	@Router		/api/v1/buyers/report-purchase-orders [get]
+func (h *Buyer) PurchaseOrderReport() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var id int
+		if _, exists := c.Params.Get("id"); exists {
+			id = c.GetInt("id")
+		}
+
+		report, err := h.buyerService.CountPurchaseOrders(c, id)
+
+		if err != nil {
+			status := checkErrorStatusReportPurchaseOrder(err)
+			web.Error(c, status, err.Error())
+			return
+		}
+
+		web.Success(c, http.StatusOK, report)
+	}
+}
+
+// ReportPurchaseOrdersByID godoc
+//
+//	@Summary	Return purchaseOrder count for given buyer
+//	@Description	Return purchaseOrder count for given buyer
+//	@Tags		Buyers
+//	@Accept		json
+//	@Produce	json
+//	@Param		id	path		int					true	"Buyer ID"
+//	@Success	200	{object}	web.response		"Returns purchaseOrder count for buyer"
+//	@Failure	404	{object}	web.response		"ID was not found"
+//	@Failure	500	{object}	web.errorResponse	"Could not generate report"
+//	@Router		/api/v1/buyers/report-purchase-orders/{id} [get]
+func _() {} // Implementation is in the PurchaseOrderReport function
+
+func checkErrorStatusReportPurchaseOrder(err error) int {
+	if errors.Is(err, buyer.ErrAlreadyExists) {
+		return http.StatusConflict
+	}
+	if errors.Is(err, buyer.ErrNotFound) {
+		return http.StatusNotFound
+	}
+	return http.StatusInternalServerError
 }

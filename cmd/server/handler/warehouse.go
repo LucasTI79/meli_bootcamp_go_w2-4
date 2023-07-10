@@ -2,11 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,11 +44,7 @@ func NewWarehouse(w warehouse.Service) *Warehouse {
 //	@Router			/api/v1/warehouses/{id} [get]
 func (w *Warehouse) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, ErrInvalidID)
-			return
-		}
+		id := c.GetInt("id")
 
 		warehouse, err := w.warehouseService.Get(c, id)
 		if err != nil {
@@ -94,16 +90,13 @@ func (w *Warehouse) GetAll() gin.HandlerFunc {
 //	@Param			warehouse	body		domain.Warehouse	true	"Warehouse object"
 //	@Success		201			{object}	domain.Warehouse
 //	@Failure		422			{string}	string	"warehousecode need to be passed, it can't be empty"
-//	@Failure		500			{string}	string	 "something went wrong with the request"
+//	@Failure		500			{string}	string	"something went wrong with the request"
 //	@Failure		409			{string}	string	"warehouse can be alreary exist"
 //	@Router			/api/v1/warehouses [post]
 func (w *Warehouse) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var warehouse domain.Warehouse
-		if err := c.ShouldBindJSON(&warehouse); err != nil {
-			web.Error(c, http.StatusInternalServerError, ErrServerInternalError)
-			return
-		}
+		warehouse := middleware.GetBody[domain.Warehouse](c)
+
 		if warehouse.WarehouseCode == "" {
 			web.Error(c, http.StatusUnprocessableEntity, ErrWarehouseEmpty)
 			return
@@ -134,19 +127,11 @@ func (w *Warehouse) Create() gin.HandlerFunc {
 //	@Router			/api/v1/warehouses/{id} [patch]
 func (w *Warehouse) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		id := c.GetInt("id")
+		ware := middleware.GetBody[domain.Warehouse](c)
 
-		var ware domain.Warehouse
-		if err := c.ShouldBindJSON(&ware); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, ErrUnprocessableEntity)
-			return
-		}
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, ErrInvalidID)
-			return
-		}
 		ware.ID = id
-		ware, err = w.warehouseService.Update(c, ware)
+		ware, err := w.warehouseService.Update(c, ware)
 		if err != nil {
 			if err == warehouse.ErrNotFound {
 				web.Error(c, http.StatusNotFound, ErrWarehouseNotFound)
@@ -171,14 +156,11 @@ func (w *Warehouse) Update() gin.HandlerFunc {
 //	@Router			/api/v1/warehouses/{id} [delete]
 func (w *Warehouse) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
+		id := c.GetInt("id")
+
+		err := w.warehouseService.Delete(c, id)
 		if err != nil {
-			web.Error(c, http.StatusNotFound, ErrInvalidID)
-			return
-		}
-		err = w.warehouseService.Delete(c, id)
-		if err != nil {
-			web.Error(c, http.StatusInternalServerError, ErrWarehouseNotDeleted)
+			web.Error(c, http.StatusNotFound, ErrWarehouseNotFound)
 			return
 		}
 		web.Success(c, http.StatusNoContent, nil)

@@ -75,7 +75,7 @@ func TestCreate(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(sectionID, nil)
 
-		result, err := svc.Save(context.TODO(), body)
+		result, err := svc.Create(context.TODO(), body)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -88,7 +88,7 @@ func TestCreate(t *testing.T) {
 		body := getTestCreateSections()
 
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(true)
-		_, err := svc.Save(context.TODO(), body)
+		_, err := svc.Create(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrInvalidSectionNumber)
@@ -103,7 +103,7 @@ func TestCreate(t *testing.T) {
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
 		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, section.ErrSavingSection)
 
-		_, err := svc.Save(context.TODO(), body)
+		_, err := svc.Create(context.TODO(), body)
 
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, section.ErrSavingSection)
@@ -115,17 +115,46 @@ func TestUpdate(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := section.NewService(&repositoryMock)
 
-		actualSection := getTestSections()[0]
+		actualSection := domain.Section{
+			ID:                 1,
+			SectionNumber:      123,
+			CurrentTemperature: 10,
+			MinimumTemperature: 5,
+			CurrentCapacity:    15,
+			MinimumCapacity:    10,
+			MaximumCapacity:    20,
+			WarehouseID:        321,
+			ProductTypeID:      2,
+		}
 
-		body := getUpdateSection()
+		updates := section.UpdateSection{
+			SectionNumber:      testutil.ToPtr(1234),
+			CurrentTemperature: testutil.ToPtr(11.0),
+			MinimumTemperature: testutil.ToPtr(0.0),
+			CurrentCapacity:    testutil.ToPtr(16),
+			MinimumCapacity:    testutil.ToPtr(0),
+			MaximumCapacity:    testutil.ToPtr(21),
+			WarehouseID:        testutil.ToPtr(3210),
+			ProductTypeID:      testutil.ToPtr(3),
+		}
 
-		expected := getTestSections()[1]
+		expected := domain.Section{
+			ID:                 1,
+			SectionNumber:      1234,
+			CurrentTemperature: 11,
+			MinimumTemperature: 0,
+			CurrentCapacity:    16,
+			MinimumCapacity:    0,
+			MaximumCapacity:    21,
+			WarehouseID:        3210,
+			ProductTypeID:      3,
+		}
 
 		repositoryMock.On("Get", mock.Anything, mock.Anything).Return(actualSection, nil)
 		repositoryMock.On("Exists", mock.Anything, mock.Anything).Return(false)
-		repositoryMock.On("Update", mock.Anything, mock.Anything).Return(expected, nil)
+		repositoryMock.On("Update", mock.Anything, mock.Anything).Return(nil)
 
-		result, err := svc.Update(context.TODO(), body, sectionID)
+		result, err := svc.Update(context.TODO(), updates, sectionID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -187,6 +216,93 @@ func TestDelete(t *testing.T) {
 	})
 }
 
+func TestGetAllReportProducts(t *testing.T) {
+	t.Run("get all the products in a section successfully", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := section.NewService(&repositoryMock)
+
+		expected := []domain.GetOneData{
+			{
+				SectionId:     123,
+				SectionNumber: 2,
+				ProductCount:  0,
+			},
+			{
+				SectionId:     123,
+				SectionNumber: 2,
+				ProductCount:  0,
+			},
+		}
+
+		repositoryMock.On("GetAllReportProducts", mock.Anything).Return(expected, nil)
+		result, err := svc.GetAllReportProducts(context.Background())
+
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, expected, result)
+		assert.Len(t, expected, 2)
+	})
+	t.Run("Does not get any section and returns error: getting sections", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := section.NewService(&repositoryMock)
+
+		repositoryMock.On("GetAllReportProducts", mock.Anything).Return([]domain.GetOneData{}, section.ErrGetSections)
+		_, err := svc.GetAllReportProducts(context.Background())
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, section.ErrGetSections)
+	})
+}
+
+func TestGetReportProducts(t *testing.T) {
+	t.Run("get the product in a section successfully", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := section.NewService(&repositoryMock)
+
+		expected := []domain.GetOneData{
+			{
+				SectionId:     123,
+				SectionNumber: 2,
+				ProductCount:  0,
+			},
+			{
+				SectionId:     123,
+				SectionNumber: 2,
+				ProductCount:  0,
+			},
+		}
+
+		repositoryMock.On("GetAllReportProducts", mock.Anything).Return(expected, nil)
+
+		result, err := svc.GetReportProducts(context.Background(), expected[0].SectionId)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected[0], result)
+	})
+
+	t.Run("Does not get any section and returns error: getting sections", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := section.NewService(&repositoryMock)
+
+		repositoryMock.On("GetAllReportProducts", mock.Anything).Return([]domain.GetOneData{}, section.ErrGetSections)
+		_, err := svc.GetReportProducts(context.Background(), 1)
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, section.ErrGetSections)
+	})
+
+	t.Run("Does not get any section and returns error: not found", func(t *testing.T) {
+		repositoryMock := RepositoryMock{}
+		svc := section.NewService(&repositoryMock)
+
+		repositoryMock.On("GetAllReportProducts", mock.Anything).Return([]domain.GetOneData{}, nil)
+		repositoryMock.On("GetReportProducts", mock.Anything).Return(domain.GetOneData{}, section.ErrNotFound)
+		_, err := svc.GetReportProducts(context.Background(), 1)
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, section.ErrNotFound)
+	})
+}
+
 // Generate test objects
 
 func getTestSections() []domain.Section {
@@ -232,8 +348,8 @@ func getTestCreateSections() section.CreateSection {
 func getUpdateSection() section.UpdateSection {
 	return section.UpdateSection{
 		SectionNumber:      testutil.ToPtr(123),
-		CurrentTemperature: testutil.ToPtr(11),
-		MinimumTemperature: testutil.ToPtr(6),
+		CurrentTemperature: testutil.ToPtr(11.0),
+		MinimumTemperature: testutil.ToPtr(6.0),
 		CurrentCapacity:    testutil.ToPtr(16),
 		MinimumCapacity:    testutil.ToPtr(11),
 		MaximumCapacity:    testutil.ToPtr(21),
@@ -258,8 +374,8 @@ func (r *RepositoryMock) Get(ctx context.Context, id int) (domain.Section, error
 	return args.Get(0).(domain.Section), args.Error(1)
 }
 
-func (r *RepositoryMock) Exists(ctx context.Context, SectionNumber int) bool {
-	args := r.Called(ctx, SectionNumber)
+func (r *RepositoryMock) Exists(ctx context.Context, sectionNumber int) bool {
+	args := r.Called(ctx, sectionNumber)
 	return args.Get(0).(bool)
 }
 
@@ -268,12 +384,22 @@ func (r *RepositoryMock) Save(ctx context.Context, s domain.Section) (int, error
 	return args.Get(0).(int), args.Error(1)
 }
 
-func (r *RepositoryMock) Update(ctx context.Context, s domain.Section) (domain.Section, error) {
+func (r *RepositoryMock) Update(ctx context.Context, s domain.Section) error {
 	args := r.Called(ctx, s)
-	return args.Get(0).(domain.Section), args.Error(1)
+	return args.Error(0)
 }
 
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (r *RepositoryMock) GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]domain.GetOneData), args.Error(1)
+}
+
+func (r *RepositoryMock) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).(domain.GetOneData), args.Error(1)
 }

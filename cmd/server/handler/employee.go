@@ -4,9 +4,9 @@ import (
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/employee"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,11 +35,7 @@ func NewEmployee(e employee.Service) *Employee {
 //	@Router			/api/v1/employees/{id} [get]
 func (e *Employee) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid card id")
-			return
-		}
+		id := c.GetInt("id")
 
 		employee, err := e.employeeService.Get(c, id)
 		if err != nil {
@@ -85,11 +81,8 @@ func (e *Employee) GetAll() gin.HandlerFunc {
 //	@Router			/api/v1/employees [post]
 func (e *Employee) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var employee domain.Employee
-		if err := c.ShouldBindJSON(&employee); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "employee not created")
-			return
-		}
+		employee := middleware.GetBody[domain.Employee](c)
+
 		if employee.CardNumberID == "" {
 			web.Error(c, http.StatusBadRequest, "employee card ID need to be only")
 			return
@@ -127,19 +120,12 @@ func (e *Employee) Create() gin.HandlerFunc {
 //	@Router			/api/v1/employees/{id} [patch]
 func (e *Employee) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		id := c.GetInt("id")
+		employee := middleware.GetBody[domain.Employee](c)
 
-		var employee domain.Employee
-		if err := c.ShouldBindJSON(&employee); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, "action could not be processed correctly due to invalid data provided")
-			return
-		}
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid id")
-			return
-		}
 		employee.ID = id
-		employee, err = e.employeeService.Update(c, employee)
+		employee, err := e.employeeService.Update(c, employee)
+
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "employee does not exist")
 			return
@@ -162,12 +148,10 @@ func (e *Employee) Update() gin.HandlerFunc {
 //	@Router			/api/v1/employees/{id} [delete]
 func (e *Employee) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "invalid id")
-			return
-		}
-		err = e.employeeService.Delete(c, id)
+		id := c.GetInt("id")
+
+		err := e.employeeService.Delete(c, id)
+
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "employee not deleted")
 			return
@@ -175,3 +159,35 @@ func (e *Employee) Delete() gin.HandlerFunc {
 		web.Success(c, http.StatusNoContent, nil)
 	}
 }
+
+// @Summary	Get specific inbound order report from employee by ID
+// @Tags		Employees
+// @Accept		json
+// @Produce	json
+// @Param     id      path    int    true "Employee ID"
+// @Success	200	{object}	web.response		"returns the specified report"
+// @Failure	404	{object}	web.errorResponse	"no report to be returned"
+// @Router		/api/v1/employees/report-inbound-orders/{id} [get]
+func (e *Employee) GetInboundReport() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := 0
+		if _, exists := c.Params.Get("id"); exists {
+			id = c.GetInt("id")
+		}
+		report, err := e.employeeService.GetInboundReport(c, id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, "invalid id")
+			return
+		}
+		web.Success(c, http.StatusOK, report)
+	}
+}
+
+// @Summary	Get all inbound orders reports
+// @Tags		Employees
+// @Accept		json
+// @Produce	json
+// @Success	200	{object}	web.response		"returns all of the reports"
+// @Failure	404	{object}	web.errorResponse	"no report to be returned"
+// @Router		/api/v1/employees/report-inbound-orders [get]
+func _() {} //

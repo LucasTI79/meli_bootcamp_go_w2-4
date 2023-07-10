@@ -8,25 +8,25 @@ import (
 )
 
 type CreateSection struct {
-	SectionNumber      int `binding:"required" json:"section_number"`
-	CurrentTemperature int `binding:"required" json:"current_temperature"`
-	MinimumTemperature int `binding:"required" json:"minimum_temperature"`
-	CurrentCapacity    int `binding:"required" json:"current_capacity"`
-	MinimumCapacity    int `binding:"required" json:"minimum_capacity"`
-	MaximumCapacity    int `binding:"required" json:"maximum_capacity"`
-	WarehouseID        int `binding:"required" json:"warehouse_id"`
-	ProductTypeID      int `binding:"required" json:"product_type_id"`
+	SectionNumber      int     `binding:"required" json:"section_number"`
+	CurrentTemperature float64 `binding:"required" json:"current_temperature"`
+	MinimumTemperature float64 `binding:"required" json:"minimum_temperature"`
+	CurrentCapacity    int     `binding:"required" json:"current_capacity"`
+	MinimumCapacity    int     `binding:"required" json:"minimum_capacity"`
+	MaximumCapacity    int     `binding:"required" json:"maximum_capacity"`
+	WarehouseID        int     `binding:"required" json:"warehouse_id"`
+	ProductTypeID      int     `binding:"required" json:"product_type_id"`
 }
 
 type UpdateSection struct {
-	SectionNumber      *int `json:"section_number"`
-	CurrentTemperature *int `json:"current_temperature"`
-	MinimumTemperature *int `json:"minimum_temperature"`
-	CurrentCapacity    *int `json:"current_capacity"`
-	MinimumCapacity    *int `json:"minimum_capacity"`
-	MaximumCapacity    *int `json:"maximum_capacity"`
-	WarehouseID        *int `json:"warehouse_id"`
-	ProductTypeID      *int `json:"product_type_id"`
+	SectionNumber      *int     `json:"section_number"`
+	CurrentTemperature *float64 `json:"current_temperature"`
+	MinimumTemperature *float64 `json:"minimum_temperature"`
+	CurrentCapacity    *int     `json:"current_capacity"`
+	MinimumCapacity    *int     `json:"minimum_capacity"`
+	MaximumCapacity    *int     `json:"maximum_capacity"`
+	WarehouseID        *int     `json:"warehouse_id"`
+	ProductTypeID      *int     `json:"product_type_id"`
 }
 
 // Errors
@@ -38,11 +38,13 @@ var (
 )
 
 type Service interface {
-	Save(ctx context.Context, section CreateSection) (domain.Section, error)
+	Create(ctx context.Context, section CreateSection) (domain.Section, error)
 	GetAll(ctx context.Context) ([]domain.Section, error)
 	Get(ctx context.Context, id int) (domain.Section, error)
-	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, dto UpdateSection, id int) (domain.Section, error)
+	Delete(ctx context.Context, id int) error
+	GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error)
+	GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error)
 }
 
 type service struct {
@@ -55,7 +57,7 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) Save(ctx context.Context, createSection CreateSection) (domain.Section, error) {
+func (s *service) Create(ctx context.Context, createSection CreateSection) (domain.Section, error) {
 	existsSectionNumber := s.repository.Exists(ctx, createSection.SectionNumber)
 	if existsSectionNumber {
 		return domain.Section{}, ErrInvalidSectionNumber
@@ -119,7 +121,7 @@ func (s *service) Update(ctx context.Context, dto UpdateSection, id int) (domain
 		}
 	}
 	applyValues(&sec, dto)
-	sec, err = s.repository.Update(ctx, sec)
+	err = s.repository.Update(ctx, sec)
 	return sec, err
 }
 
@@ -168,4 +170,26 @@ func mapCreateToDomain(section *CreateSection) *domain.Section {
 		WarehouseID:        section.WarehouseID,
 		ProductTypeID:      section.ProductTypeID,
 	}
+}
+
+func (s *service) GetReportProducts(ctx context.Context, id int) (domain.GetOneData, error) {
+	section, err := s.repository.GetAllReportProducts(ctx)
+	if err != nil {
+		return domain.GetOneData{}, ErrGetSections
+	}
+
+	for _, s := range section {
+		if s.SectionId == id {
+			return s, nil
+		}
+	}
+	return domain.GetOneData{}, ErrNotFound
+}
+
+func (s *service) GetAllReportProducts(ctx context.Context) ([]domain.GetOneData, error) {
+	sec, err := s.repository.GetAllReportProducts(ctx)
+	if err != nil {
+		return []domain.GetOneData{}, ErrGetSections
+	}
+	return sec, nil
 }

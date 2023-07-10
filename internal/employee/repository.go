@@ -3,6 +3,7 @@ package employee
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 )
@@ -15,6 +16,8 @@ type Repository interface {
 	Save(ctx context.Context, e domain.Employee) (int, error)
 	Update(ctx context.Context, e domain.Employee) error
 	Delete(ctx context.Context, id int) error
+	GetInboundReport(ctx context.Context, id int) (domain.InboundReport, error)
+	GetAllInboundReports(ctx context.Context) ([]domain.InboundReport, error)
 }
 
 type repository struct {
@@ -51,6 +54,9 @@ func (r *repository) Get(ctx context.Context, id int) (domain.Employee, error) {
 	e := domain.Employee{}
 	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.Employee{}, ErrNotFound
+		}
 		return domain.Employee{}, err
 	}
 
@@ -96,9 +102,12 @@ func (r *repository) Update(ctx context.Context, e domain.Employee) error {
 		return err
 	}
 
-	_, err = res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
+	}
+	if affected < 1 {
+		return ErrNotFound
 	}
 
 	return nil
@@ -116,14 +125,67 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 		return err
 	}
 
-	affect, err := res.RowsAffected()
+	affected, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 
-	if affect < 1 {
+	if affected < 1 {
 		return ErrNotFound
 	}
 
 	return nil
+}
+func (r *repository) GetInboundReport(ctx context.Context, id int) (domain.InboundReport, error) {
+	const query = `SELECT e.id, e.card_number_id, e.first_name, e.last_name, e.warehouse_id, COUNT(i.id) as inbound_orders_count 
+					FROM employees e 
+					LEFT JOIN inbound_orders i ON i.employee_id = e.id 
+					WHERE e.id = ? 
+					GROUP BY e.id;`
+
+	row := r.db.QueryRow(query, id)
+	e := domain.InboundReport{}
+	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID, &e.InboundOrdersCount)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.InboundReport{}, ErrNotFound
+		}
+		return domain.InboundReport{}, ErrInternalServerError
+	}
+
+	return e, nil
+
+}
+
+func (r *repository) GetAllInboundReports(ctx context.Context) ([]domain.InboundReport, error) {
+	const query = `SELECT e.id, e.card_number_id, e.first_name, e.last_name, e.warehouse_id, COUNT(i.id) as inbound_orders_count 
+					FROM employees e 
+					LEFT JOIN inbound_orders i ON i.employee_id = e.id 
+					GROUP BY e.id;`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return []domain.InboundReport{}, ErrInternalServerError
+	}
+	defer rows.Close()
+
+	var reports []domain.InboundReport
+	for rows.Next() {
+		var e domain.InboundReport
+		err := rows.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.WarehouseID, &e.InboundOrdersCount)
+		if err != nil {
+			return []domain.InboundReport{}, ErrInternalServerError
+		}
+		reports = append(reports, e)
+	}
+	err = rows.Err()
+	if err != nil {
+		return []domain.InboundReport{}, ErrInternalServerError
+	}
+
+	if len(reports) == 0 {
+		return []domain.InboundReport{}, ErrNotFound
+	}
+
+	return reports, nil
 }

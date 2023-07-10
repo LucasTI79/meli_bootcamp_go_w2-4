@@ -2,11 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web"
+	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/web/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,11 +58,7 @@ func (s *Section) GetAll() gin.HandlerFunc {
 //	@Router		/api/v1/sections/{id} [get]
 func (s *Section) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 		sec, err := s.sectionService.Get(c.Request.Context(), id)
 
 		if err != nil {
@@ -87,13 +83,9 @@ func (s *Section) Get() gin.HandlerFunc {
 //	@Router		/api/v1/sections [post]
 func (s *Section) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var dto section.CreateSection
-		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+		dto := middleware.GetBody[section.CreateSection](c)
 
-		sec, err := s.sectionService.Save(c, dto)
+		sec, err := s.sectionService.Create(c, dto)
 		if err != nil {
 			if err == section.ErrInvalidSectionNumber {
 				web.Error(c, http.StatusConflict, err.Error())
@@ -124,17 +116,8 @@ func (s *Section) Create() gin.HandlerFunc {
 //	@Router		/api/v1/sections/{id} [patch]
 func (s *Section) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusBadRequest, "id should be a number")
-			return
-		}
-
-		var dto section.UpdateSection
-		if err := c.ShouldBindJSON(&dto); err != nil {
-			web.Error(c, http.StatusUnprocessableEntity, err.Error())
-			return
-		}
+		id := c.GetInt("id")
+		dto := middleware.GetBody[section.UpdateSection](c)
 
 		sec, err := s.sectionService.Update(c.Request.Context(), dto, id)
 
@@ -160,20 +143,15 @@ func (s *Section) Update() gin.HandlerFunc {
 //	@Accept		json
 //	@Produce	json
 //	@Param		id	path		int					true	"Section ID"
-//	@Success	200	{object}	web.response		"Section deleted successfully"
-//	@Failure	400	{object}	web.errorResponse	"Invalid ID type"
+//	@Success	204	{object}	web.response		"Section deleted successfully"
 //	@Failure	404	{object}	web.errorResponse	"Could not find section"
 //	@Failure	500	{object}	web.errorResponse	"Could not delete section"
 //	@Router		/api/v1/sections/{id} [delete]
 func (s *Section) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			web.Error(c, http.StatusInternalServerError, err.Error())
-			return
-		}
+		id := c.GetInt("id")
 
-		err = s.sectionService.Delete(c, id)
+		err := s.sectionService.Delete(c, id)
 
 		if err != nil {
 			web.Error(c, http.StatusNotFound, "id %d not found", id)
@@ -182,5 +160,58 @@ func (s *Section) Delete() gin.HandlerFunc {
 
 		web.Success(c, http.StatusNoContent, domain.Section{})
 
+	}
+}
+
+// GetReportProducts godoc
+//
+// @Summary	Get report of products for a section
+// @Tags		Sections
+// @Accept		json
+// @Produce	json
+// @Param		id	path	int	true	"Section ID"
+// @Success	200	{object}	web.response	"Report of products"
+// @Failure	404	{object}	web.errorResponse	"Could not find section"
+// @Failure	500	{object}	web.errorResponse	"Could not report"
+// @Router	/api/v1/sections/{id}/report-products [get]
+func (s *Section) GetReportProducts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.GetInt("id")
+
+		report, err := s.sectionService.GetReportProducts(c.Request.Context(), id)
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		web.Success(c, http.StatusOK, report)
+	}
+}
+
+// GetAllReportProducts godoc
+//
+// @Summary	Get report of products for all sections
+// @Tags		Sections
+// @Accept		json
+// @Produce	json
+// @Success	200	{object}	web.response	"Report of products"
+// @Success	204	{object}	web.errorResponse	"Status No Content"
+// @Failure	404	{object}	web.errorResponse	"Could not find any section"
+// @Router	/api/v1/sections/report-products [get]
+func (s *Section) GetAllReportProducts() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		report, err := s.sectionService.GetAllReportProducts(c.Request.Context())
+		if err != nil {
+			web.Error(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		if len(report) == 0 {
+			web.Success(c, http.StatusNoContent, report)
+			return
+		}
+
+		web.Success(c, http.StatusOK, report)
 	}
 }

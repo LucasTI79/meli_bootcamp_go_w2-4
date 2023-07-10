@@ -21,6 +21,7 @@ type Service interface {
 	Get(ctx context.Context, id int) (domain.Employee, error)
 	Delete(ctx context.Context, id int) error
 	Update(ctx context.Context, e domain.Employee) (domain.Employee, error)
+	GetInboundReport(ctx context.Context, id int) ([]domain.InboundReport, error)
 }
 
 type service struct {
@@ -114,4 +115,21 @@ func (s *service) Update(ctx context.Context, e domain.Employee) (domain.Employe
 		return domain.Employee{}, ErrNotFound
 	}
 	return currentEmployee, nil
+}
+
+func (s *service) GetInboundReport(ctx context.Context, id int) ([]domain.InboundReport, error) {
+	if id == 0 {
+		e, err := s.repository.GetAllInboundReports(ctx)
+		if err != nil {
+			return []domain.InboundReport{}, err
+		}
+		return e, nil
+
+	}
+	e, err := s.repository.GetInboundReport(ctx, id)
+	if err != nil {
+		return []domain.InboundReport{}, err
+	}
+
+	return []domain.InboundReport{e}, nil
 }

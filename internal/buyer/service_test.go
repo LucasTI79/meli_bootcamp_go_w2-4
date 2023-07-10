@@ -16,17 +16,22 @@ func TestCreateBuyer(t *testing.T) {
 		repositoryMock := RepositoryMock{}
 		svc := buyer.NewService(&repositoryMock)
 
-		buyer := domain.BuyerCreate{
+		buyer := domain.Buyer{
 			ID:           1,
 			CardNumberID: "123",
 			FirstName:    "nome",
 			LastName:     "sobrenome",
 		}
+		b := domain.BuyerCreate{
+			CardNumberID: "123",
+			FirstName:    "nome",
+			LastName:     "sobrenome",
+		}
 
-		repositoryMock.On("Exists", mock.Anything, "123").Return(false)
-		repositoryMock.On("Save", mock.Anything, buyer).Return(1, nil)
+		repositoryMock.On("Exists", mock.Anything, b.CardNumberID).Return(false)
+		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(1, nil)
 
-		received, err := svc.Create(context.TODO(), buyer)
+		received, err := svc.Create(context.TODO(), b)
 
 		assert.NoError(t, err)
 		assert.Equal(t, buyer, received)
@@ -63,7 +68,7 @@ func TestCreateBuyer(t *testing.T) {
 		}
 
 		repositoryMock.On("Exists", mock.Anything, "123").Return(false)
-		repositoryMock.On("Save", mock.Anything, buyerMock).Return(1, buyer.ErrSavingBuyer)
+		repositoryMock.On("Save", mock.Anything, mock.Anything).Return(0, buyer.ErrSavingBuyer)
 
 		_, err := svc.Create(context.TODO(), buyerMock)
 
@@ -110,12 +115,12 @@ func TestGetBuyer(t *testing.T) {
 		svc := buyer.NewService(&repositoryMock)
 
 		buyerMock := []domain.Buyer{
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
 				LastName:     "sobrenome"},
-			domain.Buyer{
+			{
 				ID:           1,
 				CardNumberID: "123",
 				FirstName:    "nome",
@@ -235,6 +240,65 @@ func TestDeleteBuyer(t *testing.T) {
 		assert.Equal(t, errors.New("buyer not found"), err)
 	})
 }
+func TestGetCountPurchaseOrders(t *testing.T) {
+	t.Run("return correct report for valid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		r := buyer.CountByBuyer{
+			ID:           1,
+			CardNumberID: 10,
+			FirstName:    "melicidade",
+			LastName:     "osasco",
+			Count:        10,
+		}
+
+		mockedRepository.On("GetPurchaseOrderByID", mock.Anything, r.ID).Return(r, nil)
+		report, err := s.CountPurchaseOrders(context.TODO(), 1)
+		assert.NoError(t, err)
+		assert.Equal(t, []buyer.CountByBuyer{r}, report)
+	})
+	t.Run("return all reports when a id is not received", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		r := []buyer.CountByBuyer{{
+			ID:           1,
+			CardNumberID: 10,
+			FirstName:    "melicidade",
+			LastName:     "osasco",
+			Count:        10,
+		},
+			{
+				ID:           2,
+				CardNumberID: 20,
+				FirstName:    "melicidade-2",
+				LastName:     "osasco-2",
+				Count:        20,
+			}}
+
+		mockedRepository.On("GetAllPurchaseOrders", mock.Anything).Return(r, nil)
+		reports, err := s.CountPurchaseOrders(context.TODO(), 0)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, r, reports)
+	})
+	t.Run("returns a error when id is not found", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		mockedRepository.On("GetPurchaseOrderByID", mock.Anything, 1).Return(buyer.CountByBuyer{}, buyer.ErrNotFound)
+		_, err := s.CountPurchaseOrders(context.TODO(), 1)
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
+	})
+	t.Run("returns a error when there isnt any report", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		mockedRepository.On("GetAllPurchaseOrders", mock.Anything).Return([]buyer.CountByBuyer{}, buyer.ErrNotFound)
+		_, err := s.CountPurchaseOrders(context.TODO(), 0)
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
@@ -255,7 +319,7 @@ func (r *RepositoryMock) Exists(ctx context.Context, cardNumberID string) bool {
 	return args.Get(0).(bool)
 }
 
-func (r *RepositoryMock) Save(ctx context.Context, s domain.BuyerCreate) (int, error) {
+func (r *RepositoryMock) Save(ctx context.Context, s domain.Buyer) (int, error) {
 	args := r.Called(ctx, s)
 	return args.Get(0).(int), args.Error(1)
 }
@@ -268,4 +332,12 @@ func (r *RepositoryMock) Update(ctx context.Context, s domain.Buyer) error {
 func (r *RepositoryMock) Delete(ctx context.Context, id int) error {
 	args := r.Called(ctx, id)
 	return args.Error(0)
+}
+func (r *RepositoryMock) GetAllPurchaseOrders(ctx context.Context) ([]buyer.CountByBuyer, error) {
+	args := r.Called(ctx)
+	return args.Get(0).([]buyer.CountByBuyer), args.Error(1)
+}
+func (r *RepositoryMock) GetPurchaseOrderByID(ctx context.Context, id int) (buyer.CountByBuyer, error) {
+	args := r.Called(ctx, id)
+	return args.Get(0).(buyer.CountByBuyer), args.Error(1)
 }

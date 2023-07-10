@@ -9,36 +9,53 @@ import (
 
 // Error definitions
 var (
-	ErrNotFound      = errors.New("buyer not found")
-	ErrGeneric       = errors.New("")
-	ErrAlreadyExists = errors.New("buyer already exists")
-	ErrSavingBuyer   = errors.New("error saving buyer")
+	ErrNotFound            = errors.New("buyer not found")
+	ErrGeneric             = errors.New("")
+	ErrInternalServerError = errors.New("internal server error")
+	ErrAlreadyExists       = errors.New("buyer already exists")
+	ErrSavingBuyer         = errors.New("error saving buyer")
 )
+
+type CountByBuyer struct {
+	ID           int
+	CardNumberID int
+	FirstName    string
+	LastName     string
+	Count        int
+}
 
 // Service is the buyer service interface
 type Service interface {
+	Create(ctx context.Context, b domain.BuyerCreate) (domain.Buyer, error)
 	GetAll(ctx context.Context) ([]domain.Buyer, error)
 	Get(ctx context.Context, id int) (domain.Buyer, error)
-	Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error)
 	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
 	Delete(ctx context.Context, id int) error
+	CountPurchaseOrders(ctx context.Context, id int) ([]CountByBuyer, error)
 }
 
 type service struct {
 	repository Repository
 }
 
-func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.BuyerCreate, error) {
+func NewService(r Repository) Service {
+	return &service{
+		r,
+	}
+}
+
+func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.Buyer, error) {
 	ex := s.repository.Exists(ctx, b.CardNumberID)
 	if ex {
-		return domain.BuyerCreate{}, ErrAlreadyExists
+		return domain.Buyer{}, ErrAlreadyExists
 	}
-	id, err := s.repository.Save(ctx, b)
+	buyerDomain := *mapCreateToDomain(b)
+	id, err := s.repository.Save(ctx, buyerDomain)
 	if err != nil {
-		return domain.BuyerCreate{}, ErrSavingBuyer
+		return domain.Buyer{}, ErrSavingBuyer
 	}
-	b.ID = id
-	return b, nil
+	buyerDomain.ID = id
+	return buyerDomain, nil
 }
 
 func (s *service) Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error) {
@@ -87,9 +104,27 @@ func (s *service) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-// NewService creates a new buyer service instance
-func NewService(r Repository) Service {
-	return &service{
-		r,
+func (s *service) CountPurchaseOrders(ctx context.Context, id int) ([]CountByBuyer, error) {
+	if id == 0 {
+		e, err := s.repository.GetAllPurchaseOrders(ctx)
+		if err != nil {
+			return []CountByBuyer{}, err
+		}
+		return e, nil
+
+	}
+	e, err := s.repository.GetPurchaseOrderByID(ctx, id)
+	if err != nil {
+		return []CountByBuyer{}, err
+	}
+
+	return []CountByBuyer{e}, nil
+}
+
+func mapCreateToDomain(b domain.BuyerCreate) *domain.Buyer {
+	return &domain.Buyer{
+		CardNumberID: b.CardNumberID,
+		FirstName:    b.FirstName,
+		LastName:     b.LastName,
 	}
 }

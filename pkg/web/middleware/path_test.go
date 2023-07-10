@@ -41,6 +41,20 @@ func TestIntPathParamValidator(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, res.Code)
 	})
+	t.Run("Should not call handler if path param is not an int", func(t *testing.T) {
+		server := testutil.CreateServer()
+
+		intParam := middleware.IntPathParam()
+		handler := func(ctx *gin.Context) { assert.Fail(t, "Should not call handler") }
+		server.GET("/:code", intParam, handler)
+
+		code := "code"
+		url := fmt.Sprintf("/%s", code)
+		req, res := testutil.MakeRequest(http.MethodGet, url, "")
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusBadRequest, res.Code)
+	})
 	t.Run("Handler should be able to retrieve path param as int", func(t *testing.T) {
 		server := testutil.CreateServer()
 
@@ -63,8 +77,10 @@ func TestIntPathParamValidator(t *testing.T) {
 		server := testutil.CreateServer()
 
 		intParam := middleware.IntPathParam()
-		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
-		server.GET("/:code/:id", intParam, handler)
+		suppressPanic := gin.CustomRecoveryWithWriter(nil, func(c *gin.Context, err any) { c.AbortWithStatus(500) })
+
+		handler := func(ctx *gin.Context) { t.Fail() }
+		server.GET("/:code/:id", suppressPanic, intParam, handler)
 
 		code := 39
 		id := 42
