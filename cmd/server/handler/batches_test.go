@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/cmd/server/handler"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/batches"
@@ -49,23 +48,22 @@ func TestCreateBatches(t *testing.T) {
 	})
 	t.Run("should return error when convertdate not convert date", func(t *testing.T) {
 		batchesServiceMock := BatchesServiceMock{}
-		handler := handler.NewBatches(&batchesServiceMock)
-		server := getBatchesServer(handler)
+		h := handler.NewBatches(&batchesServiceMock)
+		server := getBatchesServer(h)
 
-		fakeStruct := batches.CreateBatches{
+		fakeStruct := handler.CreateBatchesRequest{
 			BatchNumber:        1,
 			CurrentQuantity:    200,
 			CurrentTemperature: 20,
-			DueDate:            time.Date(2020, time.April, 4, 10, 0, 0, 0, time.UTC),
+			DueDate:            "abcde",
 			InitialQuantity:    10,
-			ManufacturingDate:  time.Date(2020, time.April, 4, 10, 0, 0, 0, time.UTC),
+			ManufacturingDate:  "abcde",
 			ManufacturingHour:  10,
 			MinimumTemperature: 5,
 			ProductID:          2,
 			SectionID:          1,
 		}
 
-		batchesServiceMock.On("Create", mock.Anything, fakeStruct).Return(domain.Batches{}, errors.New("error"))
 		request, response := testutil.MakeRequest(http.MethodPost, BATCHES_URL, fakeStruct)
 
 		server.ServeHTTP(response, request)
