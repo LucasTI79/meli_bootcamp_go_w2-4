@@ -311,36 +311,33 @@ func TestGetPurchaseOrderReports(t *testing.T) {
 
 		assert.Equal(t, http.StatusNotFound, res.Code)
 	})
-	t.Run("should return status 200 when id is valid", func(t *testing.T) {
+	t.Run("should return status 409 when id alredy exists", func(t *testing.T) {
 		svcMock := ServiceMockBuyer{}
 		buyerHandler := handler.NewBuyer(&svcMock)
 		server := getBuyerServer(buyerHandler)
-		expected := []buyer.CountByBuyer{{
-			ID:           10,
-			CardNumberID: 10,
-			FirstName:    "meli",
-			LastName:     "osasco",
-			Count:        10,
-		},
-			{
-				ID:           11,
-				CardNumberID: 11,
-				FirstName:    "meli",
-				LastName:     "osasco",
-				Count:        5,
-			}}
+
 		url := fmt.Sprintf("%s/report-purchase-orders/%d", BUYER_URL, 1)
 
-		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return(expected, nil)
-
-		svcMock.On("CountPurchaseOrders", mock.Anything, 0).Return(expected, nil)
+		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return([]buyer.CountByBuyer{}, buyer.ErrAlreadyExists)
 
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var received testutil.SuccessResponse[[]domain.InboundReport]
-		json.Unmarshal(res.Body.Bytes(), &received)
-		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, http.StatusConflict, res.Code)
+	})
+	t.Run("should return status 500 when bd is off", func(t *testing.T) {
+		svcMock := ServiceMockBuyer{}
+		buyerHandler := handler.NewBuyer(&svcMock)
+		server := getBuyerServer(buyerHandler)
+
+		url := fmt.Sprintf("%s/report-purchase-orders/%d", BUYER_URL, 1)
+
+		svcMock.On("CountPurchaseOrders", mock.Anything, mock.Anything).Return([]buyer.CountByBuyer{}, buyer.ErrInternalServerError)
+
+		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
+		server.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusInternalServerError, res.Code)
 	})
 }
 

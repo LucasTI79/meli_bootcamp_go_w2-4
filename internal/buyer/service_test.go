@@ -240,6 +240,65 @@ func TestDeleteBuyer(t *testing.T) {
 		assert.Equal(t, errors.New("buyer not found"), err)
 	})
 }
+func TestGetCountPurchaseOrders(t *testing.T) {
+	t.Run("return correct report for valid id", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		r := buyer.CountByBuyer{
+			ID:           1,
+			CardNumberID: 10,
+			FirstName:    "melicidade",
+			LastName:     "osasco",
+			Count:        10,
+		}
+
+		mockedRepository.On("GetPurchaseOrderByID", mock.Anything, r.ID).Return(r, nil)
+		report, err := s.CountPurchaseOrders(context.TODO(), 1)
+		assert.NoError(t, err)
+		assert.Equal(t, []buyer.CountByBuyer{r}, report)
+	})
+	t.Run("return all reports when a id is not received", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		r := []buyer.CountByBuyer{{
+			ID:           1,
+			CardNumberID: 10,
+			FirstName:    "melicidade",
+			LastName:     "osasco",
+			Count:        10,
+		},
+			{
+				ID:           2,
+				CardNumberID: 20,
+				FirstName:    "melicidade-2",
+				LastName:     "osasco-2",
+				Count:        20,
+			}}
+
+		mockedRepository.On("GetAllPurchaseOrders", mock.Anything).Return(r, nil)
+		reports, err := s.CountPurchaseOrders(context.TODO(), 0)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, r, reports)
+	})
+	t.Run("returns a error when id is not found", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		mockedRepository.On("GetPurchaseOrderByID", mock.Anything, 1).Return(buyer.CountByBuyer{}, buyer.ErrNotFound)
+		_, err := s.CountPurchaseOrders(context.TODO(), 1)
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
+	})
+	t.Run("returns a error when there isnt any report", func(t *testing.T) {
+		mockedRepository := RepositoryMock{}
+		s := buyer.NewService(&mockedRepository)
+
+		mockedRepository.On("GetAllPurchaseOrders", mock.Anything).Return([]buyer.CountByBuyer{}, buyer.ErrNotFound)
+		_, err := s.CountPurchaseOrders(context.TODO(), 0)
+		assert.ErrorIs(t, err, buyer.ErrNotFound)
+	})
+}
 
 type RepositoryMock struct {
 	mock.Mock
