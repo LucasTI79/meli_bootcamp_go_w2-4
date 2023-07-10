@@ -74,6 +74,7 @@ func (s *Batches) Create() gin.HandlerFunc {
 		convertdate, err := ConvertDate(dto)
 		if err != nil {
 			web.Error(c, http.StatusUnprocessableEntity, err.Error())
+			return
 		}
 		batch, err := s.service.Create(c, convertdate)
 		if err != nil {

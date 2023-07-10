@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/domain"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/pkg/optional"
@@ -77,6 +78,11 @@ func (s *service) Create(c context.Context, product CreateDTO) (domain.Product, 
 }
 
 func (s *service) CreateRecord(c context.Context, product CreateRecordDTO) (domain.Product_Records, error) {
+	idProd := product.ProductID
+	_, err := s.repo.Get(c, idProd)
+	if err != nil {
+		return domain.Product_Records{}, NewErrInvalidProductCode(strconv.Itoa(idProd))
+	}
 	p := MapCreateRecord(&product)
 	id, err := s.repo.SaveRecord(c, *p)
 	if err != nil {
