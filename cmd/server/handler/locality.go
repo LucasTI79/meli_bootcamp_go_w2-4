@@ -15,6 +15,18 @@ type Locality struct {
 	locService localities.Service
 }
 
+type SellerReportEntry struct {
+	LocalityID   int    `json:"locality_id"`
+	LocalityName string `json:"locality_name"`
+	SellerCount  int    `json:"sellers_count"`
+}
+
+type CarrierReportEntry struct {
+	LocalityID   int    `json:"locality_id"`
+	LocalityName string `json:"locality_name"`
+	CarrierCount int    `json:"carriers_count"`
+}
+
 func NewLocality(svc localities.Service) *Locality {
 	return &Locality{
 		locService: svc,
@@ -66,6 +78,7 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 		}
 
 		report, err := h.locService.CountSellers(c, id)
+		data := MapSellerReportToDTO(report)
 
 		if err != nil {
 			status := mapLocalityErrToStatus(err)
@@ -74,10 +87,10 @@ func (h *Locality) SellerReport() gin.HandlerFunc {
 		}
 
 		if len(report) == 0 {
-			web.Success(c, http.StatusNoContent, report)
+			web.Success(c, http.StatusNoContent, data)
 			return
 		}
-		web.Success(c, http.StatusOK, report)
+		web.Success(c, http.StatusOK, data)
 	}
 }
 
@@ -112,6 +125,7 @@ func (h *Locality) CarrierReport() gin.HandlerFunc {
 		}
 
 		report, err := h.locService.CountCarriers(c, id)
+		data := MapCarrierReportToDTO(report)
 
 		if err != nil {
 			status := mapLocalityErrToStatus(err)
@@ -120,10 +134,10 @@ func (h *Locality) CarrierReport() gin.HandlerFunc {
 		}
 
 		if len(report) == 0 {
-			web.Success(c, http.StatusNoContent, report)
+			web.Success(c, http.StatusNoContent, data)
 			return
 		}
-		web.Success(c, http.StatusOK, report)
+		web.Success(c, http.StatusOK, data)
 	}
 }
 
@@ -151,4 +165,40 @@ func mapLocalityErrToStatus(err error) int {
 		return http.StatusNotFound
 	}
 	return http.StatusInternalServerError
+}
+
+func MapCarrierReportToDTO(report []localities.CountByLocality) []CarrierReportEntry {
+	dtos := make([]CarrierReportEntry, 0)
+
+	for _, entry := range report {
+		dtos = append(dtos, mapCountToCarrierReport(entry))
+	}
+
+	return dtos
+}
+
+func MapSellerReportToDTO(report []localities.CountByLocality) []SellerReportEntry {
+	dtos := make([]SellerReportEntry, 0)
+
+	for _, entry := range report {
+		dtos = append(dtos, mapCountToSellerReport(entry))
+	}
+
+	return dtos
+}
+
+func mapCountToCarrierReport(count localities.CountByLocality) CarrierReportEntry {
+	return CarrierReportEntry{
+		LocalityID:   count.ID,
+		LocalityName: count.Name,
+		CarrierCount: count.Count,
+	}
+}
+
+func mapCountToSellerReport(count localities.CountByLocality) SellerReportEntry {
+	return SellerReportEntry{
+		LocalityID:   count.ID,
+		LocalityName: count.Name,
+		SellerCount:  count.Count,
+	}
 }
