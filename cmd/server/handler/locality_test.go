@@ -75,13 +75,14 @@ func TestLocalitySellerReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		expected := getSellerCounts()
-		svc.On("CountSellers", mock.Anything, mock.Anything).Return(expected, nil)
+		counts := getSellerCounts()
+		expected := handler.MapSellerReportToDTO(counts)
+		svc.On("CountSellers", mock.Anything, mock.Anything).Return(counts, nil)
 
 		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+SELLER_REPORT_URL, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		var response testutil.SuccessResponse[[]handler.SellerReportEntry]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -92,15 +93,16 @@ func TestLocalitySellerReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		expected := getSellerCounts()[:1]
-		id := *optional.FromVal(expected[0].ID)
-		svc.On("CountSellers", mock.Anything, id).Return(expected, nil)
+		counts := getSellerCounts()[:1]
+		expected := handler.MapSellerReportToDTO(counts)
+		id := *optional.FromVal(counts[0].ID)
+		svc.On("CountSellers", mock.Anything, id).Return(counts, nil)
 
 		url := fmt.Sprintf("%s/%d", LOCALITY_URL+SELLER_REPORT_URL, id.Val)
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		var response testutil.SuccessResponse[[]handler.SellerReportEntry]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -132,7 +134,7 @@ func TestLocalitySellerReport(t *testing.T) {
 			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+SELLER_REPORT_URL, nil)
 			server.ServeHTTP(res, req)
 
-			var response testutil.SuccessResponse[[]localities.CountByLocality]
+			var response testutil.SuccessResponse[[]handler.SellerReportEntry]
 			json.Unmarshal(res.Body.Bytes(), &response)
 
 			assert.Equal(t, http.StatusNoContent, res.Code)
@@ -159,13 +161,14 @@ func TestLocalityCarrierReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		expected := getSellerCounts()
-		svc.On("CountCarriers", mock.Anything, mock.Anything).Return(expected, nil)
+		counts := getSellerCounts()
+		expected := handler.MapCarrierReportToDTO(counts)
+		svc.On("CountCarriers", mock.Anything, mock.Anything).Return(counts, nil)
 
 		req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+CARRIER_REPORT_URL, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		var response testutil.SuccessResponse[[]handler.CarrierReportEntry]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -176,15 +179,17 @@ func TestLocalityCarrierReport(t *testing.T) {
 		h := handler.NewLocality(&svc)
 		server := getLocalityServer(h)
 
-		expected := getSellerCounts()[:1]
-		id := *optional.FromVal(expected[0].ID)
-		svc.On("CountCarriers", mock.Anything, id).Return(expected, nil)
+		counts := getSellerCounts()[:1]
+		expected := handler.MapCarrierReportToDTO(counts)
+
+		id := *optional.FromVal(counts[0].ID)
+		svc.On("CountCarriers", mock.Anything, id).Return(counts, nil)
 
 		url := fmt.Sprintf("%s/%d", LOCALITY_URL+CARRIER_REPORT_URL, id.Val)
 		req, res := testutil.MakeRequest(http.MethodGet, url, nil)
 		server.ServeHTTP(res, req)
 
-		var response testutil.SuccessResponse[[]localities.CountByLocality]
+		var response testutil.SuccessResponse[[]handler.CarrierReportEntry]
 		json.Unmarshal(res.Body.Bytes(), &response)
 
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -216,7 +221,7 @@ func TestLocalityCarrierReport(t *testing.T) {
 			req, res := testutil.MakeRequest(http.MethodGet, LOCALITY_URL+CARRIER_REPORT_URL, nil)
 			server.ServeHTTP(res, req)
 
-			var response testutil.SuccessResponse[[]localities.CountByLocality]
+			var response testutil.SuccessResponse[[]handler.CarrierReportEntry]
 			json.Unmarshal(res.Body.Bytes(), &response)
 
 			assert.Equal(t, http.StatusNoContent, res.Code)
