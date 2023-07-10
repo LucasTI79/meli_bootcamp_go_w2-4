@@ -31,6 +31,7 @@ func (r *repository) Exists(ctx context.Context, orderNumber string) bool {
 }
 
 func (r *repository) Create(ctx context.Context, i domain.PurchaseOrder) (int, error) {
+	// To insert a purchase_order it is necessary to have a product_record_id as a foreign key
 	queryPurchaseOrders := "INSERT INTO purchase_orders(order_number,order_date,tracking_code,buyer_id,order_status_id,product_record_id) SELECT ?,?,?,?,?,? FROM product_records pr WHERE pr.id = ?"
 	res, err := r.db.Exec(queryPurchaseOrders, i.OrderNumber, i.OrderDate, i.TrackingCode, i.BuyerID, i.OrderStatusID, i.ProductRecordID, i.ProductRecordID)
 	if err != nil {
@@ -46,7 +47,7 @@ func (r *repository) Create(ctx context.Context, i domain.PurchaseOrder) (int, e
 	}
 
 	queryOrderDetails := "INSERT INTO order_details(clean_liness_status,quantity,temperature,product_record_id,purchase_order_id) VALUES (?,?,?,?,?)"
-	res, err = r.db.Exec(queryOrderDetails, "good", 1, 32, i.ProductRecordID, id)
+	_, err = r.db.Exec(queryOrderDetails, "good", 1, 32, i.ProductRecordID, id)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "Error 1452") {
 			return 0, ErrProductRecordIDNotFound
