@@ -77,8 +77,10 @@ func TestIntPathParamValidator(t *testing.T) {
 		server := testutil.CreateServer()
 
 		intParam := middleware.IntPathParam()
-		handler := func(ctx *gin.Context) { web.Success(ctx, 200, nil) }
-		server.GET("/:code/:id", intParam, handler)
+		suppressPanic := gin.CustomRecoveryWithWriter(nil, func(c *gin.Context, err any) { c.AbortWithStatus(500) })
+
+		handler := func(ctx *gin.Context) { t.Fail() }
+		server.GET("/:code/:id", suppressPanic, intParam, handler)
 
 		code := 39
 		id := 42
