@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-txdb"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
