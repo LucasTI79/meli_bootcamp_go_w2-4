@@ -9,11 +9,20 @@ import (
 
 // Error definitions
 var (
-	ErrNotFound      = errors.New("buyer not found")
-	ErrGeneric       = errors.New("")
-	ErrAlreadyExists = errors.New("buyer already exists")
-	ErrSavingBuyer   = errors.New("error saving buyer")
+	ErrNotFound            = errors.New("buyer not found")
+	ErrGeneric             = errors.New("")
+	ErrInternalServerError = errors.New("internal server error")
+	ErrAlreadyExists       = errors.New("buyer already exists")
+	ErrSavingBuyer         = errors.New("error saving buyer")
 )
+
+type CountByBuyer struct {
+	ID           int
+	CardNumberID int
+	FirstName    string
+	LastName     string
+	Count        int
+}
 
 // Service is the buyer service interface
 type Service interface {
@@ -22,10 +31,17 @@ type Service interface {
 	Get(ctx context.Context, id int) (domain.Buyer, error)
 	Update(ctx context.Context, b domain.Buyer, id int) (domain.Buyer, error)
 	Delete(ctx context.Context, id int) error
+	CountPurchaseOrders(ctx context.Context, id int) ([]CountByBuyer, error)
 }
 
 type service struct {
 	repository Repository
+}
+
+func NewService(r Repository) Service {
+	return &service{
+		r,
+	}
 }
 
 func (s *service) Create(ctx context.Context, b domain.BuyerCreate) (domain.Buyer, error) {
@@ -88,11 +104,21 @@ func (s *service) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-// NewService creates a new buyer service instance
-func NewService(r Repository) Service {
-	return &service{
-		r,
+func (s *service) CountPurchaseOrders(ctx context.Context, id int) ([]CountByBuyer, error) {
+	if id == 0 {
+		e, err := s.repository.GetAllPurchaseOrders(ctx)
+		if err != nil {
+			return []CountByBuyer{}, err
+		}
+		return e, nil
+
 	}
+	e, err := s.repository.GetPurchaseOrderByID(ctx, id)
+	if err != nil {
+		return []CountByBuyer{}, err
+	}
+
+	return []CountByBuyer{e}, nil
 }
 
 func mapCreateToDomain(b domain.BuyerCreate) *domain.Buyer {

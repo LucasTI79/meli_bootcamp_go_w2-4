@@ -21,8 +21,6 @@ import (
 var carrierID = 1
 var CARRIER_URL = "/carrier/"
 
-//var CARRIER_URL_ID = fmt.Sprintf("%s/%d", CARRIER_URL, 1)
-
 func TestCarrierCreate(t *testing.T) {
 	t.Run("Create a carrier successfully", func(t *testing.T) {
 		carrierService := CarrierServiceMock{}

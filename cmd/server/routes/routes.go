@@ -14,6 +14,7 @@ import (
 	inboundOrder "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/inbound_order"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/localities"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/product"
+	purchaseorder "github.com/extmatperez/meli_bootcamp_go_w2-4/internal/purchase_order"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/section"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/seller"
 	"github.com/extmatperez/meli_bootcamp_go_w2-4/internal/warehouse"
@@ -51,6 +52,7 @@ func (r *router) MapRoutes() {
 	r.buildInboundOrderRoutes()
 	r.buildCarrierRoutes()
 	r.buildLocalityRoutes()
+	r.buildPurchaseOrderRoutes()
 }
 
 func (r *router) buildDocumentationRoutes() {
@@ -153,6 +155,8 @@ func (r *router) buildBuyerRoutes() {
 		buyerRG.GET("", h.GetAll())
 		buyerRG.POST("", middleware.Body[domain.BuyerCreate](), h.Create())
 		buyerRG.GET("/:id", middleware.IntPathParam(), h.Get())
+		buyerRG.GET("/report-purchase-orders/:id", middleware.IntPathParam(), h.PurchaseOrderReport())
+		buyerRG.GET("/report-purchase-orders/", h.PurchaseOrderReport())
 		buyerRG.DELETE("/:id", middleware.IntPathParam(), h.Delete())
 		buyerRG.PATCH("/:id", middleware.IntPathParam(), middleware.Body[domain.Buyer](), h.Update())
 	}
@@ -203,5 +207,16 @@ func (r *router) buildLocalityRoutes() {
 		rg.GET("/report-sellers/:id", middleware.IntPathParam(), h.SellerReport())
 		rg.GET("/report-carriers", h.CarrierReport())
 		rg.GET("/report-carriers/:id", middleware.IntPathParam(), h.CarrierReport())
+	}
+}
+
+func (r *router) buildPurchaseOrderRoutes() {
+	repo := purchaseorder.NewRepository(r.db)
+	service := purchaseorder.NewService(repo)
+	h := handler.NewPurchaseOrder(service)
+
+	purchaseOrderRG := r.rg.Group("/purchase-orders")
+	{
+		purchaseOrderRG.POST("", middleware.Body[handler.PurchaseOrderRequest](), h.Create())
 	}
 }

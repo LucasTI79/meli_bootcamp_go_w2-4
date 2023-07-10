@@ -281,7 +281,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `melisprint`.`purchase_orders` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `order_number` VARCHAR(255) NOT NULL,
+  `order_number` VARCHAR(255) NOT NULL CHECK(order_number <> ''),
   `order_date` DATETIME(6) NOT NULL,
   `tracking_code` VARCHAR(255) NOT NULL,
   `buyer_id` INT NOT NULL,
@@ -295,6 +295,7 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`purchase_orders` (
   INDEX `order_status_id_idx` (`order_status_id` ASC) VISIBLE,
   INDEX `warehouse_id_idx` (`warehouse_id` ASC) VISIBLE,
   INDEX `fk_product_record_orders_idx` (`product_record_id` ASC) VISIBLE,
+  CONSTRAINT `order_number` UNIQUE (`order_number`),
   CONSTRAINT `fk_buyer_purchase_orders`
     FOREIGN KEY (`buyer_id`)
     REFERENCES `melisprint`.`buyers` (`id`)

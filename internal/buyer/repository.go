@@ -16,6 +16,8 @@ type Repository interface {
 	Save(ctx context.Context, b domain.Buyer) (int, error)
 	Update(ctx context.Context, b domain.Buyer) error
 	Delete(ctx context.Context, id int) error
+	GetAllPurchaseOrders(ctx context.Context) ([]CountByBuyer, error)
+	GetPurchaseOrderByID(ctx context.Context, id int) (CountByBuyer, error)
 }
 
 type repository struct {
@@ -133,4 +135,58 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (r *repository) GetAllPurchaseOrders(ctx context.Context) ([]CountByBuyer, error) {
+	const query = `SELECT e.id, e.card_number_id, e.first_name, e.last_name, COUNT(i.id) as purchase_orders_count 
+	FROM buyers e 
+	LEFT JOIN purchase_orders i ON i.buyer_id = e.id 
+	GROUP BY e.id;`
+
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return []CountByBuyer{}, ErrInternalServerError
+	}
+	defer rows.Close()
+
+	var reports []CountByBuyer
+	for rows.Next() {
+		var e CountByBuyer
+		err := rows.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.Count)
+		if err != nil {
+			return []CountByBuyer{}, ErrInternalServerError
+		}
+		reports = append(reports, e)
+	}
+	err = rows.Err()
+	if err != nil {
+		return []CountByBuyer{}, ErrInternalServerError
+	}
+
+	if len(reports) == 0 {
+		return []CountByBuyer{}, ErrNotFound
+	}
+
+	return reports, nil
+}
+
+func (r *repository) GetPurchaseOrderByID(ctx context.Context, id int) (CountByBuyer, error) {
+	const query = `SELECT e.id, e.card_number_id, e.first_name, e.last_name, COUNT(i.id) as purchase_orders_count 
+	FROM buyers e 
+	LEFT JOIN purchase_orders i ON i.buyer_id = e.id 
+	WHERE e.id = ?
+	GROUP BY e.id;`
+
+	row := r.db.QueryRow(query, id)
+	e := CountByBuyer{}
+	err := row.Scan(&e.ID, &e.CardNumberID, &e.FirstName, &e.LastName, &e.Count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return CountByBuyer{}, ErrNotFound
+		}
+		return CountByBuyer{}, ErrInternalServerError
+	}
+
+	return e, nil
+
 }
