@@ -41,6 +41,21 @@ definitions:
       warehouse_id:
         type: integer
     type: object
+  domain.InboundOrder:
+    properties:
+      employee_id:
+        type: integer
+      id:
+        type: integer
+      order_date:
+        type: string
+      order_number:
+        type: string
+      product_batch_id:
+        type: integer
+      warehouse_id:
+        type: integer
+    type: object
   domain.Seller:
     properties:
       address:
@@ -51,6 +66,8 @@ definitions:
         type: string
       id:
         type: integer
+      locality_id:
+        type: integer
       telephone:
         type: string
     type: object
@@ -60,14 +77,69 @@ definitions:
         type: string
       id:
         type: integer
+      locality_id:
+        type: integer
       minimum_capacity:
         type: integer
       minimum_temperature:
-        type: integer
+        type: number
       telephone:
         type: string
       warehouse_code:
         type: string
+    type: object
+  handler.CarrierRequest:
+    properties:
+      address:
+        type: string
+      cid:
+        type: integer
+      company_name:
+        type: string
+      locality_id:
+        type: integer
+      telephone:
+        type: string
+    required:
+    - address
+    - cid
+    - company_name
+    - locality_id
+    - telephone
+    type: object
+  handler.CreateBatchesRequest:
+    properties:
+      batch_number:
+        type: integer
+      current_quantity:
+        type: integer
+      current_temperature:
+        type: integer
+      due_date:
+        type: string
+      initial_quantity:
+        type: integer
+      manufacturing_date:
+        type: string
+      manufacturing_hour:
+        type: integer
+      minimum_temperature:
+        type: integer
+      product_id:
+        type: integer
+      section_id:
+        type: integer
+    required:
+    - batch_number
+    - current_quantity
+    - current_temperature
+    - due_date
+    - initial_quantity
+    - manufacturing_date
+    - manufacturing_hour
+    - minimum_temperature
+    - product_id
+    - section_id
     type: object
   handler.CreateRequest:
     properties:
@@ -105,6 +177,44 @@ definitions:
     - recommended_freezing_temperature
     - width
     type: object
+  handler.CreateRequestRecord:
+    properties:
+      last_update_date:
+        type: string
+      product_id:
+        type: integer
+      purchase_price:
+        type: number
+      sale_price:
+        type: number
+    required:
+    - last_update_date
+    - product_id
+    - purchase_price
+    - sale_price
+    type: object
+  handler.PurchaseOrderRequest:
+    properties:
+      buyer_id:
+        type: integer
+      order_date:
+        type: string
+      order_number:
+        type: string
+      order_status_id:
+        type: integer
+      product_record_id:
+        type: integer
+      tracking_code:
+        type: string
+    required:
+    - buyer_id
+    - order_date
+    - order_number
+    - order_status_id
+    - product_record_id
+    - tracking_code
+    type: object
   handler.UpdateRequest:
     properties:
       description:
@@ -130,18 +240,27 @@ definitions:
       width:
         type: number
     type: object
+  localities.CreateDTO:
+    properties:
+      country:
+        type: string
+      name:
+        type: string
+      province:
+        type: string
+    type: object
   section.CreateSection:
     properties:
       current_capacity:
         type: integer
       current_temperature:
-        type: integer
+        type: number
       maximum_capacity:
         type: integer
       minimum_capacity:
         type: integer
       minimum_temperature:
-        type: integer
+        type: number
       product_type_id:
         type: integer
       section_number:
@@ -163,13 +282,13 @@ definitions:
       current_capacity:
         type: integer
       current_temperature:
-        type: integer
+        type: number
       maximum_capacity:
         type: integer
       minimum_capacity:
         type: integer
       minimum_temperature:
-        type: integer
+        type: number
       product_type_id:
         type: integer
       section_number:
@@ -191,6 +310,39 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/batches:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Batch data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateBatchesRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created batch
+          schema:
+            $ref: '#/definitions/web.response'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: Batch number already exists
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Failed to create batch
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create a new batch
+      tags:
+      - Batches
   /api/v1/buyers:
     get:
       description: Get all buyers
@@ -284,7 +436,7 @@ paths:
       summary: Get a buyer by ID
       tags:
       - Buyers
-    put:
+    patch:
       consumes:
       - application/json
       description: Update a buyer by ID
@@ -316,6 +468,91 @@ paths:
       summary: Update a buyer by ID
       tags:
       - Buyers
+  /api/v1/buyers/report-purchase-orders:
+    get:
+      consumes:
+      - application/json
+      description: Return purchaseOrder count for each buyer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns purchaseOrder count for buyers
+          schema:
+            $ref: '#/definitions/web.response'
+        "204":
+          description: No content was found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could not generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return purchaseOrder count for each buyer
+      tags:
+      - Buyers
+  /api/v1/buyers/report-purchase-orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Return purchaseOrder count for given buyer
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns purchaseOrder count for buyer
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: ID was not found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could not generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return purchaseOrder count for given buyer
+      tags:
+      - Buyers
+  /api/v1/carrier:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Carrier to be added
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CarrierRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns created carrier
+          schema:
+            $ref: '#/definitions/web.response'
+        "409":
+          description: '`cid` is not unique or `locality_id` not found'
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Missing fields or invalid field types
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Could not save carrier
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create new carrier
+      tags:
+      - Carrier
   /api/v1/employees:
     get:
       consumes:
@@ -355,12 +592,12 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/domain.Employee'
-        "422":
-          description: employee card ID need to be only
+        "409":
+          description: employee not created
           schema:
             type: string
-        "500":
-          description: employee not created
+        "422":
+          description: employee card ID need to be only
           schema:
             type: string
       summary: Cria um novo funcionário
@@ -386,7 +623,7 @@ paths:
           description: invalid id
           schema:
             type: string
-        "405":
+        "404":
           description: employee not deleted
           schema:
             type: string
@@ -457,6 +694,250 @@ paths:
       summary: Atualiza as informações de um funcionário
       tags:
       - Employees
+  /api/v1/employees/report-inbound-orders:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns all of the reports
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: no report to be returned
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get all inbound orders reports
+      tags:
+      - Employees
+  /api/v1/employees/report-inbound-orders/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Employee ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: returns the specified report
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: no report to be returned
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get specific inbound order report from employee by ID
+      tags:
+      - Employees
+  /api/v1/inbound-orders:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Creates a new inbound order based on the data provided
+        The date field in the inboundOrder body should follow the ISO-8601 standard, "2023-07-06T14:30:00Z"
+      parameters:
+      - description: new inbound order
+        in: body
+        name: inboundOrder
+        required: true
+        schema:
+          $ref: '#/definitions/domain.InboundOrder'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: returns inbound order
+          schema:
+            $ref: '#/definitions/web.response'
+        "400":
+          description: missing fields
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "409":
+          description: error creating inbound order
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: invalid fields
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Creates a new inbound order
+      tags:
+      - InboundOrder
+  /api/v1/localities:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Locality to be added
+        in: body
+        name: locality
+        required: true
+        schema:
+          $ref: '#/definitions/localities.CreateDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns created locality
+          schema:
+            $ref: '#/definitions/web.response'
+        "409":
+          description: Locality is not unique
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Missing fields or invalid field types
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Could not save locality
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create new locality
+      tags:
+      - Localities
+  /api/v1/localities/report-carriers:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns carrier count for localities
+          schema:
+            $ref: '#/definitions/web.response'
+        "204":
+          description: No content was found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could not generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return carrier count for each locality
+      tags:
+      - Localities
+  /api/v1/localities/report-carriers/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Locality ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns carrier count for locality
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: ID was not found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could not generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return carrier count for given locality
+      tags:
+      - Localities
+  /api/v1/localities/report-sellers:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns seller count for localities
+          schema:
+            $ref: '#/definitions/web.response'
+        "204":
+          description: No content was found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could not generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return seller count for each locality
+      tags:
+      - Localities
+  /api/v1/localities/report-sellers/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Locality ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns seller count for locality
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: ID was not found
+          schema:
+            $ref: '#/definitions/web.response'
+        "500":
+          description: Could generate report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Return seller count for given locality
+      tags:
+      - Localities
+  /api/v1/product-records:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Product record to be added
+        in: body
+        name: record
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateRequestRecord'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns created product record
+          schema:
+            $ref: '#/definitions/web.response'
+        "409":
+          description: '`product_code` is not unique'
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Missing fields or invalid field types
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Could not save product
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create new product record
+      tags:
+      - Products
   /api/v1/products:
     get:
       consumes:
@@ -615,6 +1096,101 @@ paths:
       summary: Updates existing product
       tags:
       - Products
+  /api/v1/products/report-records:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: Returns product
+          schema:
+            $ref: '#/definitions/web.response'
+        "400":
+          description: Invalid ID type
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Could not find product
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get product records by productID
+      tags:
+      - Products
+      - Products
+  /api/v1/products/report-records/{id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: Returns product
+          schema:
+            $ref: '#/definitions/web.response'
+        "400":
+          description: Invalid ID type
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Could not find product
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get product records by productID
+      tags:
+      - Products
+      - Products
+  /api/v1/purchase-orders:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: purchase order to be added
+        in: body
+        name: purchaseOrder
+        required: true
+        schema:
+          $ref: '#/definitions/handler.PurchaseOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Returns created purchase order
+          schema:
+            $ref: '#/definitions/web.response'
+        "409":
+          description: '`id` is not unique or `locality_id` not found'
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "422":
+          description: Missing fields or invalid field types
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Could not save purchase order
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Create new purchase order
+      tags:
+      - Purchase order
   /api/v1/sections:
     get:
       consumes:
@@ -682,14 +1258,10 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
+        "204":
           description: Section deleted successfully
           schema:
             $ref: '#/definitions/web.response'
-        "400":
-          description: Invalid ID type
-          schema:
-            $ref: '#/definitions/web.errorResponse'
         "404":
           description: Could not find section
           schema:
@@ -771,6 +1343,56 @@ paths:
           schema:
             $ref: '#/definitions/web.errorResponse'
       summary: Updates existing section
+      tags:
+      - Sections
+  /api/v1/sections/{id}/report-products:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Report of products
+          schema:
+            $ref: '#/definitions/web.response'
+        "404":
+          description: Could not find section
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "500":
+          description: Could not report
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get report of products for a section
+      tags:
+      - Sections
+  /api/v1/sections/report-products:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Report of products
+          schema:
+            $ref: '#/definitions/web.response'
+        "204":
+          description: Status No Content
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+        "404":
+          description: Could not find any section
+          schema:
+            $ref: '#/definitions/web.errorResponse'
+      summary: Get report of products for all sections
       tags:
       - Sections
   /api/v1/sellers:
@@ -957,16 +1579,16 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/domain.Warehouse'
-        "400":
-          description: Invalid request
-          schema:
-            type: string
         "409":
           description: warehouse can be alreary exist
           schema:
             type: string
+        "422":
+          description: warehousecode need to be passed, it can't be empty
+          schema:
+            type: string
         "500":
-          description: Internal Server Error
+          description: something went wrong with the request
           schema:
             type: string
       summary: Create a warehouse
