@@ -4,6 +4,57 @@
         "contact": {}
     },
     "paths": {
+        "/api/v1/batches": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batches"
+                ],
+                "summary": "Create a new batch",
+                "parameters": [
+                    {
+                        "description": "Batch data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateBatchesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created batch",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Batch number already exists",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create batch",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/buyers": {
             "get": {
                 "description": "Get all buyers",
@@ -71,6 +122,85 @@
                 }
             }
         },
+        "/api/v1/buyers/report-purchase-orders": {
+            "get": {
+                "description": "Return purchaseOrder count for each buyer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Return purchaseOrder count for each buyer",
+                "responses": {
+                    "200": {
+                        "description": "Returns purchaseOrder count for buyers",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "204": {
+                        "description": "No content was found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/buyers/report-purchase-orders/{id}": {
+            "get": {
+                "description": "Return purchaseOrder count for given buyer",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Return purchaseOrder count for given buyer",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Buyer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns purchaseOrder count for buyer",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "ID was not found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/buyers/{id}": {
             "get": {
                 "description": "Get a buyer by ID",
@@ -108,7 +238,43 @@
                     }
                 }
             },
-            "put": {
+            "delete": {
+                "description": "Delete a buyer by ID",
+                "tags": [
+                    "Buyers"
+                ],
+                "summary": "Delete a buyer by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Buyer ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Buyer deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Buyer not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
                 "description": "Update a buyer by ID",
                 "consumes": [
                     "application/json"
@@ -155,39 +321,54 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete a buyer by ID",
-                "tags": [
-                    "Buyers"
+            }
+        },
+        "/api/v1/carrier": {
+            "post": {
+                "consumes": [
+                    "application/json"
                 ],
-                "summary": "Delete a buyer by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Carrier"
+                ],
+                "summary": "Create new carrier",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Buyer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Carrier to be added",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CarrierRequest"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Buyer deleted",
+                    "201": {
+                        "description": "Returns created carrier",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/web.response"
                         }
                     },
-                    "400": {
-                        "description": "Invalid ID",
+                    "409": {
+                        "description": "`cid` is not unique or `locality_id` not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/web.errorResponse"
                         }
                     },
-                    "404": {
-                        "description": "Buyer not found",
+                    "422": {
+                        "description": "Missing fields or invalid field types",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not save carrier",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
                         }
                     }
                 }
@@ -254,16 +435,81 @@
                             "$ref": "#/definitions/domain.Employee"
                         }
                     },
+                    "409": {
+                        "description": "employee not created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "422": {
                         "description": "employee card ID need to be only",
                         "schema": {
                             "type": "string"
                         }
-                    },
-                    "500": {
-                        "description": "employee not created",
+                    }
+                }
+            }
+        },
+        "/api/v1/employees/report-inbound-orders": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Get all inbound orders reports",
+                "responses": {
+                    "200": {
+                        "description": "returns all of the reports",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "no report to be returned",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/employees/report-inbound-orders/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Get specific inbound order report from employee by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Employee ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns the specified report",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "no report to be returned",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
                         }
                     }
                 }
@@ -343,7 +589,7 @@
                             "type": "string"
                         }
                     },
-                    "405": {
+                    "404": {
                         "description": "employee not deleted",
                         "schema": {
                             "type": "string"
@@ -398,6 +644,314 @@
                         "description": "action could not be processed correctly due to invalid data provided",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/inbound-orders": {
+            "post": {
+                "description": "Creates a new inbound order based on the data provided\nThe date field in the inboundOrder body should follow the ISO-8601 standard, \"2023-07-06T14:30:00Z\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "InboundOrder"
+                ],
+                "summary": "Creates a new inbound order",
+                "parameters": [
+                    {
+                        "description": "new inbound order",
+                        "name": "inboundOrder",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.InboundOrder"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "returns inbound order",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "400": {
+                        "description": "missing fields",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "error creating inbound order",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "invalid fields",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/localities": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Localities"
+                ],
+                "summary": "Create new locality",
+                "parameters": [
+                    {
+                        "description": "Locality to be added",
+                        "name": "locality",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/localities.CreateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Returns created locality",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "409": {
+                        "description": "Locality is not unique",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Missing fields or invalid field types",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not save locality",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/localities/report-carriers": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Localities"
+                ],
+                "summary": "Return carrier count for each locality",
+                "responses": {
+                    "200": {
+                        "description": "Returns carrier count for localities",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "204": {
+                        "description": "No content was found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/localities/report-carriers/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Localities"
+                ],
+                "summary": "Return carrier count for given locality",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Locality ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns carrier count for locality",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "ID was not found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/localities/report-sellers": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Localities"
+                ],
+                "summary": "Return seller count for each locality",
+                "responses": {
+                    "200": {
+                        "description": "Returns seller count for localities",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "204": {
+                        "description": "No content was found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/localities/report-sellers/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Localities"
+                ],
+                "summary": "Return seller count for given locality",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Locality ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns seller count for locality",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "ID was not found",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "500": {
+                        "description": "Could generate report",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product-records": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Create new product record",
+                "parameters": [
+                    {
+                        "description": "Product record to be added",
+                        "name": "record",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateRequestRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Returns created product record",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "409": {
+                        "description": "`product_code` is not unique",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Missing fields or invalid field types",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not save product",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
                         }
                     }
                 }
@@ -479,6 +1033,98 @@
                     },
                     "500": {
                         "description": "Could not save product",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/products/report-records": {
+            "get": {
+                "consumes": [
+                    "application/json",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/json"
+                ],
+                "tags": [
+                    "Products",
+                    "Products"
+                ],
+                "summary": "Get product records by productID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns product",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID type",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Could not find product",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/products/report-records/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json",
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json",
+                    "application/json"
+                ],
+                "tags": [
+                    "Products",
+                    "Products"
+                ],
+                "summary": "Get product records by productID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns product",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID type",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Could not find product",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -644,6 +1290,57 @@
                 }
             }
         },
+        "/api/v1/purchase-orders": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Purchase order"
+                ],
+                "summary": "Create new purchase order",
+                "parameters": [
+                    {
+                        "description": "purchase order to be added",
+                        "name": "purchaseOrder",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.PurchaseOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Returns created purchase order",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "409": {
+                        "description": "`id` is not unique or `locality_id` not found",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Missing fields or invalid field types",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not save purchase order",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sections": {
             "get": {
                 "consumes": [
@@ -727,6 +1424,40 @@
                 }
             }
         },
+        "/api/v1/sections/report-products": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sections"
+                ],
+                "summary": "Get report of products for all sections",
+                "responses": {
+                    "200": {
+                        "description": "Report of products",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "204": {
+                        "description": "Status No Content",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Could not find any section",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sections/{id}": {
             "get": {
                 "consumes": [
@@ -790,16 +1521,10 @@
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": "Section deleted successfully",
                         "schema": {
                             "$ref": "#/definitions/web.response"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID type",
-                        "schema": {
-                            "$ref": "#/definitions/web.errorResponse"
                         }
                     },
                     "404": {
@@ -878,6 +1603,49 @@
                     },
                     "500": {
                         "description": "Could not save section",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sections/{id}/report-products": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sections"
+                ],
+                "summary": "Get report of products for a section",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report of products",
+                        "schema": {
+                            "$ref": "#/definitions/web.response"
+                        }
+                    },
+                    "404": {
+                        "description": "Could not find section",
+                        "schema": {
+                            "$ref": "#/definitions/web.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Could not report",
                         "schema": {
                             "$ref": "#/definitions/web.errorResponse"
                         }
@@ -1165,20 +1933,20 @@
                             "$ref": "#/definitions/domain.Warehouse"
                         }
                     },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     "409": {
                         "description": "warehouse can be alreary exist",
                         "schema": {
                             "type": "string"
                         }
                     },
+                    "422": {
+                        "description": "warehousecode need to be passed, it can't be empty",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "something went wrong with the request",
                         "schema": {
                             "type": "string"
                         }
@@ -1382,6 +2150,29 @@
                 }
             }
         },
+        "domain.InboundOrder": {
+            "type": "object",
+            "properties": {
+                "employee_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "order_date": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "product_batch_id": {
+                    "type": "integer"
+                },
+                "warehouse_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "domain.Seller": {
             "type": "object",
             "properties": {
@@ -1395,6 +2186,9 @@
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "locality_id": {
                     "type": "integer"
                 },
                 "telephone": {
@@ -1411,17 +2205,94 @@
                 "id": {
                     "type": "integer"
                 },
+                "locality_id": {
+                    "type": "integer"
+                },
                 "minimum_capacity": {
                     "type": "integer"
                 },
                 "minimum_temperature": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "telephone": {
                     "type": "string"
                 },
                 "warehouse_code": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.CarrierRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "cid",
+                "company_name",
+                "locality_id",
+                "telephone"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "cid": {
+                    "type": "integer"
+                },
+                "company_name": {
+                    "type": "string"
+                },
+                "locality_id": {
+                    "type": "integer"
+                },
+                "telephone": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.CreateBatchesRequest": {
+            "type": "object",
+            "required": [
+                "batch_number",
+                "current_quantity",
+                "current_temperature",
+                "due_date",
+                "initial_quantity",
+                "manufacturing_date",
+                "manufacturing_hour",
+                "minimum_temperature",
+                "product_id",
+                "section_id"
+            ],
+            "properties": {
+                "batch_number": {
+                    "type": "integer"
+                },
+                "current_quantity": {
+                    "type": "integer"
+                },
+                "current_temperature": {
+                    "type": "integer"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "initial_quantity": {
+                    "type": "integer"
+                },
+                "manufacturing_date": {
+                    "type": "string"
+                },
+                "manufacturing_hour": {
+                    "type": "integer"
+                },
+                "minimum_temperature": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "section_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1475,6 +2346,60 @@
                 }
             }
         },
+        "handler.CreateRequestRecord": {
+            "type": "object",
+            "required": [
+                "last_update_date",
+                "product_id",
+                "purchase_price",
+                "sale_price"
+            ],
+            "properties": {
+                "last_update_date": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "purchase_price": {
+                    "type": "number"
+                },
+                "sale_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "handler.PurchaseOrderRequest": {
+            "type": "object",
+            "required": [
+                "buyer_id",
+                "order_date",
+                "order_number",
+                "order_status_id",
+                "product_record_id",
+                "tracking_code"
+            ],
+            "properties": {
+                "buyer_id": {
+                    "type": "integer"
+                },
+                "order_date": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "order_status_id": {
+                    "type": "integer"
+                },
+                "product_record_id": {
+                    "type": "integer"
+                },
+                "tracking_code": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.UpdateRequest": {
             "type": "object",
             "properties": {
@@ -1513,6 +2438,20 @@
                 }
             }
         },
+        "localities.CreateDTO": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
         "section.CreateSection": {
             "type": "object",
             "required": [
@@ -1530,7 +2469,7 @@
                     "type": "integer"
                 },
                 "current_temperature": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "maximum_capacity": {
                     "type": "integer"
@@ -1539,7 +2478,7 @@
                     "type": "integer"
                 },
                 "minimum_temperature": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "product_type_id": {
                     "type": "integer"
@@ -1559,7 +2498,7 @@
                     "type": "integer"
                 },
                 "current_temperature": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "maximum_capacity": {
                     "type": "integer"
@@ -1568,7 +2507,7 @@
                     "type": "integer"
                 },
                 "minimum_temperature": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "product_type_id": {
                     "type": "integer"
