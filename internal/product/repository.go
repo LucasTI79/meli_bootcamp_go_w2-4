@@ -51,7 +51,9 @@ func (r *repository) GetAll(ctx context.Context) ([]domain.Product, error) {
 }
 
 func (r *repository) Get(ctx context.Context, id int) (domain.Product, error) {
-	query := "SELECT * FROM products WHERE id=?;"
+	query := `SELECT id,description,expiration_rate,freezing_rate,
+		height,length,net_weight,product_code,recommended_freezing_temperature,
+		width,product_type_id,seller_id FROM products WHERE id=?;`
 	row := r.db.QueryRow(query, id)
 	p := domain.Product{}
 	err := row.Scan(&p.ID, &p.Description, &p.ExpirationRate, &p.FreezingRate, &p.Height, &p.Length, &p.Netweight, &p.ProductCode, &p.RecomFreezTemp, &p.Width, &p.ProductTypeID, &p.SellerID)
@@ -73,7 +75,11 @@ func (r *repository) Exists(ctx context.Context, productCode string) bool {
 }
 
 func (r *repository) Save(ctx context.Context, p domain.Product) (int, error) {
-	query := "INSERT INTO products(description,expiration_rate,freezing_rate,height,lenght,netweight,product_code,recommended_freezing_temperature,width,id_product_type,id_seller) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+	query := `INSERT INTO products(description,expiration_rate,freezing_rate,
+		height,length,net_weight,product_code,recommended_freezing_temperature,
+		width,product_type_id,seller_id)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return 0, err
@@ -93,7 +99,11 @@ func (r *repository) Save(ctx context.Context, p domain.Product) (int, error) {
 }
 
 func (r *repository) Update(ctx context.Context, p domain.Product) error {
-	query := "UPDATE products SET description=?, expiration_rate=?, freezing_rate=?, height=?, lenght=?, netweight=?, product_code=?, recommended_freezing_temperature=?, width=?, id_product_type=?, id_seller=?  WHERE id=?"
+	query := `UPDATE products SET 
+		description=?, expiration_rate=?, freezing_rate=?, height=?,
+		length=?, net_weight=?, product_code=?, 
+		recommended_freezing_temperature=?, width=?,
+		product_type_id=?, seller_id=? WHERE id=?`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err

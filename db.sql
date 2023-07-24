@@ -70,7 +70,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `melisprint`.`sellers` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `cid` VARCHAR(255) NOT NULL,
+  `cid` INT NOT NULL,
   `company_name` VARCHAR(255) NOT NULL,
   `address` VARCHAR(255) NOT NULL,
   `telephone` VARCHAR(255) NOT NULL,
@@ -107,9 +107,9 @@ CREATE TABLE IF NOT EXISTS `melisprint`.`products` (
   `height` DECIMAL(19,2) NOT NULL,
   `length` DECIMAL(19,2) NOT NULL,
   `net_weight` DECIMAL(19,2) NOT NULL,
-  `expiration_rate` DECIMAL(19,2) NOT NULL,
+  `expiration_rate` INT NOT NULL,
   `recommended_freezing_temperature` DECIMAL(19,2) NOT NULL,
-  `freezing_rate` DECIMAL(19,2) NOT NULL,
+  `freezing_rate` int NOT NULL,
   `product_type_id` INT NOT NULL,
   `seller_id` INT NULL,
   PRIMARY KEY (`id`),
