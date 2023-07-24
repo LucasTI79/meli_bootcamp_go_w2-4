@@ -71,7 +71,11 @@ func (r *repository) Exists(ctx context.Context, sectionNumber int) bool {
 }
 
 func (r *repository) Save(ctx context.Context, s domain.Section) (int, error) {
-	query := "INSERT INTO sections (section_number, current_temperature, minimum_temperature, current_capacity, minimum_capacity, maximum_capacity, warehouse_id, id_product_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+	query := `INSERT INTO sections
+		(section_number, current_temperature, minimum_temperature,
+		current_capacity, minimum_capacity, maximum_capacity,
+		warehouse_id, product_type_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return 0, err
@@ -91,7 +95,10 @@ func (r *repository) Save(ctx context.Context, s domain.Section) (int, error) {
 }
 
 func (r *repository) Update(ctx context.Context, s domain.Section) error {
-	query := "UPDATE sections SET section_number=?, current_temperature=?, minimum_temperature=?, current_capacity=?, minimum_capacity=?, maximum_capacity=?, warehouse_id=?, id_product_type=? WHERE id=?;"
+	query := `UPDATE sections SET section_number=?, current_temperature=?,
+		minimum_temperature=?, current_capacity=?, minimum_capacity=?,
+		maximum_capacity=?, warehouse_id=?, product_type_id=?
+		WHERE id=?;`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return err
