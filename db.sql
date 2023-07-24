@@ -70,7 +70,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `melisprint`.`sellers` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `cid` VARCHAR(255) NOT NULL,
+  `cid` INT NOT NULL,
   `company_name` VARCHAR(255) NOT NULL,
   `address` VARCHAR(255) NOT NULL,
   `telephone` VARCHAR(255) NOT NULL,
